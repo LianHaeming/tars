@@ -18,7 +18,7 @@ function save() {
 }
 
 const id = () => crypto.randomBytes(6).toString('hex');
-const TASK_FIELDS = ['title', 'description', 'due', 'priority', 'projectId', 'done'];
+const TASK_FIELDS = ['title', 'description', 'due', 'dueTime', 'priority', 'projectId', 'done'];
 const pick = (obj, keys) => Object.fromEntries(keys.filter(k => k in obj).map(k => [k, obj[k]]));
 
 function send(res, status, body) {
@@ -43,7 +43,7 @@ async function api(req, res, parts) {
   if (resource === 'tasks') {
     if (req.method === 'POST' && !rid) {
       if (!body.title?.trim()) return send(res, 400, { error: 'title required' });
-      const task = { id: id(), title: '', description: '', due: null, priority: 4, projectId: null, done: false,
+      const task = { id: id(), title: '', description: '', due: null, dueTime: null, priority: 4, projectId: null, done: false,
         ...pick(body, TASK_FIELDS), createdAt: Date.now(), completedAt: null };
       db.tasks.push(task); save();
       return send(res, 201, task);

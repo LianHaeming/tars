@@ -100,11 +100,28 @@ body.adding .fab { transform: scale(0); }
 .pill { padding: 5px 10px; border-radius: 8px; background: var(--bg); font-size: 13px; display: inline-flex; gap: 5px; align-items: center; border: 1.5px solid transparent; }
 .pill.on { border-color: var(--pc, var(--fg)); }
 .pill svg { width: 13px; height: 13px; color: var(--pc); }
-.pill input[type=date] { border: 0; background: none; font-size: 13px; padding: 0; width: 0; opacity: 0; position: absolute; }
-.pill.date { position: relative; }
+.pill input[type=date], .pill input[type=time] { border: 0; background: none; font-size: 13px; padding: 0; width: 0; opacity: 0; position: absolute; }
+.pill.date, .pill.time { position: relative; }
 .pill.del { color: var(--p1); margin-left: auto; }
 select.pill { appearance: none; -webkit-appearance: none; padding-right: 10px; }
 
+/* Calendar */
+.calbar { display: flex; align-items: center; gap: 12px; padding: 10px 0 12px; }
+.calbar h2 { font-size: 19px; margin: 0; font-weight: 700; letter-spacing: -.01em; }
+.calbar .nav { margin-left: auto; display: flex; gap: 6px; align-items: center; }
+.calbar .nav button { width: 32px; height: 32px; border-radius: 8px; background: var(--soft); display: grid; place-items: center; }
+.calbar .nav button svg { width: 16px; height: 16px; }
+.calbar .nav .todaybtn { width: auto; padding: 0 12px; font-size: 13px; font-weight: 600; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin-bottom: 8px; }
+.cal-wd { text-align: center; font-size: 11px; color: var(--mute); font-weight: 600; padding: 2px 0 6px; }
+.cal-day { aspect-ratio: 1 / 1; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 6px; gap: 4px; }
+.cal-day.dim .dnum { opacity: .35; }
+.cal-day .dnum { font-size: 13px; font-variant-numeric: tabular-nums; width: 24px; height: 24px; display: grid; place-items: center; border-radius: 50%; }
+.cal-day.today .dnum { background: var(--accent); color: #fff; font-weight: 700; }
+.cal-day.sel { background: var(--soft); }
+.cal-day.sel.today { background: color-mix(in srgb, var(--accent) 16%, transparent); }
+.cal-day .dots { display: flex; gap: 3px; height: 5px; }
+.cal-day .dots i { width: 5px; height: 5px; border-radius: 50%; display: block; }
 .empty { text-align: center; color: var(--mute); padding: 56px 20px; }
 .empty .big { font-size: 36px; margin-bottom: 6px; }
 
@@ -136,6 +153,8 @@ select.pill { appearance: none; -webkit-appearance: none; padding-right: 10px; }
 let state = { projects: [], tasks: [] };
 let view = localGet('view') || 'today';
 let openId = null;           // task currently expanded for editing
+let calAnchor = null;        // first-of-month Date shown in the calendar
+let calSel = null;           // selected day (ymd) in the calendar
 const PROJECT_COLORS = ['#dc4c3e', '#eb8909', '#fad000', '#7ecc49', '#299438', '#14aaf5', '#4073ff', '#884dff', '#e05194', '#808080'];
 
 function localGet(k) { try { return localStorage.getItem(k); } catch { return null; } }
@@ -204,6 +223,17 @@ function parseQuickAdd(text) {
   take(/\s(\d{1,2})(?:st|nd|rd|th)? (jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\s/i, m => monthDate(+m[1], m[2]));
   take(/\s(jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]* (\d{1,2})(?:st|nd|rd|th)?\s/i, m => monthDate(+m[2], m[1]));
 
+  let dueTime;
+  const setTime = (h, min, ap) => {
+    h = +h; min = min ? +min : 0;
+    if (ap) { ap = ap.toLowerCase(); if (ap === 'pm' && h < 12) h += 12; if (ap === 'am' && h === 12) h = 0; }
+    return (h > 23 || min > 59) ? null : pad(h) + ':' + pad(min);
+  };
+  const grabTime = (re, fn) => { if (dueTime !== undefined) return; const m = title.match(re); if (m) { const v = fn(m); if (v) { dueTime = v; title = title.replace(m[0], ' '); } } };
+  grabTime(/\sat (\d{1,2})(?::(\d{2}))? ?(am|pm)?\s/i, m => setTime(m[1], m[2], m[3]));
+  grabTime(/\s(\d{1,2}):(\d{2})\s/, m => setTime(m[1], m[2], null));
+  grabTime(/\s(\d{1,2}) ?(am|pm)\s/i, m => setTime(m[1], null, m[2]));
+
   const p = title.match(/\s[pP]([1-4])\s/);
   if (p) { priority = +p[1]; title = title.replace(p[0], ' '); }
 
@@ -214,12 +244,13 @@ function parseQuickAdd(text) {
       || state.projects.find(pr => pr.name.toLowerCase().replace(/\s+/g, '').startsWith(key));
     if (proj) { projectId = proj.id; title = title.replace(h[0], ' '); }
   }
-  return { title: title.replace(/\s+/g, ' ').trim(), due, priority, projectId };
+  return { title: title.replace(/\s+/g, ' ').trim(), due, dueTime, priority, projectId };
 }
 
 // ---------- Views ----------
 const open = () => state.tasks.filter(t => !t.done);
 const byPriority = (a, b) => a.priority - b.priority || (a.due || '9').localeCompare(b.due || '9') || a.createdAt - b.createdAt;
+const byTime = (a, b) => (a.dueTime || '99:99').localeCompare(b.dueTime || '99:99') || a.priority - b.priority || a.createdAt - b.createdAt;
 const project = id => state.projects.find(p => p.id === id);
 
 function viewInfo() {
@@ -227,6 +258,7 @@ function viewInfo() {
   if (view === 'inbox') return { title: 'Inbox', tasks: open().filter(x => !x.projectId), defaults: {} };
   if (view === 'today') return { title: 'Today', sub: today().toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' }), tasks: open().filter(x => x.due && x.due <= t), defaults: { due: t } };
   if (view === 'upcoming') return { title: 'Upcoming', tasks: open().filter(x => x.due), defaults: {} };
+  if (view === 'calendar') { const sel = calSel || ymd(today()); return { title: 'Calendar', calendar: true, tasks: open().filter(x => x.due === sel), defaults: { due: sel } }; }
   if (view === 'completed') return { title: 'Completed', tasks: state.tasks.filter(x => x.done), defaults: {} };
   if (view.startsWith('project:')) {
     const p = project(view.slice(8));
@@ -243,6 +275,7 @@ const ICONS = {
   cal: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="11" rx="1.5"/><path d="M2 6.5h12"/></svg>',
   tick: '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 6.2l2.3 2.3 4.7-4.9"/></svg>',
   flag: '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M3 2h1v12H3zM5 2.5h7.5l-2 3.5 2 3.5H5z"/></svg>',
+  clock: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 4.5V8l2.5 1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
 };
 
 function renderTabs() {
@@ -252,6 +285,7 @@ function renderTabs() {
   document.getElementById('tabs').innerHTML =
     tab('today', 'Today', open().filter(x => x.due && x.due <= t).length, overdue ? '<span class="dot" style="background:var(--overdue)"></span>' : '') +
     tab('upcoming', 'Upcoming', 0) +
+    tab('calendar', 'Calendar', 0) +
     tab('inbox', 'Inbox', open().filter(x => !x.projectId).length) +
     state.projects.map(p => tab('project:' + p.id, esc(p.name), open().filter(x => x.projectId === p.id).length, `<span class="dot" style="background:${esc(p.color)}"></span>`)).join('') +
     tab('completed', 'Completed', 0, '<span style="color:var(--today)">✓</span>') +
@@ -275,7 +309,8 @@ function taskHtml(t, { hideProject, hideDue } = {}) {
       <div class="ctl">
         ${dateBtn(td, `<span style="color:var(--today)">${ICONS.cal}</span>Today`)}${dateBtn(tm, 'Tomorrow')}${dateBtn(nw, 'Next week')}
         <label class="pill date ${custom ? 'on' : ''}">${custom ? dueLabel(t.due) : 'Pick date…'}<input type="date" value="${t.due || ''}" onchange="patch('${t.id}', { due: this.value || null })"></label>
-        ${t.due ? dateBtn(null, 'No date') : ''}
+        ${t.due ? `<label class="pill time ${t.dueTime ? 'on' : ''}">${ICONS.clock}${t.dueTime || 'Time'}<input type="time" value="${t.dueTime || ''}" onchange="patch('${t.id}', { dueTime: this.value || null })"></label>` : ''}
+        ${t.due ? `<button class="pill" onclick="patch('${t.id}', { due: null, dueTime: null })">No date</button>` : ''}
       </div>
       <div class="ctl">
         ${[1, 2, 3, 4].map(n => `<button class="pill ${t.priority === n ? 'on' : ''}" style="--pc:var(--p${n})" onclick="patch('${t.id}', { priority: ${n} })">${ICONS.flag}P${n}</button>`).join('')}
@@ -286,7 +321,8 @@ function taskHtml(t, { hideProject, hideDue } = {}) {
   }
 
   const meta = [];
-  if (t.due && !hideDue) meta.push(`<span style="color:${t.done ? 'var(--mute)' : dueColor(t.due)}">${ICONS.cal}${dueLabel(t.due)}</span>`);
+  if (t.due && !hideDue) meta.push(`<span style="color:${t.done ? 'var(--mute)' : dueColor(t.due)}">${ICONS.cal}${dueLabel(t.due)}${t.dueTime ? ' · ' + t.dueTime : ''}</span>`);
+  else if (t.dueTime) meta.push(`<span style="color:${t.done ? 'var(--mute)' : dueColor(t.due || ymd(today()))}">${ICONS.clock}${t.dueTime}</span>`);
   if (!hideProject && p) meta.push(`<span><span class="dot" style="background:${esc(p.color)};width:7px;height:7px"></span>${esc(p.name)}</span>`);
   return `<div class="task ${t.done ? 'done' : ''}" data-id="${t.id}">
     <div class="row" onclick="toggleOpen('${t.id}')">${check}
@@ -305,7 +341,7 @@ function render() {
 
   if (view === 'today') {
     const overdue = v.tasks.filter(x => x.due < t).sort(byPriority);
-    const due = v.tasks.filter(x => x.due === t).sort(byPriority);
+    const due = v.tasks.filter(x => x.due === t).sort(byTime);
     body += overdueBlock(overdue);
     if (overdue.length && due.length) body += `<div class="section"><span>Today</span></div>`;
     body += due.map(x => taskHtml(x, { hideDue: true })).join('');
@@ -315,12 +351,14 @@ function render() {
     const days = new Set(v.tasks.filter(x => x.due >= t).map(x => x.due));
     for (let i = 0; i < 7; i++) days.add(ymd(addDays(today(), i)));
     for (const d of [...days].sort()) {
-      const list = v.tasks.filter(x => x.due === d).sort(byPriority);
+      const list = v.tasks.filter(x => x.due === d).sort(byTime);
       const dt = parseYmd(d), n = dayDiff(d);
       const name = n <= 1 ? dueLabel(d) : dt.toLocaleDateString(undefined, { weekday: 'long' });
       body += `<div class="section"><span>${name} <span class="muted">· ${shortDate(dt)}</span></span></div>`;
       body += list.map(x => taskHtml(x, { hideDue: true })).join('');
     }
+  } else if (view === 'calendar') {
+    body += renderCalendar();
   } else if (view === 'completed') {
     const done = v.tasks.sort((a, b) => (b.completedAt || 0) - (a.completedAt || 0));
     let lastDay = null;
@@ -346,14 +384,59 @@ function render() {
 
 function autosize(el) { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; }
 
+// ---------- Calendar ----------
+const CHEV = dir => `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="${dir < 0 ? 'M10 3L5 8l5 5' : 'M6 3l5 5-5 5'}"/></svg>`;
+const WDS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+function renderCalendar() {
+  if (!calAnchor) calAnchor = new Date(today().getFullYear(), today().getMonth(), 1);
+  if (!calSel) calSel = ymd(today());
+  const y = calAnchor.getFullYear(), m = calAnchor.getMonth();
+  const monthName = calAnchor.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+  const startDow = (new Date(y, m, 1).getDay() + 6) % 7;
+  const gridStart = addDays(new Date(y, m, 1), -startDow);
+
+  const byDay = {};
+  open().forEach(x => { if (x.due) (byDay[x.due] ||= []).push(x); });
+  const tds = ymd(today());
+
+  let cells = WDS.map(w => `<div class="cal-wd">${w}</div>`).join('');
+  for (let i = 0; i < 42; i++) {
+    const d = addDays(gridStart, i), ds = ymd(d);
+    const cls = [d.getMonth() !== m ? 'dim' : '', ds === tds ? 'today' : '', ds === calSel ? 'sel' : ''].join(' ');
+    const dots = (byDay[ds] || []).slice(0, 3).map(x => `<i style="background:var(--p${x.priority})"></i>`).join('');
+    cells += `<button class="cal-day ${cls}" onclick="selectDay('${ds}')"><span class="dnum">${d.getDate()}</span><span class="dots">${dots}</span></button>`;
+  }
+
+  const n = dayDiff(calSel), sd = parseYmd(calSel);
+  const rel = n === 0 ? 'Today' : n === 1 ? 'Tomorrow' : n === -1 ? 'Yesterday' : '';
+  const full = sd.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' });
+  const list = (byDay[calSel] || []).sort(byTime);
+  const dayList = `<div class="section"><span>${rel || full}${rel ? ` <span class="muted">· ${full}</span>` : ''}</span></div>`
+    + (list.length ? list.map(x => taskHtml(x, { hideDue: true })).join('') : `<div class="empty">Nothing on this day. Type above to add.</div>`);
+
+  return `<div class="calbar"><h2>${monthName}</h2><div class="nav">
+      <button onclick="calMove(-1)" aria-label="Previous month">${CHEV(-1)}</button>
+      <button class="todaybtn" onclick="calToday()">Today</button>
+      <button onclick="calMove(1)" aria-label="Next month">${CHEV(1)}</button>
+    </div></div>
+    <div class="cal-grid">${cells}</div>${dayList}`;
+}
+
+function selectDay(ds) { calSel = ds; openId = null; render(); updateChips(); }
+function calMove(n) { calAnchor = new Date(calAnchor.getFullYear(), calAnchor.getMonth() + n, 1); render(); }
+function calToday() { calAnchor = new Date(today().getFullYear(), today().getMonth(), 1); calSel = ymd(today()); openId = null; render(); updateChips(); }
+
 // ---------- Quick add ----------
 const qa = document.getElementById('qa');
 function updateChips() {
   const p = parseQuickAdd(qa.value);
   const d = viewInfo().defaults;
-  const due = p.due || (qa.value.trim() && d.due), proj = p.projectId || d.projectId;
+  let due = p.due || (qa.value.trim() && d.due);
+  if (p.dueTime && !due) due = ymd(today());
+  const proj = p.projectId || d.projectId;
   const chips = [];
-  if (due) chips.push(`<span class="chip" style="color:${dueColor(due)}">${ICONS.cal}${dueLabel(due)}</span>`);
+  if (due) chips.push(`<span class="chip" style="color:${dueColor(due)}">${ICONS.cal}${dueLabel(due)}${p.dueTime ? ' · ' + p.dueTime : ''}</span>`);
   if (p.priority) chips.push(`<span class="chip" style="color:var(--p${p.priority})">${ICONS.flag}P${p.priority}</span>`);
   if (qa.value.trim() && proj) { const pr = project(proj); chips.push(`<span class="chip"><span class="dot" style="background:${esc(pr.color)}"></span>${esc(pr.name)}</span>`); }
   document.getElementById('chips').innerHTML = chips.join('');
@@ -387,6 +470,7 @@ document.getElementById('qaForm').addEventListener('submit', async e => {
   if (p.due) task.due = p.due;
   if (p.priority) task.priority = p.priority;
   if (p.projectId) task.projectId = p.projectId;
+  if (p.dueTime) { task.dueTime = p.dueTime; if (!task.due) task.due = ymd(today()); }
   qa.value = ''; updateChips(); qa.focus();
   await api('POST', 'tasks', task);
   await load();
