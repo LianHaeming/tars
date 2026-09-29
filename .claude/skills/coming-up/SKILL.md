@@ -16,9 +16,8 @@ present a single chronological list. Timezone is **Europe/London**.
 
 ## Sources
 
-1. **Gmail** — via the claude.ai Gmail connector tools already available in the
-   session (`mcp__claude_ai_Gmail__search_threads`, `…__get_thread`,
-   `…__get_message`). No setup/OAuth needed; the connector is Lian's account.
+1. **Gmail** — `bin/gmail search '<gmail query>' -n 25` lists matches (id, date,
+   sender, subject, snippet); `bin/gmail read <id>` shows one message in full.
 2. **Todo app** — `GET http://127.0.0.1:8788/api/state` returns `{ tasks, projects }`.
    Tasks have `title`, `due` (`YYYY-MM-DD`), `dueTime` (`HH:MM` or null),
    `description`, `done`. Include not-`done` tasks with a `due` of today or later.
@@ -27,13 +26,12 @@ present a single chronological list. Timezone is **Europe/London**.
 
 ## How to answer
 
-1. Search Gmail for recent mail that implies a future commitment. The search
-   tool is `search_threads` and its parameter is **`query`** (Gmail syntax, not
-   natural language). Lian's inbox is heavy with marketing and order/delivery
+1. Search Gmail for recent mail that implies a future commitment, using Gmail
+   query syntax (not natural language). Lian's inbox is heavy with marketing and order/delivery
    spam, so favour precise queries over broad keyword ORs:
    - `newer_than:45d (category:reservations OR appointment OR booking OR consultation OR reservation OR itinerary OR "e-ticket" OR "your ticket" OR "your booking") -category:promotions`
    - `is:important newer_than:30d -category:promotions` as a focused sweep.
-   Read only the promising threads (`get_thread`) to extract what it is, the
+   Read only the promising messages (`bin/gmail read <id>`) to extract what it is, the
    date, the time and the location. Ignore: promotions, sale/discount blasts,
    "order confirmed"/"dispatched"/"delivered" retail mail, and newsletters —
    these are noise, not commitments (a *theatre/travel/appointment* booking is a

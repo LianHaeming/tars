@@ -22,7 +22,7 @@ while it's being built. One private repo: github.com/LianHaeming/tars. Lian also
 | `hellofresh-recipes` | 8443 | Lian's 63-dish menu. `build_app.py` writes `app/` (gitignored). Recipes/photos are HelloFresh's copyrighted content: personal use only, never publish or make public. The full 34 GB archive lives on the Mac (`~/dev/hellofresh-recipes`); to change the menu, run `export_menu.py` there against it (see its docstring), commit, push, then `bin/sync` here. |
 
 ## Tools
-- `bin/gmail` — read-only Gmail for cottrelllian@gmail.com: `bin/gmail search '<gmail query>' [-n N]`, `bin/gmail read <id>`.
+- `bin/gmail` — read-only Gmail for cottrelllian@gmail.com (the only Gmail path; skills use it, not a connector): `bin/gmail search '<gmail query>' [-n N]`, `bin/gmail read <id>`.
   OAuth client + token live in `~/.config/tars/` (outside the repo — never copy them into it or print them).
   If it says sign-in expired: `bin/gmail login`, give Lian the link, then `bin/gmail login '<localhost address they paste back>'`.
 
