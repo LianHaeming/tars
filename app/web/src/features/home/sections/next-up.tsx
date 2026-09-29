@@ -23,7 +23,7 @@ export function NextUp() {
   if (!x) {
     return (
       <div className={box}>
-        <div className="text-sm font-bold text-muted-foreground">Next up</div>
+        <div className="text-sm font-semibold text-muted-foreground">Next up</div>
         <div className="mt-1 text-xl leading-tight font-bold tracking-tight">Nothing scheduled</div>
       </div>
     )
@@ -31,7 +31,7 @@ export function NextUp() {
   const where = x.description.split('\n')[0]
   return (
     <Link className={`${box} transition-transform active:scale-98`} to={`/month?d=${x.due}`}>
-      <div className="text-sm font-bold" style={{ color: dueColor(x.due!) }}>{countdown(x)} · Next up</div>
+      <div className="text-sm font-semibold" style={{ color: dueColor(x.due!) }}>{countdown(x)} · Next up</div>
       <div className="mt-1 text-xl leading-tight font-bold tracking-tight">{x.title}</div>
       {where && <div className="mt-1 truncate text-sm text-muted-foreground">{where}</div>}
     </Link>

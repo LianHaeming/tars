@@ -38,7 +38,14 @@ bin/             sync, up, backup, gmail
   - `components/` — Page.tsx (every page's header/back/width), common.tsx (SectionHead, Section, Empty, PillBar, pill),
     `ui/` (shadcn: `cd app/web && npx shadcn@latest add <name>`). `lib/` — api.ts, dates.ts, utils.ts.
   - **One look everywhere**: shadcn components + the shared pieces above; never hard-code colours — use the tokens in
-    `src/index.css` (dark only, blue `primary`, due/priority colours, `glass`/`glass-strong`). No second theme or CSS file.
+    `src/index.css` (dark only, blue `primary`, due/priority colours). No second theme or CSS file.
+  - **Crispness rules** (see UI-CRISPNESS-BRIEF.md): type ramp only — `text-xs/sm/base/lg/xl/2xl` = 12/13/15/17/20/24,
+    `text-field` (16) for every text input so iOS never zooms; weights 400 body / 600 labels / 700 headings.
+    4px spacing scale, no half steps, **no arbitrary `[..px]` values** — add a named token/utility in index.css
+    instead (e.g. `max-w-page`, `pt-safe-*`/`pb-safe-*`/`bottom-safe-*`, `top-below-header`, `ease-sheet`).
+    Separators are `hairline`/`hairline-t`/`hairline-b` (0.5px). Sticky/fixed bars use solid `chrome-bar`/`bg-chrome`;
+    **no backdrop blur except the dock**. Cards: `glass` (translucent, no blur). Motion: transform/opacity only,
+    150–250ms (`ease-sheet` for sheets); reduced motion is handled globally.
   - Browser storage is only for view preferences (last list tab, food filters). Anything that should follow Lian between
     devices goes through the server into data/state/.
   - Dev: `npm run dev` in `app/web` (proxies `/api` and `/data` to :8400).
