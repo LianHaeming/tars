@@ -27,11 +27,17 @@ present a single chronological list. Timezone is **Europe/London**.
 
 ## How to answer
 
-1. Search Gmail for recent mail that implies a future commitment. Run a few
-   targeted searches rather than reading the whole inbox, e.g.:
-   - `newer_than:45d (appointment OR booking OR confirmed OR reservation OR itinerary OR "your order" OR invoice OR "due" OR consultation)`
-   - `newer_than:14d in:inbox` as a general sweep.
-   Read only the promising threads to extract: what it is, date, time, location.
+1. Search Gmail for recent mail that implies a future commitment. The search
+   tool is `search_threads` and its parameter is **`query`** (Gmail syntax, not
+   natural language). Lian's inbox is heavy with marketing and order/delivery
+   spam, so favour precise queries over broad keyword ORs:
+   - `newer_than:45d (category:reservations OR appointment OR booking OR consultation OR reservation OR itinerary OR "e-ticket" OR "your ticket" OR "your booking") -category:promotions`
+   - `is:important newer_than:30d -category:promotions` as a focused sweep.
+   Read only the promising threads (`get_thread`) to extract what it is, the
+   date, the time and the location. Ignore: promotions, sale/discount blasts,
+   "order confirmed"/"dispatched"/"delivered" retail mail, and newsletters —
+   these are noise, not commitments (a *theatre/travel/appointment* booking is a
+   commitment; an Amazon/New Look order is not).
 2. Pull todo-app tasks with due dates (and calendar events if available).
 3. Keep only items dated **today or later** (London time). Drop anything already
    past, already `done`, or clearly not a real commitment (newsletters, promos).
