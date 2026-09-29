@@ -1,6 +1,0 @@
-{
-  "name": "HelloFresh menu",
-  "port": 8443,
-  "build": "python3 build_app.py",
-  "start": "python3 -m http.server $PORT --bind 127.0.0.1"
-}

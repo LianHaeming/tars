@@ -154,7 +154,7 @@ async function totals(ids) {
   }
   return [...lines.values()].map(L => ({
     name: L.name, img: L.img, amount: [...[...L.byUnit].map(([u, q]) => fmtQ(q, u)), ...L.other].join(" + "),
-    units: L.other.length ? [...L.byUnit, ["?", 1]] : [...L.byUnit], dishes: L.dishes.size,
+    units: L.other.length ? [...L.byUnit, ["?", 1]] : [...L.byUnit], dishes: L.dishes.size, dishIds: [...L.dishes],
   })).sort((a, b) => a.name.localeCompare(b.name));
 }
 
@@ -167,7 +167,7 @@ async function openList() {
     ${ids.length ? `
       <ul class="list chosen" style="margin-top:12px">${ids.map(id => BY_ID.get(id)).map(r =>
         `<li><span><img src="${esc(r.img)}" alt="">${esc(r.n)}</span><button data-remove="${r.id}" aria-label="Remove">×</button></li>`).join("")}</ul>
-      <div class="actions"><button id="clearList">Clear</button></div>
+      <div class="actions"><button class="primary" id="sendList">Send to Shopping list</button><button id="clearList">Clear</button></div>
       <div class="panelhead" style="margin-top:18px"><h3 style="margin:0">Ingredients <span class="muted">(2 servings each)</span></h3>${shopSwitch()}</div>
       ${shop ? shopList(lines) : `<ul class="list">${lines.map(l => `<li>${thumb(l)}<span class="grow">${esc(l.name)}</span><span>${esc(l.amount)}</span></li>`).join("")}</ul>`}`
     : `<p class="muted">No dishes added.</p>`}
@@ -191,8 +191,25 @@ listDlg.onclick = e => {
   if (t.closest("[data-shop]")) { setShop(t.closest("[data-shop]").dataset.shop); return openList(); }
   if (t === listDlg || t.closest(".close")) return listDlg.close();
   if (t.dataset.remove) { toggleBasket(t.dataset.remove); openList(); }
+  if (t.id === "sendList") return sendList();
   if (t.id === "clearList") { [...basket].forEach(toggleBasket); openList(); }
 };
+async function sendList() {
+  const btn = $("#sendList");
+  btn.disabled = true;
+  const items = (await totals([...basket])).map(l => ({
+    title: l.amount ? `${l.name} — ${l.amount}` : l.name,
+    description: "For: " + l.dishIds.map(id => BY_ID.get(id)?.n).filter(Boolean).join(", "),
+  }));
+  try {
+    const r = await fetch("/api/shopping", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ items }) });
+    if (!r.ok) throw new Error(r.statusText);
+    btn.textContent = `Sent ${items.length} items ✓`;
+  } catch {
+    btn.disabled = false;
+    btn.textContent = "Couldn't send, try again";
+  }
+}
 $("#listBtn").onclick = openList;
 
 saveBasket();

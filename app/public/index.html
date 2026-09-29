@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#08090b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="tars">
+<title>tars</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<main class="dash">
+  <header class="top">
+    <div class="hello" id="hello"></div>
+    <h1 id="date"></h1>
+  </header>
+  <section class="cards" id="cards"></section>
+</main>
+
+<div class="panel-scrim" id="panelScrim"></div>
+<section class="panel" id="panel">
+  <header class="panel-head" id="panelHead">
+    <div class="grabber"></div>
+    <h2 id="panelTitle"></h2>
+    <button class="panel-close" id="panelClose">Done</button>
+  </header>
+  <div class="panel-body" id="panelBody"></div>
+</section>
+
+<button class="fab" id="fab" aria-label="Add task"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+<div class="scrim" id="scrim"></div>
+<div class="sheet" id="sheet">
+  <form id="qaForm" autocomplete="off">
+    <input id="qa" enterkeyhint="send" placeholder="Task name">
+    <button class="go" id="qaGo" disabled aria-label="Add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
+  </form>
+  <div class="chips" id="chips"></div>
+</div>
+<div class="toast" id="toast"><span id="toastMsg"></span><button id="toastUndo">Undo</button></div>
+
+<script src="core.js"></script>
+<script src="cards/next-up.js"></script>
+<script src="cards/upcoming.js"></script>
+<script src="cards/food.js"></script>
+<script src="cards/tasks.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

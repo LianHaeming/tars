@@ -1,160 +1,11 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#1f1f1f" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<title>Tasks</title>
-<style>
-:root {
-  --bg: #ffffff; --fg: #202020; --mute: #8a8a8a; --line: #eeeeee; --soft: #f5f3f1;
-  --accent: #dc4c3e; --shadow: 0 6px 24px rgba(0,0,0,.12);
-  --p1: #d1453b; --p2: #eb8909; --p3: #246fe0; --p4: #a0a0a0;
-  --overdue: #d1453b; --today: #058527; --tomorrow: #ad6200; --week: #692ec2;
-}
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #1c1c1c; --fg: #ededed; --mute: #9a9a9a; --line: #2e2e2e; --soft: #262626;
-    --accent: #e8705f; --shadow: 0 6px 24px rgba(0,0,0,.5);
-    --p1: #ff7066; --p2: #ff9a14; --p3: #5297ff; --p4: #7a7a7a;
-    --overdue: #ff7066; --today: #25b84c; --tomorrow: #ff9a14; --week: #a970ff;
-  }
-}
-* { box-sizing: border-box; }
-html, body { margin: 0; }
-body { background: var(--bg); color: var(--fg); font: 15px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; -webkit-tap-highlight-color: transparent; }
-button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; padding: 0; }
-input, textarea, select { font: inherit; color: inherit; }
-
-.wrap { max-width: 680px; margin: 0 auto; padding: 0 16px 110px; }
-
-/* Sticky header: tabs */
-header { position: sticky; top: 0; z-index: 10; background: var(--bg); padding-top: env(safe-area-inset-top); }
-.tabs { display: flex; gap: 6px; overflow-x: auto; padding: 14px 0 10px; scrollbar-width: none; }
-.tabs::-webkit-scrollbar { display: none; }
-.tab { flex-shrink: 0; display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; background: var(--soft); font-size: 14px; font-weight: 500; white-space: nowrap; }
-.tab .n { font-size: 12px; color: var(--mute); font-variant-numeric: tabular-nums; }
-.tab.on { background: var(--fg); color: var(--bg); }
-.tab.on .n { color: inherit; opacity: .7; }
-.tab.add { background: none; color: var(--mute); border: 1px dashed var(--line); }
-.dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; display: inline-block; }
-
-/* Add button + bottom sheet */
-.fab { position: fixed; right: max(20px, calc(50% - 340px + 20px)); bottom: calc(24px + env(safe-area-inset-bottom)); width: 56px; height: 56px; border-radius: 50%; background: var(--accent); color: #fff; display: grid; place-items: center; box-shadow: var(--shadow); z-index: 20; transition: transform .15s; }
-.fab:active { transform: scale(.92); }
-.fab svg { width: 24px; height: 24px; }
-.scrim { position: fixed; inset: 0; background: rgba(0,0,0,.3); opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 30; }
-.sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 31; background: var(--bg); border-radius: 16px 16px 0 0; box-shadow: var(--shadow);
-  padding: 16px 16px calc(12px + env(safe-area-inset-bottom)); transform: translateY(110%); transition: transform .25s cubic-bezier(.2,.8,.2,1); max-width: 680px; margin: 0 auto; }
-body.adding .scrim { opacity: 1; pointer-events: auto; }
-body.adding .sheet { transform: none; }
-body.adding .fab { transform: scale(0); }
-.sheet form { display: flex; align-items: center; gap: 10px; }
-.sheet input { flex: 1; min-width: 0; border: 0; outline: 0; background: none; font-size: 17px; font-weight: 500; padding: 6px 0; }
-.sheet .go { width: 36px; height: 36px; border-radius: 50%; background: var(--accent); color: #fff; display: grid; place-items: center; flex-shrink: 0; transition: opacity .15s; }
-.sheet .go:disabled { opacity: .3; }
-.sheet .go svg { width: 18px; height: 18px; }
-.chips { display: flex; gap: 6px; flex-wrap: wrap; font-size: 12px; }
-.chips:not(:empty) { padding-top: 8px; }
-.chip { padding: 3px 8px; border-radius: 6px; background: var(--soft); display: inline-flex; gap: 4px; align-items: center; font-weight: 600; }
-.chip svg { width: 12px; height: 12px; }
-
-/* Title row */
-.head { display: flex; align-items: baseline; gap: 10px; padding: 8px 0 4px; }
-.head h1 { font-size: 26px; margin: 0; letter-spacing: -.01em; }
-.head .sub { color: var(--mute); font-size: 14px; }
-.head .tools { margin-left: auto; display: flex; gap: 12px; font-size: 13px; color: var(--mute); }
-.head .tools button:hover { color: var(--fg); }
-
-.section { font-weight: 700; font-size: 13px; padding: 20px 0 6px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: baseline; }
-.section.overdue { color: var(--overdue); }
-.section button { color: var(--accent); font-weight: 500; }
-.section .muted { color: var(--mute); font-weight: 500; }
-
-/* Tasks */
-.task { border-bottom: 1px solid var(--line); }
-.row { display: flex; gap: 12px; padding: 12px 0; cursor: pointer; align-items: flex-start; }
-.check { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--pc); flex-shrink: 0; display: grid; place-items: center; background: color-mix(in srgb, var(--pc) 10%, transparent); }
-.check svg { width: 12px; height: 12px; opacity: 0; color: var(--pc); transition: opacity .15s; }
-@media (hover: hover) { .check:hover svg { opacity: 1; } }
-.task.done .check, .task.completing .check { background: var(--pc); }
-.task.done .check svg, .task.completing .check svg { opacity: 1; color: var(--bg); }
-.task.done .title { text-decoration: line-through; color: var(--mute); }
-.task.completing { opacity: .4; transition: opacity .3s; }
-.body { flex: 1; min-width: 0; }
-.title { word-wrap: break-word; }
-.desc { color: var(--mute); font-size: 13px; white-space: pre-wrap; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-.meta { display: flex; gap: 12px; font-size: 12px; margin-top: 2px; color: var(--mute); }
-.meta span { display: inline-flex; align-items: center; gap: 4px; }
-.meta svg { width: 12px; height: 12px; }
-
-/* Inline editor (expanded task) */
-.task.open { background: var(--soft); border-radius: 12px; border-bottom-color: transparent; margin: 6px -12px; padding: 0 12px 12px; }
-.task.open .row { cursor: default; }
-.task.open .title-in { width: 100%; border: 0; outline: 0; background: none; font-weight: 600; padding: 0; }
-.task.open .desc-in { width: 100%; border: 0; outline: 0; background: none; resize: none; color: var(--mute); font-size: 13px; padding: 2px 0 0; min-height: 22px; }
-.ctl { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 0 34px; }
-.ctl + .ctl { margin-top: 8px; }
-.pill { padding: 5px 10px; border-radius: 8px; background: var(--bg); font-size: 13px; display: inline-flex; gap: 5px; align-items: center; border: 1.5px solid transparent; }
-.pill.on { border-color: var(--pc, var(--fg)); }
-.pill svg { width: 13px; height: 13px; color: var(--pc); }
-.pill input[type=date], .pill input[type=time] { border: 0; background: none; font-size: 13px; padding: 0; width: 0; opacity: 0; position: absolute; }
-.pill.date, .pill.time { position: relative; }
-.pill.del { color: var(--p1); margin-left: auto; }
-select.pill { appearance: none; -webkit-appearance: none; padding-right: 10px; }
-
-/* Calendar */
-.calbar { display: flex; align-items: center; gap: 12px; padding: 10px 0 12px; }
-.calbar h2 { font-size: 19px; margin: 0; font-weight: 700; letter-spacing: -.01em; }
-.calbar .nav { margin-left: auto; display: flex; gap: 6px; align-items: center; }
-.calbar .nav button { width: 32px; height: 32px; border-radius: 8px; background: var(--soft); display: grid; place-items: center; }
-.calbar .nav button svg { width: 16px; height: 16px; }
-.calbar .nav .todaybtn { width: auto; padding: 0 12px; font-size: 13px; font-weight: 600; }
-.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin-bottom: 8px; }
-.cal-wd { text-align: center; font-size: 11px; color: var(--mute); font-weight: 600; padding: 2px 0 6px; }
-.cal-day { aspect-ratio: 1 / 1; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 6px; gap: 4px; }
-.cal-day.dim .dnum { opacity: .35; }
-.cal-day .dnum { font-size: 13px; font-variant-numeric: tabular-nums; width: 24px; height: 24px; display: grid; place-items: center; border-radius: 50%; }
-.cal-day.today .dnum { background: var(--accent); color: #fff; font-weight: 700; }
-.cal-day.sel { background: var(--soft); }
-.cal-day.sel.today { background: color-mix(in srgb, var(--accent) 16%, transparent); }
-.cal-day .dots { display: flex; gap: 3px; height: 5px; }
-.cal-day .dots i { width: 5px; height: 5px; border-radius: 50%; display: block; }
-.empty { text-align: center; color: var(--mute); padding: 56px 20px; }
-.empty .big { font-size: 36px; margin-bottom: 6px; }
-
-.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom)); transform: translateX(-50%) translateY(140px); background: #282828; color: #fff; padding: 10px 16px; border-radius: 10px; display: flex; gap: 16px; align-items: center; transition: transform .2s; z-index: 50; box-shadow: var(--shadow); white-space: nowrap; }
-.toast.show { transform: translateX(-50%) translateY(0); }
-.toast button { color: #ff9a8a; font-weight: 600; }
-</style>
-</head>
-<body>
-<div class="wrap">
-  <header>
-    <nav class="tabs" id="tabs"></nav>
-  </header>
-  <div id="content"></div>
-</div>
-<button class="fab" id="fab" aria-label="Add task"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
-<div class="scrim" id="scrim"></div>
-<div class="sheet" id="sheet">
-  <form id="qaForm" autocomplete="off">
-    <input id="qa" enterkeyhint="send" placeholder="Task name">
-    <button class="go" id="qaGo" disabled aria-label="Add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
-  </form>
-  <div class="chips" id="chips"></div>
-</div>
-<div class="toast" id="toast"><span id="toastMsg"></span><button id="toastUndo">Undo</button></div>
-
-<script>
 // ---------- State ----------
 let state = { projects: [], tasks: [] };
 let view = localGet('view') || 'today';
+let panel = null;            // card whose full-screen panel is open: 'tasks' | 'upcoming' | 'food'
 let openId = null;           // task currently expanded for editing
 let calAnchor = null;        // first-of-month Date shown in the calendar
 let calSel = null;           // selected day (ymd) in the calendar
+const CARDS = [];
 const PROJECT_COLORS = ['#dc4c3e', '#eb8909', '#fad000', '#7ecc49', '#299438', '#14aaf5', '#4073ff', '#884dff', '#e05194', '#808080'];
 
 function localGet(k) { try { return localStorage.getItem(k); } catch { return null; } }
@@ -170,6 +21,7 @@ async function load() { state = await api('GET', 'state'); render(); }
 // ---------- Dates ----------
 const pad = n => String(n).padStart(2, '0');
 const ymd = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const hhmm = d => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
 const parseYmd = s => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
 const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
 const today = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; };
@@ -193,6 +45,7 @@ function dueColor(s) {
   const n = dayDiff(s);
   return n < 0 ? 'var(--overdue)' : n === 0 ? 'var(--today)' : n === 1 ? 'var(--tomorrow)' : n < 7 ? 'var(--week)' : 'var(--mute)';
 }
+const whenLabel = t => `${dueLabel(t.due)}${t.dueTime ? ' · ' + t.dueTime : ''}`;
 
 // ---------- Quick-add parsing ----------
 // Pulls dates ("tomorrow", "fri", "next week", "in 3 days", "12 oct"), priority (p1-p4)
@@ -251,14 +104,18 @@ function parseQuickAdd(text) {
 const open = () => state.tasks.filter(t => !t.done);
 const byPriority = (a, b) => a.priority - b.priority || (a.due || '9').localeCompare(b.due || '9') || a.createdAt - b.createdAt;
 const byTime = (a, b) => (a.dueTime || '99:99').localeCompare(b.dueTime || '99:99') || a.priority - b.priority || a.createdAt - b.createdAt;
+const byWhen = (a, b) => a.due.localeCompare(b.due) || (a.dueTime || '').localeCompare(b.dueTime || '') || a.priority - b.priority;
 const project = id => state.projects.find(p => p.id === id);
+const shoppingList = () => state.projects.find(p => p.name === 'Shopping');
+const isTaskView = v => ['today', 'inbox', 'completed'].includes(v) || v.startsWith('project:');
+const isUpcomingView = v => ['upcoming', 'calendar'].includes(v);
 
 function viewInfo() {
   const t = ymd(today());
   if (view === 'inbox') return { title: 'Inbox', tasks: open().filter(x => !x.projectId), defaults: {} };
   if (view === 'today') return { title: 'Today', sub: today().toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' }), tasks: open().filter(x => x.due && x.due <= t), defaults: { due: t } };
   if (view === 'upcoming') return { title: 'Upcoming', tasks: open().filter(x => x.due), defaults: {} };
-  if (view === 'calendar') { const sel = calSel || ymd(today()); return { title: 'Calendar', calendar: true, tasks: open().filter(x => x.due === sel), defaults: { due: sel } }; }
+  if (view === 'calendar') { const sel = calSel || ymd(today()); return { title: 'Upcoming', calendar: true, tasks: open().filter(x => x.due === sel), defaults: { due: sel } }; }
   if (view === 'completed') return { title: 'Completed', tasks: state.tasks.filter(x => x.done), defaults: {} };
   if (view.startsWith('project:')) {
     const p = project(view.slice(8));
@@ -266,8 +123,9 @@ function viewInfo() {
   }
   view = 'today'; return viewInfo();
 }
+const addDefaults = () => panel === 'tasks' || panel === 'upcoming' ? viewInfo().defaults : {};
 
-function setView(v) { view = v; localSet('view', v); openId = null; render(); updateChips(); window.scrollTo(0, 0); }
+function setView(v) { view = v; localSet('view', v); openId = null; render(); updateChips(); document.getElementById('panelBody').scrollTop = 0; }
 
 // ---------- Rendering ----------
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
@@ -281,21 +139,20 @@ const ICONS = {
 function renderTabs() {
   const t = ymd(today());
   const tab = (key, label, n, lead = '') => `<button class="tab ${view === key ? 'on' : ''}" onclick="setView('${key}')">${lead}${label}${n ? `<span class="n">${n}</span>` : ''}</button>`;
+  if (panel === 'upcoming') return tab('upcoming', 'List', 0) + tab('calendar', 'Month', 0);
   const overdue = open().some(x => x.due && x.due < t);
-  document.getElementById('tabs').innerHTML =
-    tab('today', 'Today', open().filter(x => x.due && x.due <= t).length, overdue ? '<span class="dot" style="background:var(--overdue)"></span>' : '') +
-    tab('upcoming', 'Upcoming', 0) +
-    tab('calendar', 'Calendar', 0) +
+  return tab('today', 'Today', open().filter(x => x.due && x.due <= t).length, overdue ? '<span class="dot" style="background:var(--overdue)"></span>' : '') +
     tab('inbox', 'Inbox', open().filter(x => !x.projectId).length) +
     state.projects.map(p => tab('project:' + p.id, esc(p.name), open().filter(x => x.projectId === p.id).length, `<span class="dot" style="background:${esc(p.color)}"></span>`)).join('') +
     tab('completed', 'Completed', 0, '<span style="color:var(--today)">✓</span>') +
-    `<button class="tab add" onclick="addProject()">+ Project</button>`;
-  document.querySelector('.tab.on')?.scrollIntoView({ inline: 'nearest', block: 'nearest' });
+    `<button class="tab add" onclick="addProject()">+ List</button>`;
 }
+
+const checkHtml = t => `<button class="check" style="--pc:var(--p${t.priority})" onclick="event.stopPropagation(); toggleDone('${t.id}', this)" aria-label="Complete">${ICONS.tick}</button>`;
 
 function taskHtml(t, { hideProject, hideDue } = {}) {
   const p = project(t.projectId);
-  const check = `<button class="check" style="--pc:var(--p${t.priority})" onclick="event.stopPropagation(); toggleDone('${t.id}', this)" aria-label="Complete">${ICONS.tick}</button>`;
+  const check = checkHtml(t);
 
   if (t.id === openId) {
     const td = ymd(today()), tm = ymd(addDays(today(), 1)), nw = ymd(nextMonday());
@@ -321,7 +178,7 @@ function taskHtml(t, { hideProject, hideDue } = {}) {
   }
 
   const meta = [];
-  if (t.due && !hideDue) meta.push(`<span style="color:${t.done ? 'var(--mute)' : dueColor(t.due)}">${ICONS.cal}${dueLabel(t.due)}${t.dueTime ? ' · ' + t.dueTime : ''}</span>`);
+  if (t.due && !hideDue) meta.push(`<span style="color:${t.done ? 'var(--mute)' : dueColor(t.due)}">${ICONS.cal}${whenLabel(t)}</span>`);
   else if (t.dueTime) meta.push(`<span style="color:${t.done ? 'var(--mute)' : dueColor(t.due || ymd(today()))}">${ICONS.clock}${t.dueTime}</span>`);
   if (!hideProject && p) meta.push(`<span><span class="dot" style="background:${esc(p.color)};width:7px;height:7px"></span>${esc(p.name)}</span>`);
   return `<div class="task ${t.done ? 'done' : ''}" data-id="${t.id}">
@@ -332,7 +189,8 @@ function taskHtml(t, { hideProject, hideDue } = {}) {
 }
 
 function render() {
-  renderTabs();
+  renderDashboard();
+  if (panel !== 'tasks' && panel !== 'upcoming') return;
   const v = viewInfo();
   const t = ymd(today());
   let body = '';
@@ -374,11 +232,13 @@ function render() {
     if (!done.length) body += `<div class="empty"><div class="big">✓</div>Nothing completed yet.</div>`;
   } else {
     body += v.tasks.sort(byPriority).map(x => taskHtml(x, { hideProject: !!v.project })).join('');
-    if (!v.tasks.length) body += `<div class="empty"><div class="big">${v.project ? '✨' : '📥'}</div>Nothing here. Type above to add a task.</div>`;
+    if (!v.tasks.length) body += `<div class="empty"><div class="big">${v.project ? '✨' : '📥'}</div>Nothing here. Tap + to add a task.</div>`;
   }
 
   const tools = v.project ? `<div class="tools"><button onclick="renameProject('${v.project.id}')">Rename</button><button onclick="deleteProject('${v.project.id}')">Delete</button></div>` : '';
-  document.getElementById('content').innerHTML = `<div class="head"><h1>${esc(v.title)}</h1>${v.sub ? `<span class="sub">${v.sub}</span>` : ''}${tools}</div>${body}`;
+  document.getElementById('panelTitle').textContent = v.title;
+  document.getElementById('panelBody').innerHTML = `<div class="wrap"><nav class="tabs">${renderTabs()}</nav>${v.sub || tools ? `<div class="head">${v.sub ? `<span class="sub">${v.sub}</span>` : ''}${tools}</div>` : ''}${body}</div>`;
+  document.querySelector('#panelBody .tab.on')?.scrollIntoView({ inline: 'nearest', block: 'nearest' });
   document.querySelectorAll('.desc-in').forEach(autosize);
 }
 
@@ -413,7 +273,7 @@ function renderCalendar() {
   const full = sd.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' });
   const list = (byDay[calSel] || []).sort(byTime);
   const dayList = `<div class="section"><span>${rel || full}${rel ? ` <span class="muted">· ${full}</span>` : ''}</span></div>`
-    + (list.length ? list.map(x => taskHtml(x, { hideDue: true })).join('') : `<div class="empty">Nothing on this day. Type above to add.</div>`);
+    + (list.length ? list.map(x => taskHtml(x, { hideDue: true })).join('') : `<div class="empty">Nothing on this day. Tap + to add.</div>`);
 
   return `<div class="calbar"><h2>${monthName}</h2><div class="nav">
       <button onclick="calMove(-1)" aria-label="Previous month">${CHEV(-1)}</button>
@@ -431,7 +291,7 @@ function calToday() { calAnchor = new Date(today().getFullYear(), today().getMon
 const qa = document.getElementById('qa');
 function updateChips() {
   const p = parseQuickAdd(qa.value);
-  const d = viewInfo().defaults;
+  const d = addDefaults();
   let due = p.due || (qa.value.trim() && d.due);
   if (p.dueTime && !due) due = ymd(today());
   const proj = p.projectId || d.projectId;
@@ -466,7 +326,7 @@ document.getElementById('qaForm').addEventListener('submit', async e => {
   e.preventDefault();
   const p = parseQuickAdd(qa.value);
   if (!p.title) return;
-  const task = { ...viewInfo().defaults, title: p.title };
+  const task = { ...addDefaults(), title: p.title };
   if (p.due) task.due = p.due;
   if (p.priority) task.priority = p.priority;
   if (p.projectId) task.projectId = p.projectId;
@@ -475,8 +335,7 @@ document.getElementById('qaForm').addEventListener('submit', async e => {
   await api('POST', 'tasks', task);
   await load();
   // Say where it went if it landed outside the current view.
-  const v = viewInfo();
-  const visible = v.tasks.some(x => x.title === task.title);
+  const visible = (panel === 'tasks' || panel === 'upcoming') && viewInfo().tasks.some(x => x.title === task.title);
   if (!visible) toast(`Added to ${task.projectId ? project(task.projectId).name : task.due ? dueLabel(task.due) : 'Inbox'}`);
 });
 
@@ -536,13 +395,13 @@ async function rescheduleOverdue() {
 
 // ---------- Projects ----------
 async function addProject() {
-  const name = prompt('New project name');
+  const name = prompt('New list name');
   if (!name?.trim()) return;
   const p = await api('POST', 'projects', { name, color: PROJECT_COLORS[state.projects.length % PROJECT_COLORS.length] });
   await load(); setView('project:' + p.id);
 }
 async function renameProject(id) {
-  const name = prompt('Rename project', project(id).name);
+  const name = prompt('Rename list', project(id).name);
   if (!name?.trim()) return;
   await api('PATCH', 'projects/' + id, { name: name.trim() }); await load();
 }
@@ -550,17 +409,3 @@ async function deleteProject(id) {
   if (!confirm(`Delete "${project(id).name}"? Its tasks move to Inbox.`)) return;
   await api('DELETE', 'projects/' + id); setView('inbox'); await load();
 }
-
-// ---------- Shell ----------
-document.addEventListener('keydown', e => {
-  const typing = e.target.closest('input, textarea, select');
-  if ((e.key === 'q' || e.key === '/') && !typing) { e.preventDefault(); openSheet(); }
-  if (e.key === 'Escape') { if (document.body.classList.contains('adding')) closeSheet(); else if (openId) { openId = null; render(); } }
-});
-// Pick up changes made on another device when you come back to the tab.
-document.addEventListener('visibilitychange', () => { if (!document.hidden && !document.activeElement.closest('.task.open, .sheet')) load(); });
-
-load().then(updateChips);
-</script>
-</body>
-</html>
