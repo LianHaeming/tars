@@ -52,7 +52,7 @@ export function QuickAdd() {
       <div
         style={{ bottom }}
         className={cn(
-          'chrome-bar fixed inset-x-0 z-61 mx-auto max-w-page rounded-t-2xl border-b-0 px-4 pt-4 pb-safe-3 shadow-2xl transition-transform duration-200 ease-sheet',
+          'chrome-bar hairline fixed inset-x-0 z-61 mx-auto max-w-page rounded-t-2xl border-b-0 px-4 pt-4 pb-safe-3 shadow-2xl transition-transform duration-200 ease-sheet',
           adding ? 'translate-y-0' : 'translate-y-full',
         )}
       >

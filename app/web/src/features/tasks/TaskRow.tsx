@@ -54,7 +54,7 @@ export function TaskRow({ task, hideProject, hideDue, compact }: { task: Task } 
     <div
       data-task-row
       data-done={task.done || completing}
-      className={cn('group/task border-b border-border transition-opacity duration-300', completing && 'opacity-40')}
+      className={cn('group/task hairline-b transition-opacity duration-300', completing && 'opacity-40')}
     >
       <div className="flex cursor-pointer items-start gap-3 py-3" onClick={() => setOpenId(task.id)}>
         <Check task={task} onDone={done} />

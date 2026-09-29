@@ -126,7 +126,7 @@ export function TarsPage() {
         onSubmit={submit}
         autoComplete="off"
         style={{ bottom }}
-        className="chrome-bar fixed inset-x-0 z-20 border-x-0 border-b-0 px-3 pt-3 pb-safe-3"
+        className="chrome-bar hairline-t fixed inset-x-0 z-20 px-3 pt-3 pb-safe-3"
       >
         <div className={cn('mx-auto flex items-end gap-2', pageWidth())}>
           <Textarea

@@ -142,7 +142,7 @@ export function RecipePage() {
             <BasketButton id={r.id} />
           </div>
           <Tabs defaultValue="ingredients" className="mt-5">
-            <TabsList variant="line" className="sticky top-below-header z-10 -mx-4 flex w-auto justify-start gap-4 border-b border-border bg-chrome px-4">
+            <TabsList variant="line" className="sticky top-below-header z-10 -mx-4 flex w-auto justify-start gap-4 hairline-b bg-chrome px-4">
               <TabsTrigger value="ingredients" className="flex-none">Ingredients</TabsTrigger>
               <TabsTrigger value="method" className="flex-none">Method</TabsTrigger>
               <TabsTrigger value="nutrition" className="flex-none">Nutrition</TabsTrigger>
