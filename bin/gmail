@@ -1,63 +1,204 @@
-#!/usr/bin/env node
-// tars-owned Gmail access. Usage:
-//   bin/gmail auth            one-time OAuth (authorise from your phone)
-//   bin/gmail recent [n]      list the n most recent messages
-//   bin/gmail search <query>  Gmail search (Gmail query syntax)
-const http = require('http');
-const { execSync } = require('child_process');
-const g = require('../lib/gmail');
+#!/usr/bin/env python3
+"""Read-only Gmail access for tars.
 
-const [cmd, ...rest] = process.argv.slice(2);
-const PORT = 8790;
+Usage:
+    bin/gmail login                   print a Google sign-in link (step 1)
+    bin/gmail login '<address>'       finish sign-in with the localhost address the browser ended on (step 2)
+    bin/gmail search '<query>' [-n N] list matching messages (Gmail search syntax, e.g. 'from:bank newer_than:7d')
+    bin/gmail read <id>               show one message: headers and plain-text body
 
-function serveOff() { try { execSync(`tailscale serve --https=${PORT} off`); } catch {} }
+Client: ~/.config/tars/google-client.json (Desktop OAuth client). Token: ~/.config/tars/google-token.json.
+"""
+import argparse
+import base64
+import hashlib
+import html
+import json
+import os
+import re
+import secrets
+import sys
+import time
+import urllib.error
+import urllib.parse
+import urllib.request
+from pathlib import Path
 
-function auth() {
-  const cbPath = new URL(g.REDIRECT).pathname;
-  const server = http.createServer(async (req, res) => {
-    const u = new URL(req.url, 'http://x');
-    if (u.pathname !== cbPath) { res.writeHead(404); return res.end(); }
-    const code = u.searchParams.get('code');
-    if (!code) { res.writeHead(400); return res.end('missing code'); }
-    try {
-      await g.exchangeCode(code);
-      res.writeHead(200, { 'content-type': 'text/html' });
-      res.end('<h2>tars is connected to Gmail ✅</h2><p>You can close this tab.</p>');
-      console.log('\n✅ Saved refresh token to', g.TOKEN);
-    } catch (e) {
-      res.writeHead(500, { 'content-type': 'text/plain' });
-      res.end('Error: ' + e.message);
-      console.error('\n❌ ' + e.message);
-    } finally {
-      setTimeout(() => { serveOff(); server.close(); process.exit(0); }, 400);
-    }
-  });
-  server.listen(PORT, '127.0.0.1', () => {
-    try { execSync(`tailscale serve --bg --https=${PORT} http://127.0.0.1:${PORT}`); }
-    catch (e) { console.error('tailscale serve failed:', e.message); }
-    console.log('1. Open this URL on a device signed into the Google account:\n');
-    console.log('   ' + g.authUrl());
-    console.log('\n2. Approve access (click through the "unverified app" warning if shown).');
-    console.log('3. You will land on a "connected" page. Done.\n\nWaiting for the redirect…');
-  });
-  process.on('SIGINT', () => { serveOff(); process.exit(1); });
-}
+CONFIG = Path.home() / ".config" / "tars"
+CLIENT = CONFIG / "google-client.json"
+TOKEN = CONFIG / "google-token.json"
+PENDING = CONFIG / "google-login-pending.json"
+SCOPE = "https://www.googleapis.com/auth/gmail.readonly"
+REDIRECT = "http://localhost:8765/"
+API = "https://gmail.googleapis.com/gmail/v1/users/me"
 
-async function list(query, n) {
-  const msgs = await g.search(query, n);
-  if (!msgs.length) return console.log('(no messages)');
-  for (const m of msgs) {
-    const d = await g.message(m.id);
-    const date = (d.headers.date || '').replace(/\s*\(.*\)$/, '').slice(0, 22);
-    console.log(`${date.padEnd(22)}  ${(d.headers.subject || '(no subject)').slice(0, 70)}`);
-  }
-}
 
-(async () => {
-  try {
-    if (cmd === 'auth') auth();
-    else if (cmd === 'recent') await list('', Number(rest[0]) || 10);
-    else if (cmd === 'search') await list(rest.join(' '), 25);
-    else { console.log('usage: bin/gmail auth | recent [n] | search <query>'); process.exit(1); }
-  } catch (e) { console.error('Error:', e.message); process.exit(1); }
-})();
+class LoginNeeded(Exception):
+    pass
+
+
+def write_private(path, data):
+    CONFIG.mkdir(mode=0o700, parents=True, exist_ok=True)
+    fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    with os.fdopen(fd, "w") as f:
+        json.dump(data, f)
+
+
+def client():
+    if not CLIENT.exists():
+        sys.exit(f"missing {CLIENT} (Google OAuth Desktop client JSON)")
+    return json.loads(CLIENT.read_text())["installed"]
+
+
+def post_form(url, fields):
+    req = urllib.request.Request(url, urllib.parse.urlencode(fields).encode())
+    try:
+        with urllib.request.urlopen(req, timeout=30) as r:
+            return json.load(r)
+    except urllib.error.HTTPError as e:
+        body = json.loads(e.read() or b"{}")
+        if body.get("error") == "invalid_grant":
+            raise LoginNeeded()
+        sys.exit(f"Google token error {e.code}: {body}")
+
+
+def login_start():
+    c = client()
+    verifier = secrets.token_urlsafe(64)
+    state = secrets.token_urlsafe(16)
+    challenge = base64.urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest()).rstrip(b"=").decode()
+    write_private(PENDING, {"verifier": verifier, "state": state, "at": time.time()})
+    url = c["auth_uri"] + "?" + urllib.parse.urlencode({
+        "client_id": c["client_id"], "redirect_uri": REDIRECT, "response_type": "code", "scope": SCOPE,
+        "access_type": "offline", "prompt": "consent", "state": state,
+        "code_challenge": challenge, "code_challenge_method": "S256",
+    })
+    print("1. Open this link on any device and allow access "
+          "(on 'Google hasn't verified this app': Advanced -> Go to ...):\n")
+    print(url)
+    print("\n2. The browser then lands on a localhost:8765 page that won't load - that's expected.\n"
+          "   Copy that page's full address and run:  bin/gmail login '<address>'")
+
+
+def login_finish(address):
+    if not PENDING.exists():
+        sys.exit("run 'bin/gmail login' first to get a sign-in link")
+    pending = json.loads(PENDING.read_text())
+    query = urllib.parse.parse_qs(urllib.parse.urlparse(address).query)
+    if query.get("error"):
+        sys.exit(f"Google said: {query['error'][0]}")
+    if query.get("state", [""])[0] != pending["state"]:
+        sys.exit("that address is from a different sign-in attempt; run 'bin/gmail login' again")
+    c = client()
+    tok = post_form(c["token_uri"], {
+        "code": query["code"][0], "client_id": c["client_id"], "client_secret": c["client_secret"],
+        "redirect_uri": REDIRECT, "grant_type": "authorization_code", "code_verifier": pending["verifier"],
+    })
+    if "refresh_token" not in tok:
+        sys.exit("Google returned no refresh token; run 'bin/gmail login' again")
+    write_private(TOKEN, {"refresh_token": tok["refresh_token"], "access_token": tok["access_token"],
+                          "expires_at": time.time() + tok["expires_in"] - 60})
+    PENDING.unlink()
+    profile = api("profile")
+    print(f"signed in as {profile['emailAddress']} ({profile['messagesTotal']} messages)")
+
+
+def access_token():
+    if not TOKEN.exists():
+        raise LoginNeeded()
+    tok = json.loads(TOKEN.read_text())
+    if time.time() < tok.get("expires_at", 0):
+        return tok["access_token"]
+    c = client()
+    fresh = post_form(c["token_uri"], {"refresh_token": tok["refresh_token"], "client_id": c["client_id"],
+                                       "client_secret": c["client_secret"], "grant_type": "refresh_token"})
+    tok.update(access_token=fresh["access_token"], expires_at=time.time() + fresh["expires_in"] - 60)
+    write_private(TOKEN, tok)
+    return tok["access_token"]
+
+
+def api(path, **params):
+    url = f"{API}/{path}" + ("?" + urllib.parse.urlencode(params, doseq=True) if params else "")
+    req = urllib.request.Request(url, headers={"Authorization": f"Bearer {access_token()}"})
+    try:
+        with urllib.request.urlopen(req, timeout=30) as r:
+            return json.load(r)
+    except urllib.error.HTTPError as e:
+        if e.code == 401:
+            raise LoginNeeded()
+        sys.exit(f"Gmail API error {e.code}: {e.read().decode()[:500]}")
+
+
+def headers(msg):
+    return {h["name"].lower(): h["value"] for h in msg["payload"].get("headers", [])}
+
+
+def decode(data):
+    return base64.urlsafe_b64decode(data + "=" * (-len(data) % 4)).decode("utf-8", "replace")
+
+
+def body_text(payload):
+    plain, rich = [], []
+
+    def walk(part):
+        mime, data = part.get("mimeType", ""), part.get("body", {}).get("data")
+        if data and mime == "text/plain":
+            plain.append(decode(data))
+        elif data and mime == "text/html":
+            rich.append(decode(data))
+        for sub in part.get("parts", []):
+            walk(sub)
+
+    walk(payload)
+    if plain:
+        return "\n".join(plain).strip()
+    text = re.sub(r"(?is)<(script|style).*?</\1>", "", "\n".join(rich))
+    text = re.sub(r"(?i)<br\s*/?>|</p>|</div>|</tr>", "\n", text)
+    text = html.unescape(re.sub(r"<[^>]+>", "", text))
+    return re.sub(r"\n\s*\n+", "\n\n", text).strip()
+
+
+def search(query, n):
+    found = api("messages", q=query, maxResults=n).get("messages", [])
+    for m in found:
+        msg = api(f"messages/{m['id']}", format="metadata", metadataHeaders=["From", "Subject", "Date"])
+        h = headers(msg)
+        print(f"{m['id']}  {h.get('date', '')[:31]}\n  from: {h.get('from', '')}\n  subject: {h.get('subject', '')}\n"
+              f"  {html.unescape(msg.get('snippet', ''))[:160]}\n")
+    if not found:
+        print("no messages match")
+
+
+def read(mid):
+    msg = api(f"messages/{mid}", format="full")
+    h = headers(msg)
+    for k in ("date", "from", "to", "subject"):
+        print(f"{k.title()}: {h.get(k, '')}")
+    print(f"Labels: {', '.join(msg.get('labelIds', []))}\n")
+    print(body_text(msg["payload"]))
+
+
+def main():
+    p = argparse.ArgumentParser(description="Read-only Gmail access for tars")
+    sub = p.add_subparsers(dest="cmd", required=True)
+    s = sub.add_parser("login")
+    s.add_argument("address", nargs="?")
+    s = sub.add_parser("search")
+    s.add_argument("query")
+    s.add_argument("-n", type=int, default=10)
+    s = sub.add_parser("read")
+    s.add_argument("id")
+    a = p.parse_args()
+    try:
+        if a.cmd == "login":
+            login_finish(a.address) if a.address else login_start()
+        elif a.cmd == "search":
+            search(a.query, a.n)
+        else:
+            read(a.id)
+    except LoginNeeded:
+        sys.exit("Gmail sign-in missing or expired - run: bin/gmail login")
+
+
+if __name__ == "__main__":
+    main()

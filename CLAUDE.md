@@ -21,6 +21,11 @@ while it's being built. One private repo: github.com/LianHaeming/tars. Lian also
 | `todo` | 8788 | Node, no dependencies. Tasks live in `data.json` (gitignored — only on the PC). |
 | `hellofresh-recipes` | 8443 | Lian's 63-dish menu. `build_app.py` writes `app/` (gitignored). Recipes/photos are HelloFresh's copyrighted content: personal use only, never publish or make public. The full 34 GB archive lives on the Mac (`~/dev/hellofresh-recipes`); to change the menu, run `export_menu.py` there against it (see its docstring), commit, push, then `bin/sync` here. |
 
+## Tools
+- `bin/gmail` — read-only Gmail for cottrelllian@gmail.com: `bin/gmail search '<gmail query>' [-n N]`, `bin/gmail read <id>`.
+  OAuth client + token live in `~/.config/tars/` (outside the repo — never copy them into it or print them).
+  If it says sign-in expired: `bin/gmail login`, give Lian the link, then `bin/gmail login '<localhost address they paste back>'`.
+
 ## Working rules
 - Pull before starting work; commit and push when a change is done, so the Mac clone and the PC stay in step.
 - After changing an app: rebuild if it has a build step, then `bin/up <app>`; give Lian the link to check on their phone.
