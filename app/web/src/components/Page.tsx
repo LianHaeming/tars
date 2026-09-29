@@ -23,7 +23,7 @@ export function Page({ title, back = '/', actions, wide, bare, className, childr
 
   return (
     <div className="min-h-dvh animate-in duration-200 fade-in slide-in-from-right-3">
-      <header className="glass-strong sticky top-0 z-20 border-x-0 border-t-0 pt-safe-0">
+      <header className="chrome-bar sticky top-0 z-20 border-x-0 border-t-0 pt-safe-0">
         <div className={cn('mx-auto flex h-14 items-center gap-1 px-2', pageWidth(wide))}>
           <Button variant="ghost" size="icon-lg" onClick={goBack} aria-label="Back" className="text-primary">
             <ChevronLeftIcon className="size-6" />

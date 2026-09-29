@@ -47,7 +47,7 @@ export function BasketButton({ id, size = 'default' }: { id: string; size?: 'def
         size="xs"
         variant={on ? 'default' : 'secondary'}
         onClick={e => { e.preventDefault(); e.stopPropagation(); basket.toggle(id) }}
-        className={cn('rounded-full', !on && 'bg-black/60 text-white backdrop-blur hover:bg-black/70')}
+        className={cn('rounded-full', !on && 'bg-black/60 text-white hover:bg-black/70')}
       >
         {on ? <CheckIcon /> : <PlusIcon />}{on ? 'Added' : 'Add'}
       </Button>

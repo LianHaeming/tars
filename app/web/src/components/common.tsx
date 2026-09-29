@@ -33,7 +33,7 @@ export const pill = 'inline-flex shrink-0 items-center gap-2 rounded-full bg-sec
 
 export function PillBar({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <nav className={cn('scrollbar-none sticky top-below-header z-10 -mx-4 flex gap-2 overflow-x-auto bg-background/95 px-4 pt-3 pb-3 backdrop-blur', className)}>
+    <nav className={cn('scrollbar-none sticky top-below-header z-10 -mx-4 flex gap-2 overflow-x-auto bg-chrome px-4 pt-3 pb-3', className)}>
       {children}
     </nav>
   )
