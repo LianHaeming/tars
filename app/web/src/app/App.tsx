@@ -1,0 +1,35 @@
+import { RouterProvider, createBrowserRouter } from 'react-router'
+import { ListPage } from '@/features/food/ListPage'
+import { MenuPage } from '@/features/food/MenuPage'
+import { RecipePage } from '@/features/food/RecipePage'
+import { Home } from '@/features/home/Home'
+import { TarsPage } from '@/features/tars/TarsPage'
+import { ListsPage, ShoppingPage } from '@/features/tasks/ListsPage'
+import { MonthPage } from '@/features/tasks/MonthPage'
+import { StoreProvider } from '@/features/tasks/store'
+import { Layout } from './Layout'
+
+const router = createBrowserRouter([
+  {
+    element: <Layout />,
+    children: [
+      { path: '/', element: <Home /> },
+      { path: '/lists/:key?', element: <ListsPage /> },
+      { path: '/month', element: <MonthPage /> },
+      { path: '/shopping', element: <ShoppingPage /> },
+      { path: '/tars', element: <TarsPage /> },
+      { path: '/food', element: <MenuPage /> },
+      { path: '/food/list', element: <ListPage /> },
+      { path: '/food/:id', element: <RecipePage /> },
+      { path: '*', element: <Home /> },
+    ],
+  },
+])
+
+export default function App() {
+  return (
+    <StoreProvider>
+      <RouterProvider router={router} />
+    </StoreProvider>
+  )
+}

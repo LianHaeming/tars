@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# Usage: bin/backup           snapshot data/state/ to ~/tars-backups/state-<date>.tgz, keeping the last 30 days
+#        bin/backup install   run it daily (systemd user timer, catches up after the PC was off)
+# The Mac pulls ~/tars-backups too (launchd agent com.tars.backup), so a copy survives the PC's disk.
+set -euo pipefail
+TARS="$(cd "$(dirname "$0")/.." && pwd)"
+DEST="$HOME/tars-backups"
+
+if [ "${1:-}" = install ]; then
+  dir="$HOME/.config/systemd/user"
+  mkdir -p "$dir"
+  printf '[Unit]\nDescription=tars: back up data/state\n\n[Service]\nType=oneshot\nExecStart=%s backup\n' "$TARS/bin/backup" > "$dir/tars-backup.service"
+  printf '[Unit]\nDescription=tars: daily backup of data/state\n\n[Timer]\nOnCalendar=*-*-* 03:30\nPersistent=true\n\n[Install]\nWantedBy=timers.target\n' > "$dir/tars-backup.timer"
+  systemctl --user daemon-reload
+  systemctl --user enable --now tars-backup.timer
+  systemctl --user list-timers tars-backup.timer --no-pager
+  exit
+fi
+
+mkdir -p "$DEST"
+tar -czf "$DEST/state-$(date +%F).tgz" -C "$TARS/data" state
+find "$DEST" -name 'state-*.tgz' -mtime +30 -delete
+ls -1 "$DEST" | tail -3

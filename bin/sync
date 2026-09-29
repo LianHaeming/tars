@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
-# Usage: bin/sync   pull from GitHub, rebuild the food menu, restart the tars app.
+# Usage: bin/sync   pull from GitHub, then rebuild and restart the tars app.
 set -euo pipefail
 TARS="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$TARS"
 if git remote get-url origin >/dev/null 2>&1; then git pull --ff-only; fi
-(cd food && python3 build_app.py)
 bin/up app

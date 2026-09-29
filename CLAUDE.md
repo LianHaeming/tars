@@ -7,36 +7,47 @@ Remote Control from their phone or iPad, and uses the app on their phone over Ta
 (Separate from robin, Lian's planner/notes toolbox on the Mac.)
 
 ## Layout
-- `app/` — the tars app. Home screen (D-style: colour wash + glass): Next up card, Food / Shopping buttons,
-  then **flat lists at the root** — Upcoming (dated) and Tasks (undated, not Shopping). A glass dock at the bottom has
-  **Add task** (quick-add sheet) and **Tars** (Ask Claude chat). Everything else is a **page** with its own URL and a back
-  button — Lian doesn't want pop-up windows: `/lists/:key` (All lists), `/month?d=`, `/shopping`, `/tars`, `/food`,
-  `/food/:id` (recipe), `/food/list` (dishes → ingredients → "Send to Shopping list"). No bottom tabs (Lian's choice).
-  "Todo"/"calendar" always means this app.
-  - `server.js` — Node, no dependencies. `/api/*` (state, tasks, projects, shopping, ask), static `dist/` (the built UI;
-    any extension-less path falls back to `index.html` for the router), `/food/` → `../food/` (data + photos). Data in `app/data.json` (gitignored, PC only). Port 8400, served on the tailnet at 443.
-  - `POST /api/ask {message, sessionId}` runs `claude -p` in `~/tars` (streams NDJSON: text/status/error/done). It may
-    read files, use `bin/gmail` and `curl` the API, and is denied Edit/Write — it never changes code.
-  - `web/` — the UI: **React + TypeScript + Vite + Tailwind v4 + shadcn/ui** (style radix-nova, lucide icons, Geist font).
-    Builds to `app/dist/` (gitignored) — `bin/up app` runs the build (`build` in `app.json`) before restarting.
-    - **One look everywhere**: use shadcn components (`cd app/web && npx shadcn@latest add <name>` →
-      `src/components/ui/`) and the shared pieces in `components/common.tsx` (SectionHead, Section, Empty, PillBar, pill)
-      and `components/Page.tsx` (every page's header/back/width). Never hard-code colours — use the theme tokens in
-      `src/index.css` (dark only, blue `primary`, due/priority colours, `glass`/`glass-strong`). No second theme or CSS file.
-    - `src/lib/store.tsx` — all state and actions (`useTars()`); `lib/quickadd.ts` — quick-add parsing; `lib/dates.ts`.
-    - `src/sections/<name>.tsx` — one file per home section, listed in display order in `sections/index.ts`:
-      next-up, actions, upcoming, tasks.
-    - `src/App.tsx` — routes (react-router). `src/pages/` — ListsPage (+ ShoppingPage), MonthPage, TarsPage.
-      `src/food/` — MenuPage, RecipePage, ListPage, `data.ts` (loads `/food/app/data/*.json`, basket + shop choice in
-      localStorage), `parts.tsx`. `src/components/` — TaskRow (row + inline editor), QuickAdd, Dock, NameDialog.
-    - Dev: `npm run dev` in `app/web` (proxies `/api` and `/food/app|photos` to :8400).
-- `food/` — HelloFresh menu data (Lian's 63 dishes) + photos. `build_app.py` writes JSON to `food/app/data/` (gitignored)
-  that the Food pages in `app/web/src/food/` read. "Send to Shopping list" → `POST /api/shopping`, which replaces the
-  unticked items of the Shopping list. Recipes/photos are HelloFresh's copyrighted content: personal use only, never publish.
-  The full archive is on the Mac (`~/dev/hellofresh-recipes`); to change the menu run `export_menu.py` there
-  (see its docstring), commit, push, then `bin/sync` here.
-- `bin/sync` — pull, rebuild food, restart the app. `bin/up <dir>` — (re)start a folder with an `app.json` as the
-  `tars-<dir>` user service and serve it over tailnet HTTPS (`https` field, else its port).
+One data folder, one server, one React frontend.
+
+```
+data/            all data — only the server reads or writes it
+  food/          Food content: menu.json, r/<id>.json, sainsburys/ocado.json, photos/ (in git; published from the Mac)
+  state/         live data (PC only, gitignored): tasks.json (lists + tasks), food.json (basket, shop), chat.json (Tars)
+app/
+  server/        Node, no dependencies: index.js (routes + static), store.js (data/state docs), ask.js (Tars chat)
+  web/           React + TypeScript + Vite + Tailwind v4 + shadcn/ui — display only, everything via /api
+  app.json       service config for bin/up (build → app/dist/, start → node server)
+bin/             sync, up, backup, gmail
+```
+
+- **The app** (Lian's phone, over Tailscale): Home — Next up card, Food / Shopping buttons, then flat lists at the root:
+  Upcoming (dated) and Tasks (undated, not Shopping). Glass dock: **Add task** (quick-add sheet) and **Tars** (chat).
+  Everything else is a **page** with its own URL and a back button — Lian doesn't want pop-up windows: `/lists/:key`,
+  `/month?d=`, `/shopping`, `/tars`, `/food`, `/food/:id`, `/food/list`. No bottom tabs. "Todo"/"calendar" = this app.
+- **API** (`app/server/index.js`): `GET /api/state` · `POST|PATCH|DELETE /api/tasks[/id]` · `/api/projects[/id]` ·
+  `POST /api/shopping {items}` (replaces the Shopping list's unticked items) · `GET|PATCH /api/food {basket, shop}` ·
+  `GET|DELETE /api/chat` · `POST /api/ask {message}` (runs `claude -p` in `~/tars`, streams NDJSON text/status/error/done,
+  saves the conversation in chat.json; read-only tools + `bin/gmail` + curl to the API, never edits code).
+  Static: `/data/food/*` from data/food; anything else is the built app (page URLs fall back to index.html).
+- **Frontend** (`app/web/src/`), grouped by feature:
+  - `app/` — App.tsx (routes), Layout.tsx (dock, quick-add, toasts), Dock.tsx.
+  - `features/tasks/` — store.tsx (`useTars()`: all task state + actions), parse-quick-add.ts, TaskRow, QuickAdd,
+    NameDialog, ListsPage (+ ShoppingPage), MonthPage. `features/home/` — Home + `sections/` (display order in
+    `sections/index.ts`: next-up, actions, upcoming, tasks). `features/food/` — data.ts (content + server-backed basket/shop),
+    parts.tsx, MenuPage, RecipePage, ListPage. `features/tars/` — TarsPage.
+  - `components/` — Page.tsx (every page's header/back/width), common.tsx (SectionHead, Section, Empty, PillBar, pill),
+    `ui/` (shadcn: `cd app/web && npx shadcn@latest add <name>`). `lib/` — api.ts, dates.ts, utils.ts.
+  - **One look everywhere**: shadcn components + the shared pieces above; never hard-code colours — use the tokens in
+    `src/index.css` (dark only, blue `primary`, due/priority colours, `glass`/`glass-strong`). No second theme or CSS file.
+  - Browser storage is only for view preferences (last list tab, food filters). Anything that should follow Lian between
+    devices goes through the server into data/state/.
+  - Dev: `npm run dev` in `app/web` (proxies `/api` and `/data` to :8400).
+- **Food content** is made on the Mac from the full HelloFresh archive (`~/dev/hellofresh-recipes`): edit its
+  my-menu.json, run `python3 export_tars.py` there (writes data/food/ here), commit, push, then `bin/sync` on the PC.
+  Recipes/photos are HelloFresh's copyrighted content: personal use only, never publish.
+- `bin/sync` — pull, build, restart. `bin/up <dir>` — build (`build` in app.json) and (re)start `tars-<dir>` as a user
+  service on the tailnet (`https` field, else its port). `bin/backup` — snapshot data/state to `~/tars-backups/`
+  (daily timer via `bin/backup install`, 30 days kept); the Mac pulls that folder daily (launchd `com.tars.backup`).
 
 ## Tools
 - `bin/gmail` — read-only Gmail for cottrelllian@gmail.com (the only Gmail path — the claude.ai Gmail and Todoist
@@ -46,8 +57,8 @@ Remote Control from their phone or iPad, and uses the app on their phone over Ta
 
 ## Working rules
 - Pull before starting work; commit and push when a change is done. Only one session edits `~/tars` at a time.
-- After a change: `bin/up app` (builds the UI, restarts; or `bin/sync` if food changed), then give Lian the link to check on their phone.
+- After a change: `bin/up app` (builds the UI and restarts), then give Lian the link to check on their phone.
 - Before committing UI changes, `cd app/web && npm run build` must pass (it type-checks).
-- Try risky changes on a spare port: copy `app/` elsewhere, build `web/`, run it with `PORT=9xxx`, `tailscale serve --bg --https=9xxx http://127.0.0.1:9xxx`, remove after.
+- Try risky changes on a spare port: build `app/web`, run `TARS_DATA=<copy of data/> PORT=9xxx node app/server`, `tailscale serve --bg --https=9xxx http://127.0.0.1:9xxx`, remove after.
 - Service: `systemctl --user status|restart tars-app`; logs: `journalctl --user -u tars-app`.
 - Don't write explanatory comments in code. After a meaningful change, give a short list of next steps.

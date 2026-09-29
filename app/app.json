@@ -2,6 +2,6 @@
   "name": "tars",
   "port": 8400,
   "https": 443,
-  "start": "node server.js",
+  "start": "node server",
   "build": "cd web && npm ci --no-audit --no-fund --loglevel=error && npm run build"
 }
