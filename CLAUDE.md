@@ -9,16 +9,24 @@ Remote Control from their phone or iPad, and uses the app on their phone over Ta
 ## Layout
 - `app/` — the tars app. Home screen (D-style: colour wash + glass): Next up card, Food / Shopping buttons,
   then **flat lists at the root** — Upcoming (dated) and Tasks (undated, not Shopping). A glass dock at the bottom has
-  **Add task** (quick-add) and **Ask Claude** (chat). Food, Shopping, Month and All lists open as full-screen panels.
+  **Add task** (quick-add) and **Tars** (Ask Claude chat). Food, Shopping, Month and All lists open as full-screen panels.
   No tabs (Lian's choice). "Todo"/"calendar" always means this app.
-  - `server.js` — Node, no dependencies. `/api/*` (state, tasks, projects, shopping, ask), static `public/`,
+  - `server.js` — Node, no dependencies. `/api/*` (state, tasks, projects, shopping, ask), static `dist/` (the built UI),
     `/food/` → `../food/`. Data in `app/data.json` (gitignored, PC only). Port 8400, served on the tailnet at 443.
   - `POST /api/ask {message, sessionId}` runs `claude -p` in `~/tars` (streams NDJSON: text/status/error/done). It may
     read files, use `bin/gmail` and `curl` the API, and is denied Edit/Write — it never changes code.
-  - `public/core.js` — tasks logic (quick-add parsing, task rows/editor, calendar, panels' lists).
-    `public/app.js` — home + panels. `public/ask.js` — chat sheet.
-  - `public/sections/<name>.js` — one file per home section: `SECTIONS.push({ id, html() })`, listed in `index.html`
-    in display order: next-up, actions, upcoming, tasks.
+  - `web/` — the UI: **React + TypeScript + Vite + Tailwind v4 + shadcn/ui** (style radix-nova, lucide icons, Geist font).
+    Builds to `app/dist/` (gitignored) — `bin/up app` runs the build (`build` in `app.json`) before restarting.
+    - Use shadcn components for everything (`cd app/web && npx shadcn@latest add <name>` → `src/components/ui/`);
+      don't hand-roll buttons/inputs/dialogs/menus. Theme tokens (dark only, blue primary, due/priority colours,
+      `glass`/`glass-strong` utilities) live in `src/index.css`.
+    - `src/lib/store.tsx` — all state and actions (`useTars()`); `lib/quickadd.ts` — quick-add parsing; `lib/dates.ts`.
+    - `src/sections/<name>.tsx` — one file per home section, listed in display order in `sections/index.ts`:
+      next-up, actions, upcoming, tasks.
+    - `src/components/` — `TaskRow` (row + inline editor), `Panel` (full-screen sheet), `ListsView`, `MonthView`,
+      `QuickAdd`, `Ask`, `Dock`. Panel/QuickAdd/Ask are custom sheets on purpose: shadcn's Drawer (vaul) is always
+      modal and traps focus, which breaks Add task / Tars while a panel is open.
+    - Dev: `npm run dev` in `app/web` (proxies `/api` and `/food` to :8400).
 - `food/` — HelloFresh menu (Lian's 63 dishes). `build_app.py` writes `food/app/` (gitignored), shown inside the Food card.
   Its shopping list has "Send to Shopping list" → `POST /api/shopping`, which replaces the unticked items of the
   Shopping list. Recipes/photos are HelloFresh's copyrighted content: personal use only, never publish.
@@ -35,7 +43,8 @@ Remote Control from their phone or iPad, and uses the app on their phone over Ta
 
 ## Working rules
 - Pull before starting work; commit and push when a change is done. Only one session edits `~/tars` at a time.
-- After a change: `bin/up app` (or `bin/sync` if food changed), then give Lian the link to check on their phone.
-- Try risky changes on a spare port: copy `app/` elsewhere, run it with `PORT=9xxx`, `tailscale serve --bg --https=9xxx http://127.0.0.1:9xxx`, remove after.
+- After a change: `bin/up app` (builds the UI, restarts; or `bin/sync` if food changed), then give Lian the link to check on their phone.
+- Before committing UI changes, `cd app/web && npm run build` must pass (it type-checks).
+- Try risky changes on a spare port: copy `app/` elsewhere, build `web/`, run it with `PORT=9xxx`, `tailscale serve --bg --https=9xxx http://127.0.0.1:9xxx`, remove after.
 - Service: `systemctl --user status|restart tars-app`; logs: `journalctl --user -u tars-app`.
 - Don't write explanatory comments in code. After a meaningful change, give a short list of next steps.

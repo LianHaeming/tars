@@ -6,8 +6,8 @@ const crypto = require('crypto');
 const { spawn } = require('child_process');
 
 const PORT = process.env.PORT || 8400;
-const DATA = path.join(__dirname, 'data.json');
-const PUBLIC = path.join(__dirname, 'public');
+const DATA = process.env.DATA || path.join(__dirname, 'data.json');
+const PUBLIC = path.join(__dirname, 'dist');
 const TARS = path.join(__dirname, '..');
 const FOOD = path.join(TARS, 'food');
 const ASK_TIMEOUT = 180e3;
@@ -160,7 +160,7 @@ function ask(res, body) {
 }
 
 const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.json': 'application/json',
-  '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.webp': 'image/webp' };
+  '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.webp': 'image/webp', '.woff2': 'font/woff2' };
 
 http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://x');
@@ -176,7 +176,8 @@ http.createServer(async (req, res) => {
   if (!file.startsWith(base + path.sep)) return send(res, 403, { error: 'forbidden' });
   fs.readFile(file, (err, buf) => {
     if (err) return send(res, 404, { error: 'not found' });
-    res.writeHead(200, { 'content-type': TYPES[path.extname(file).toLowerCase()] || 'application/octet-stream' });
+    const cache = file.startsWith(path.join(PUBLIC, 'assets') + path.sep) ? 'public, max-age=31536000, immutable' : 'no-cache';
+    res.writeHead(200, { 'content-type': TYPES[path.extname(file).toLowerCase()] || 'application/octet-stream', 'cache-control': cache });
     res.end(buf);
   });
 }).listen(PORT, '127.0.0.1', () => console.log('Listening on :' + PORT));

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Usage: bin/up <dir>   (a folder with an app.json: {"name", "port", "https"?, "start"})
+# Usage: bin/up <dir>   (a folder with an app.json: {"name", "port", "https"?, "build"?, "start"})
 # Installs/restarts the tars-<dir> user service and serves it on the tailnet over HTTPS (on "https", else "port").
 set -euo pipefail
 TARS="$(cd "$(dirname "$0")/.." && pwd)"
@@ -7,7 +7,12 @@ name="$(basename "${1:?usage: bin/up <dir>}")"
 dir="$TARS/$name"
 [ -f "$dir/app.json" ] || { echo "no $dir/app.json" >&2; exit 1; }
 field() { python3 -c 'import json,sys; print(json.load(open(sys.argv[1])).get(sys.argv[2], ""))' "$dir/app.json" "$1"; }
-port="$(field port)"; public="$(field https)"; public="${public:-$port}"; start="$(field start)"
+port="$(field port)"; public="$(field https)"; public="${public:-$port}"; start="$(field start)"; build="$(field build)"
+
+if [ -n "$build" ]; then
+  export PATH="$HOME/.local/share/mise/shims:$HOME/.local/bin:$PATH"
+  (cd "$dir" && sh -c "$build")
+fi
 
 unit="$HOME/.config/systemd/user/tars-$name.service"
 mkdir -p "$(dirname "$unit")"
