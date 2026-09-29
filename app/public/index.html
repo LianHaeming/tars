@@ -12,11 +12,8 @@
 </head>
 <body>
 <main class="dash">
-  <header class="top">
-    <div class="hello" id="hello"></div>
-    <h1 id="date"></h1>
-  </header>
-  <section class="cards" id="cards"></section>
+  <header class="top"><div class="date" id="date"></div></header>
+  <div id="home"></div>
 </main>
 
 <div class="panel-scrim" id="panelScrim"></div>
@@ -29,7 +26,11 @@
   <div class="panel-body" id="panelBody"></div>
 </section>
 
-<button class="fab" id="fab" aria-label="Add task"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+<nav class="dock">
+  <button class="add" id="addBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add task</button>
+  <button class="askbtn" id="askBtn"><span>✦</span>Ask Claude</button>
+</nav>
+
 <div class="scrim" id="scrim"></div>
 <div class="sheet" id="sheet">
   <form id="qaForm" autocomplete="off">
@@ -38,13 +39,24 @@
   </form>
   <div class="chips" id="chips"></div>
 </div>
+
+<section class="ask" id="ask">
+  <header class="ask-head"><button id="askNew">New chat</button><span>✦ Claude</span><button class="panel-close" id="askClose">Done</button></header>
+  <div class="ask-log" id="askLog"></div>
+  <form class="ask-form" id="askForm" autocomplete="off">
+    <textarea id="askIn" rows="1" enterkeyhint="send" placeholder="Ask anything…"></textarea>
+    <button class="go" id="askGo" disabled aria-label="Send"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
+  </form>
+</section>
+
 <div class="toast" id="toast"><span id="toastMsg"></span><button id="toastUndo">Undo</button></div>
 
 <script src="core.js"></script>
-<script src="cards/next-up.js"></script>
-<script src="cards/upcoming.js"></script>
-<script src="cards/food.js"></script>
-<script src="cards/tasks.js"></script>
+<script src="sections/next-up.js"></script>
+<script src="sections/actions.js"></script>
+<script src="sections/upcoming.js"></script>
+<script src="sections/tasks.js"></script>
 <script src="app.js"></script>
+<script src="ask.js"></script>
 </body>
 </html>

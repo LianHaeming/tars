@@ -1,11 +1,12 @@
 // ---------- State ----------
 let state = { projects: [], tasks: [] };
 let view = localGet('view') || 'today';
-let panel = null;            // card whose full-screen panel is open: 'tasks' | 'upcoming' | 'food'
+let panel = null;            // full-screen panel over the home screen: 'lists' | 'month' | 'shopping' | 'food'
 let openId = null;           // task currently expanded for editing
 let calAnchor = null;        // first-of-month Date shown in the calendar
 let calSel = null;           // selected day (ymd) in the calendar
-const CARDS = [];
+const SECTIONS = [];
+const LIST_PANELS = ['lists', 'month', 'shopping'];
 const PROJECT_COLORS = ['#dc4c3e', '#eb8909', '#fad000', '#7ecc49', '#299438', '#14aaf5', '#4073ff', '#884dff', '#e05194', '#808080'];
 
 function localGet(k) { try { return localStorage.getItem(k); } catch { return null; } }
@@ -108,14 +109,12 @@ const byWhen = (a, b) => a.due.localeCompare(b.due) || (a.dueTime || '').localeC
 const project = id => state.projects.find(p => p.id === id);
 const shoppingList = () => state.projects.find(p => p.name === 'Shopping');
 const isTaskView = v => ['today', 'inbox', 'completed'].includes(v) || v.startsWith('project:');
-const isUpcomingView = v => ['upcoming', 'calendar'].includes(v);
 
 function viewInfo() {
   const t = ymd(today());
   if (view === 'inbox') return { title: 'Inbox', tasks: open().filter(x => !x.projectId), defaults: {} };
   if (view === 'today') return { title: 'Today', sub: today().toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' }), tasks: open().filter(x => x.due && x.due <= t), defaults: { due: t } };
-  if (view === 'upcoming') return { title: 'Upcoming', tasks: open().filter(x => x.due), defaults: {} };
-  if (view === 'calendar') { const sel = calSel || ymd(today()); return { title: 'Upcoming', calendar: true, tasks: open().filter(x => x.due === sel), defaults: { due: sel } }; }
+  if (view === 'calendar') { const sel = calSel || ymd(today()); return { title: 'Calendar', calendar: true, tasks: open().filter(x => x.due === sel), defaults: { due: sel } }; }
   if (view === 'completed') return { title: 'Completed', tasks: state.tasks.filter(x => x.done), defaults: {} };
   if (view.startsWith('project:')) {
     const p = project(view.slice(8));
@@ -123,9 +122,9 @@ function viewInfo() {
   }
   view = 'today'; return viewInfo();
 }
-const addDefaults = () => panel === 'tasks' || panel === 'upcoming' ? viewInfo().defaults : {};
+const addDefaults = () => LIST_PANELS.includes(panel) ? viewInfo().defaults : {};
 
-function setView(v) { view = v; localSet('view', v); openId = null; render(); updateChips(); document.getElementById('panelBody').scrollTop = 0; }
+function setView(v) { view = v; if (panel === 'lists') localSet('view', v); openId = null; render(); updateChips(); document.getElementById('panelBody').scrollTop = 0; }
 
 // ---------- Rendering ----------
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
@@ -139,7 +138,7 @@ const ICONS = {
 function renderTabs() {
   const t = ymd(today());
   const tab = (key, label, n, lead = '') => `<button class="tab ${view === key ? 'on' : ''}" onclick="setView('${key}')">${lead}${label}${n ? `<span class="n">${n}</span>` : ''}</button>`;
-  if (panel === 'upcoming') return tab('upcoming', 'List', 0) + tab('calendar', 'Month', 0);
+  if (panel !== 'lists') return '';
   const overdue = open().some(x => x.due && x.due < t);
   return tab('today', 'Today', open().filter(x => x.due && x.due <= t).length, overdue ? '<span class="dot" style="background:var(--overdue)"></span>' : '') +
     tab('inbox', 'Inbox', open().filter(x => !x.projectId).length) +
@@ -150,7 +149,7 @@ function renderTabs() {
 
 const checkHtml = t => `<button class="check" style="--pc:var(--p${t.priority})" onclick="event.stopPropagation(); toggleDone('${t.id}', this)" aria-label="Complete">${ICONS.tick}</button>`;
 
-function taskHtml(t, { hideProject, hideDue } = {}) {
+function taskHtml(t, { hideProject, hideDue, compact } = {}) {
   const p = project(t.projectId);
   const check = checkHtml(t);
 
@@ -183,14 +182,14 @@ function taskHtml(t, { hideProject, hideDue } = {}) {
   if (!hideProject && p) meta.push(`<span><span class="dot" style="background:${esc(p.color)};width:7px;height:7px"></span>${esc(p.name)}</span>`);
   return `<div class="task ${t.done ? 'done' : ''}" data-id="${t.id}">
     <div class="row" onclick="toggleOpen('${t.id}')">${check}
-      <div class="body"><div class="title">${esc(t.title)}</div>${t.description ? `<div class="desc">${esc(t.description)}</div>` : ''}${meta.length ? `<div class="meta">${meta.join('')}</div>` : ''}</div>
+      <div class="body"><div class="title">${esc(t.title)}</div>${t.description && !compact ? `<div class="desc">${esc(t.description)}</div>` : ''}${meta.length ? `<div class="meta">${meta.join('')}</div>` : ''}</div>
     </div>
   </div>`;
 }
 
 function render() {
   renderDashboard();
-  if (panel !== 'tasks' && panel !== 'upcoming') return;
+  if (!LIST_PANELS.includes(panel)) return;
   const v = viewInfo();
   const t = ymd(today());
   let body = '';
@@ -204,17 +203,6 @@ function render() {
     if (overdue.length && due.length) body += `<div class="section"><span>Today</span></div>`;
     body += due.map(x => taskHtml(x, { hideDue: true })).join('');
     if (!v.tasks.length) body += `<div class="empty"><div class="big">🎉</div>All clear for today.</div>`;
-  } else if (view === 'upcoming') {
-    body += overdueBlock(v.tasks.filter(x => x.due < t).sort(byPriority));
-    const days = new Set(v.tasks.filter(x => x.due >= t).map(x => x.due));
-    for (let i = 0; i < 7; i++) days.add(ymd(addDays(today(), i)));
-    for (const d of [...days].sort()) {
-      const list = v.tasks.filter(x => x.due === d).sort(byTime);
-      const dt = parseYmd(d), n = dayDiff(d);
-      const name = n <= 1 ? dueLabel(d) : dt.toLocaleDateString(undefined, { weekday: 'long' });
-      body += `<div class="section"><span>${name} <span class="muted">· ${shortDate(dt)}</span></span></div>`;
-      body += list.map(x => taskHtml(x, { hideDue: true })).join('');
-    }
   } else if (view === 'calendar') {
     body += renderCalendar();
   } else if (view === 'completed') {
@@ -232,12 +220,12 @@ function render() {
     if (!done.length) body += `<div class="empty"><div class="big">✓</div>Nothing completed yet.</div>`;
   } else {
     body += v.tasks.sort(byPriority).map(x => taskHtml(x, { hideProject: !!v.project })).join('');
-    if (!v.tasks.length) body += `<div class="empty"><div class="big">${v.project ? '✨' : '📥'}</div>Nothing here. Tap + to add a task.</div>`;
+    if (!v.tasks.length) body += `<div class="empty"><div class="big">${v.project ? '✨' : '📥'}</div>Nothing here. Tap Add task to add one.</div>`;
   }
 
   const tools = v.project ? `<div class="tools"><button onclick="renameProject('${v.project.id}')">Rename</button><button onclick="deleteProject('${v.project.id}')">Delete</button></div>` : '';
   document.getElementById('panelTitle').textContent = v.title;
-  document.getElementById('panelBody').innerHTML = `<div class="wrap"><nav class="tabs">${renderTabs()}</nav>${v.sub || tools ? `<div class="head">${v.sub ? `<span class="sub">${v.sub}</span>` : ''}${tools}</div>` : ''}${body}</div>`;
+  document.getElementById('panelBody').innerHTML = `<div class="wrap">${panel === 'lists' ? `<nav class="tabs">${renderTabs()}</nav>` : ''}${v.sub || tools ? `<div class="head">${v.sub ? `<span class="sub">${v.sub}</span>` : ''}${tools}</div>` : ''}${body}</div>`;
   document.querySelector('#panelBody .tab.on')?.scrollIntoView({ inline: 'nearest', block: 'nearest' });
   document.querySelectorAll('.desc-in').forEach(autosize);
 }
@@ -273,7 +261,7 @@ function renderCalendar() {
   const full = sd.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' });
   const list = (byDay[calSel] || []).sort(byTime);
   const dayList = `<div class="section"><span>${rel || full}${rel ? ` <span class="muted">· ${full}</span>` : ''}</span></div>`
-    + (list.length ? list.map(x => taskHtml(x, { hideDue: true })).join('') : `<div class="empty">Nothing on this day. Tap + to add.</div>`);
+    + (list.length ? list.map(x => taskHtml(x, { hideDue: true })).join('') : `<div class="empty">Nothing on this day. Tap Add task to add one.</div>`);
 
   return `<div class="calbar"><h2>${monthName}</h2><div class="nav">
       <button onclick="calMove(-1)" aria-label="Previous month">${CHEV(-1)}</button>
@@ -313,7 +301,7 @@ function closeSheet() {
   document.body.classList.remove('adding');
   qa.blur();
 }
-document.getElementById('fab').addEventListener('click', openSheet);
+document.getElementById('addBtn').addEventListener('click', openSheet);
 document.getElementById('scrim').addEventListener('click', closeSheet);
 // Keep the sheet sitting on top of the on-screen keyboard.
 if (window.visualViewport) {
@@ -335,7 +323,7 @@ document.getElementById('qaForm').addEventListener('submit', async e => {
   await api('POST', 'tasks', task);
   await load();
   // Say where it went if it landed outside the current view.
-  const visible = (panel === 'tasks' || panel === 'upcoming') && viewInfo().tasks.some(x => x.title === task.title);
+  const visible = LIST_PANELS.includes(panel) && viewInfo().tasks.some(x => x.title === task.title);
   if (!visible) toast(`Added to ${task.projectId ? project(task.projectId).name : task.due ? dueLabel(task.due) : 'Inbox'}`);
 });
 

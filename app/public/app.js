@@ -1,21 +1,23 @@
 const $ = s => document.querySelector(s);
 const panelEl = $('#panel'), panelBody = $('#panelBody');
+const editing = () => document.activeElement?.closest('input, textarea, select');
 
 function renderDashboard() {
-  const h = new Date().getHours();
-  $('#hello').textContent = h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
   $('#date').textContent = new Date().toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' });
-  $('#cards').innerHTML = CARDS.map(c => `<article class="card ${c.wide ? 'wide' : ''}" onclick="openCard('${c.id}')">
-    <header class="card-head"><span class="card-label">${c.label}</span><span class="card-go">›</span></header>${c.summary()}</article>`).join('');
+  $('#home').innerHTML = SECTIONS.map(s => `<section class="s-${s.id}">${s.html()}</section>`).join('');
+  document.querySelectorAll('#home .desc-in').forEach(autosize);
 }
 
-function openCard(id) { CARDS.find(c => c.id === id).open(); }
-
-function openPanel(kind) {
+async function openPanel(kind) {
+  if (kind === 'shopping' && !shoppingList()) {
+    await api('POST', 'projects', { name: 'Shopping', color: '#25b84c' });
+    state = await api('GET', 'state');
+  }
   panel = kind;
   openId = null;
-  if (kind === 'tasks' && !isTaskView(view)) view = 'today';
-  if (kind === 'upcoming' && !isUpcomingView(view)) view = 'upcoming';
+  if (kind === 'lists') { const v = localGet('view'); view = v && isTaskView(v) ? v : 'today'; }
+  if (kind === 'month') view = 'calendar';
+  if (kind === 'shopping') view = 'project:' + shoppingList().id;
   document.body.classList.add('panel-open');
   document.body.classList.toggle('panel-food', kind === 'food');
   if (kind === 'food') {
@@ -25,6 +27,13 @@ function openPanel(kind) {
   panelBody.scrollTop = 0;
   render();
   updateChips();
+}
+
+function openMonth(ds) {
+  calSel = ds;
+  const d = parseYmd(ds);
+  calAnchor = new Date(d.getFullYear(), d.getMonth(), 1);
+  openPanel('month');
 }
 
 function closePanel() {
@@ -38,7 +47,7 @@ function closePanel() {
 }
 
 $('#panelClose').addEventListener('click', closePanel);
-$('#panelScrim').addEventListener('click', closePanel);
+$('#panelScrim').addEventListener('click', () => document.body.classList.contains('asking') ? closeAsk() : closePanel());
 
 let dragFrom = null;
 $('#panelHead').addEventListener('touchstart', e => { dragFrom = e.touches[0].clientY; panelEl.style.transition = 'none'; }, { passive: true });
@@ -55,16 +64,16 @@ $('#panelHead').addEventListener('touchend', e => {
 });
 
 document.addEventListener('keydown', e => {
-  const typing = e.target.closest('input, textarea, select');
-  if ((e.key === 'q' || e.key === '/') && !typing && panel !== 'food') { e.preventDefault(); openSheet(); }
+  if ((e.key === 'q' || e.key === '/') && !editing() && panel !== 'food' && !document.body.classList.contains('asking')) { e.preventDefault(); openSheet(); }
   if (e.key === 'Escape') {
     if (document.body.classList.contains('adding')) closeSheet();
+    else if (document.body.classList.contains('asking')) closeAsk();
     else if (openId) { openId = null; render(); }
     else if (panel) closePanel();
   }
 });
 // Pick up changes made on another device when you come back to the tab.
-document.addEventListener('visibilitychange', () => { if (!document.hidden && !document.activeElement.closest('.task.open, .sheet')) load(); });
-setInterval(() => { if (!panel && !document.hidden) renderDashboard(); }, 60000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden && !editing() && !document.activeElement.closest('.task.open')) load(); });
+setInterval(() => { if (!document.hidden && !editing() && !openId) renderDashboard(); }, 60000);
 
 load().then(updateChips);

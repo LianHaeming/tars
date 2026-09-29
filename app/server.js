@@ -3,11 +3,18 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const { spawn } = require('child_process');
 
 const PORT = process.env.PORT || 8400;
 const DATA = path.join(__dirname, 'data.json');
 const PUBLIC = path.join(__dirname, 'public');
-const FOOD = path.join(__dirname, '..', 'food');
+const TARS = path.join(__dirname, '..');
+const FOOD = path.join(TARS, 'food');
+const ASK_TIMEOUT = 180e3;
+const ASK_PROMPT = `You are replying in the chat inside the tars app on Lian's phone. Keep replies short and plain: a few lines, no headings or tables.
+Lian's tasks and upcoming items live in the tars app API at http://127.0.0.1:${PORT}: GET /api/state, POST /api/tasks {title, due, dueTime, description, projectId}, PATCH /api/tasks/<id>, DELETE /api/tasks/<id>.
+Gmail is read with bin/gmail (see CLAUDE.md and the coming-up / from-gmail skills). Timezone Europe/London.
+You may read files, but never edit files or code — say so if Lian asks for a code change and suggest a Remote Control session.`;
 
 let db = { projects: [], tasks: [] };
 try { db = JSON.parse(fs.readFileSync(DATA, 'utf8')); } catch {}
@@ -94,7 +101,62 @@ async function api(req, res, parts) {
     return send(res, 200, { projectId: list.id, added: items.length });
   }
 
+  if (resource === 'ask' && req.method === 'POST') return ask(res, body);
+
   send(res, 404, { error: 'not found' });
+}
+
+let asking = false;
+
+function toolStatus(tool) {
+  const cmd = tool.input?.command || '';
+  if (tool.name === 'Bash' && cmd.includes('bin/gmail')) return 'Checking Gmail…';
+  if (tool.name === 'Bash' && cmd.includes('/api/')) return /-X\s*(POST|PATCH|DELETE)/.test(cmd) ? 'Updating your lists…' : 'Checking your lists…';
+  if (tool.name === 'Skill') return 'Using a skill…';
+  return 'Working…';
+}
+
+function ask(res, body) {
+  const message = String(body.message || '').trim();
+  if (!message) return send(res, 400, { error: 'message required' });
+  if (asking) return send(res, 409, { error: 'Claude is still answering the last message' });
+  asking = true;
+
+  const args = ['-p', message, '--output-format', 'stream-json', '--verbose', '--include-partial-messages',
+    '--append-system-prompt', ASK_PROMPT,
+    '--disallowedTools', 'Edit', 'Write', 'NotebookEdit',
+    '--allowedTools', 'Bash(bin/gmail:*)', 'Bash(curl:*)', 'Read', 'Grep', 'Glob', 'Skill'];
+  if (/^[\w-]{8,}$/.test(body.sessionId || '')) args.push('--resume', body.sessionId);
+
+  res.writeHead(200, { 'content-type': 'application/x-ndjson', 'cache-control': 'no-store' });
+  const emit = obj => res.writableEnded || res.write(JSON.stringify(obj) + '\n');
+  const child = spawn('claude', args, { cwd: TARS, stdio: ['ignore', 'pipe', 'pipe'] });
+  const timer = setTimeout(() => { emit({ type: 'error', text: 'Took too long, stopped after 3 minutes.' }); child.kill(); }, ASK_TIMEOUT);
+  let buf = '', wrote = false, sessionId = body.sessionId || null, errText = '';
+
+  child.stdout.on('data', chunk => {
+    buf += chunk;
+    let nl;
+    while ((nl = buf.indexOf('\n')) >= 0) {
+      const line = buf.slice(0, nl); buf = buf.slice(nl + 1);
+      let m; try { m = JSON.parse(line); } catch { continue; }
+      if (m.session_id) sessionId = m.session_id;
+      const ev = m.type === 'stream_event' ? m.event : null;
+      if (ev?.type === 'message_start' && wrote) emit({ type: 'text', text: '\n\n' });
+      if (ev?.type === 'content_block_delta' && ev.delta?.type === 'text_delta') { emit({ type: 'text', text: ev.delta.text }); wrote = true; }
+      if (m.type === 'assistant') for (const c of m.message?.content || []) if (c.type === 'tool_use') emit({ type: 'status', text: toolStatus(c) });
+      if (m.type === 'result' && m.is_error) emit({ type: 'error', text: String(m.result || 'Claude hit an error.') });
+    }
+  });
+  child.stderr.on('data', c => { errText += c; });
+  child.on('close', code => {
+    clearTimeout(timer);
+    asking = false;
+    if (code && !wrote) emit({ type: 'error', text: (errText.trim().split('\n').pop() || `claude exited with ${code}`).slice(0, 300) });
+    emit({ type: 'done', sessionId });
+    res.end();
+  });
+  child.on('error', e => { emit({ type: 'error', text: e.message }); });
 }
 
 const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.json': 'application/json',

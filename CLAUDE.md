@@ -7,13 +7,18 @@ Remote Control from their phone or iPad, and uses the app on their phone over Ta
 (Separate from robin, Lian's planner/notes toolbox on the Mac.)
 
 ## Layout
-- `app/` — the tars app: one dashboard of Whoop-style cards; tapping a card opens it full-screen.
-  - `server.js` — Node, no dependencies. `/api/*` (tasks, lists, shopping), static `public/`, and `/food/` → `../food/`.
-    Data in `app/data.json` (gitignored, PC only). Port 8400, served on the tailnet at 443.
-  - `public/core.js` — tasks logic (state, quick-add parsing, task list/editor, calendar). `public/app.js` — dashboard + panel.
-  - `public/cards/<card>.js` — one file per card: `CARDS.push({ id, label, wide?, summary(), open() })`.
-    New card = new file + a `<script>` line in `index.html`. Cards: next-up, upcoming, food, tasks.
-  - No bottom tabs yet (Lian is still deciding). "Todo"/"calendar" always means this app.
+- `app/` — the tars app. Home screen (D-style: colour wash + glass): Next up card, Food / Shopping buttons,
+  then **flat lists at the root** — Upcoming (dated) and Tasks (undated, not Shopping). A glass dock at the bottom has
+  **Add task** (quick-add) and **Ask Claude** (chat). Food, Shopping, Month and All lists open as full-screen panels.
+  No tabs (Lian's choice). "Todo"/"calendar" always means this app.
+  - `server.js` — Node, no dependencies. `/api/*` (state, tasks, projects, shopping, ask), static `public/`,
+    `/food/` → `../food/`. Data in `app/data.json` (gitignored, PC only). Port 8400, served on the tailnet at 443.
+  - `POST /api/ask {message, sessionId}` runs `claude -p` in `~/tars` (streams NDJSON: text/status/error/done). It may
+    read files, use `bin/gmail` and `curl` the API, and is denied Edit/Write — it never changes code.
+  - `public/core.js` — tasks logic (quick-add parsing, task rows/editor, calendar, panels' lists).
+    `public/app.js` — home + panels. `public/ask.js` — chat sheet.
+  - `public/sections/<name>.js` — one file per home section: `SECTIONS.push({ id, html() })`, listed in `index.html`
+    in display order: next-up, actions, upcoming, tasks.
 - `food/` — HelloFresh menu (Lian's 63 dishes). `build_app.py` writes `food/app/` (gitignored), shown inside the Food card.
   Its shopping list has "Send to Shopping list" → `POST /api/shopping`, which replaces the unticked items of the
   Shopping list. Recipes/photos are HelloFresh's copyrighted content: personal use only, never publish.
