@@ -9,27 +9,30 @@ Remote Control from their phone or iPad, and uses the app on their phone over Ta
 ## Layout
 - `app/` — the tars app. Home screen (D-style: colour wash + glass): Next up card, Food / Shopping buttons,
   then **flat lists at the root** — Upcoming (dated) and Tasks (undated, not Shopping). A glass dock at the bottom has
-  **Add task** (quick-add) and **Tars** (Ask Claude chat). Food, Shopping, Month and All lists open as full-screen panels.
-  No tabs (Lian's choice). "Todo"/"calendar" always means this app.
-  - `server.js` — Node, no dependencies. `/api/*` (state, tasks, projects, shopping, ask), static `dist/` (the built UI),
-    `/food/` → `../food/`. Data in `app/data.json` (gitignored, PC only). Port 8400, served on the tailnet at 443.
+  **Add task** (quick-add sheet) and **Tars** (Ask Claude chat). Everything else is a **page** with its own URL and a back
+  button — Lian doesn't want pop-up windows: `/lists/:key` (All lists), `/month?d=`, `/shopping`, `/tars`, `/food`,
+  `/food/:id` (recipe), `/food/list` (dishes → ingredients → "Send to Shopping list"). No bottom tabs (Lian's choice).
+  "Todo"/"calendar" always means this app.
+  - `server.js` — Node, no dependencies. `/api/*` (state, tasks, projects, shopping, ask), static `dist/` (the built UI;
+    any extension-less path falls back to `index.html` for the router), `/food/` → `../food/` (data + photos). Data in `app/data.json` (gitignored, PC only). Port 8400, served on the tailnet at 443.
   - `POST /api/ask {message, sessionId}` runs `claude -p` in `~/tars` (streams NDJSON: text/status/error/done). It may
     read files, use `bin/gmail` and `curl` the API, and is denied Edit/Write — it never changes code.
   - `web/` — the UI: **React + TypeScript + Vite + Tailwind v4 + shadcn/ui** (style radix-nova, lucide icons, Geist font).
     Builds to `app/dist/` (gitignored) — `bin/up app` runs the build (`build` in `app.json`) before restarting.
-    - Use shadcn components for everything (`cd app/web && npx shadcn@latest add <name>` → `src/components/ui/`);
-      don't hand-roll buttons/inputs/dialogs/menus. Theme tokens (dark only, blue primary, due/priority colours,
-      `glass`/`glass-strong` utilities) live in `src/index.css`.
+    - **One look everywhere**: use shadcn components (`cd app/web && npx shadcn@latest add <name>` →
+      `src/components/ui/`) and the shared pieces in `components/common.tsx` (SectionHead, Section, Empty, PillBar, pill)
+      and `components/Page.tsx` (every page's header/back/width). Never hard-code colours — use the theme tokens in
+      `src/index.css` (dark only, blue `primary`, due/priority colours, `glass`/`glass-strong`). No second theme or CSS file.
     - `src/lib/store.tsx` — all state and actions (`useTars()`); `lib/quickadd.ts` — quick-add parsing; `lib/dates.ts`.
     - `src/sections/<name>.tsx` — one file per home section, listed in display order in `sections/index.ts`:
       next-up, actions, upcoming, tasks.
-    - `src/components/` — `TaskRow` (row + inline editor), `Panel` (full-screen sheet), `ListsView`, `MonthView`,
-      `QuickAdd`, `Ask`, `Dock`. Panel/QuickAdd/Ask are custom sheets on purpose: shadcn's Drawer (vaul) is always
-      modal and traps focus, which breaks Add task / Tars while a panel is open.
-    - Dev: `npm run dev` in `app/web` (proxies `/api` and `/food` to :8400).
-- `food/` — HelloFresh menu (Lian's 63 dishes). `build_app.py` writes `food/app/` (gitignored), shown inside the Food card.
-  Its shopping list has "Send to Shopping list" → `POST /api/shopping`, which replaces the unticked items of the
-  Shopping list. Recipes/photos are HelloFresh's copyrighted content: personal use only, never publish.
+    - `src/App.tsx` — routes (react-router). `src/pages/` — ListsPage (+ ShoppingPage), MonthPage, TarsPage.
+      `src/food/` — MenuPage, RecipePage, ListPage, `data.ts` (loads `/food/app/data/*.json`, basket + shop choice in
+      localStorage), `parts.tsx`. `src/components/` — TaskRow (row + inline editor), QuickAdd, Dock, NameDialog.
+    - Dev: `npm run dev` in `app/web` (proxies `/api` and `/food/app|photos` to :8400).
+- `food/` — HelloFresh menu data (Lian's 63 dishes) + photos. `build_app.py` writes JSON to `food/app/data/` (gitignored)
+  that the Food pages in `app/web/src/food/` read. "Send to Shopping list" → `POST /api/shopping`, which replaces the
+  unticked items of the Shopping list. Recipes/photos are HelloFresh's copyrighted content: personal use only, never publish.
   The full archive is on the Mac (`~/dev/hellofresh-recipes`); to change the menu run `export_menu.py` there
   (see its docstring), commit, push, then `bin/sync` here.
 - `bin/sync` — pull, rebuild food, restart the app. `bin/up <dir>` — (re)start a folder with an `app.json` as the

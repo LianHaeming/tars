@@ -1,16 +1,22 @@
-import { useState, type ComponentProps } from 'react'
+import { useEffect, useState, type ComponentProps } from 'react'
+import { useSearchParams } from 'react-router'
 import type { DayButton } from 'react-day-picker'
 import type { Task } from '@/lib/api'
 import { parseYmd, relDay, longDate, today, ymd } from '@/lib/dates'
-import { byTime, useTars } from '@/lib/store'
+import { byTime, useListView, useTars } from '@/lib/store'
 import { Button } from '@/components/ui/button'
 import { Calendar, CalendarDayButton } from '@/components/ui/calendar'
-import { Empty, Section } from './ListsView'
-import { TaskRow } from './TaskRow'
+import { Empty, Section } from '@/components/common'
+import { Page } from '@/components/Page'
+import { TaskRow } from '@/components/TaskRow'
 
-export function MonthView() {
+export function MonthPage() {
   const { open, calSel, setCalSel } = useTars()
-  const [month, setMonth] = useState(() => { const d = parseYmd(calSel); return new Date(d.getFullYear(), d.getMonth(), 1) })
+  const [params] = useSearchParams()
+  const start = params.get('d') || calSel
+  const [month, setMonth] = useState(() => { const d = parseYmd(start); return new Date(d.getFullYear(), d.getMonth(), 1) })
+  useListView('calendar')
+  useEffect(() => { if (/^\d{4}-\d{2}-\d{2}$/.test(start)) setCalSel(start) }, [start])
 
   const byDay: Record<string, Task[]> = {}
   open.forEach(x => { if (x.due) (byDay[x.due] ||= []).push(x) })
@@ -37,7 +43,7 @@ export function MonthView() {
   }
 
   return (
-    <>
+    <Page title="Month">
       <div className="relative">
         <Calendar
           mode="single"
@@ -72,6 +78,6 @@ export function MonthView() {
       </Section>
       {list.map(x => <TaskRow key={x.id} task={x} hideDue />)}
       {!list.length && <Empty>Nothing on this day. Tap Add task to add one.</Empty>}
-    </>
+    </Page>
   )
 }

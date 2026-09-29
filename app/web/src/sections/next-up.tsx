@@ -1,3 +1,4 @@
+import { Link } from 'react-router'
 import type { Task } from '@/lib/api'
 import { dueColor, hhmm, pad, today, whenLabel, ymd } from '@/lib/dates'
 import { byWhen, useTars } from '@/lib/store'
@@ -16,7 +17,7 @@ function countdown(x: Task) {
 }
 
 export function NextUp() {
-  const { open, openMonth } = useTars()
+  const { open } = useTars()
   const x = nextItem(open)
   const box = 'glass mb-2.5 block w-full rounded-[20px] px-4 py-[15px] text-left'
   if (!x) {
@@ -29,10 +30,10 @@ export function NextUp() {
   }
   const where = x.description.split('\n')[0]
   return (
-    <button className={`${box} transition-transform active:scale-[.98]`} onClick={() => openMonth(x.due!)}>
+    <Link className={`${box} transition-transform active:scale-[.98]`} to={`/month?d=${x.due}`}>
       <div className="text-[13px] font-bold" style={{ color: dueColor(x.due!) }}>{countdown(x)} · Next up</div>
       <div className="mt-0.5 text-[21px] leading-tight font-extrabold tracking-tight">{x.title}</div>
       {where && <div className="mt-0.5 truncate text-[13px] text-muted-foreground">{where}</div>}
-    </button>
+    </Link>
   )
 }

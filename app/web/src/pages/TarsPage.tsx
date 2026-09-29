@@ -4,15 +4,11 @@ import { cn } from '@/lib/utils'
 import { localGet, localSet } from '@/lib/api'
 import { useTars } from '@/lib/store'
 import { useKeyboardOffset } from '@/hooks/use-keyboard-offset'
+import { Page, pageWidth } from '@/components/Page'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 
 type Msg = { who: 'me' | 'ai'; text: string; status?: string }
-
-export function openAsk(setAsking: (v: boolean) => void) {
-  setAsking(true)
-  document.getElementById('askIn')?.focus()
-}
 
 function inline(line: string) {
   return line.split(/(\*\*[^*]+\*\*|`[^`]+`)/g).map((part, i) =>
@@ -33,19 +29,16 @@ function loadMsgs(): Msg[] {
   try { return JSON.parse(localGet('askMsgs') || '[]') } catch { return [] }
 }
 
-export function Ask() {
-  const { asking, setAsking, load } = useTars()
+export function TarsPage() {
+  const { load } = useTars()
   const [msgs, setMsgs] = useState<Msg[]>(loadMsgs)
   const [session, setSession] = useState(() => localGet('askSession') || null)
   const [busy, setBusy] = useState(false)
   const [text, setText] = useState('')
-  const log = useRef<HTMLDivElement>(null)
-  const input = useRef<HTMLTextAreaElement>(null)
+  const end = useRef<HTMLDivElement>(null)
   const bottom = useKeyboardOffset()
 
-  useEffect(() => { log.current?.scrollTo({ top: log.current.scrollHeight }) }, [msgs, asking])
-
-  const close = () => { setAsking(false); input.current?.blur() }
+  useEffect(() => { end.current?.scrollIntoView({ block: 'end' }) }, [msgs])
 
   async function send(message: string) {
     setBusy(true)
@@ -99,51 +92,46 @@ export function Ask() {
   }
 
   return (
-    <>
-      <div onClick={close} className={cn('fixed inset-0 z-40 bg-black/50 transition-opacity duration-250', asking ? 'opacity-100' : 'pointer-events-none opacity-0')} />
-      <section
+    <Page
+      title={<span className="inline-flex items-center gap-1.5"><SparkleIcon className="size-4 fill-current text-claude" />Tars</span>}
+      actions={<Button variant="ghost" size="sm" className="text-muted-foreground" onClick={newChat} disabled={busy}>New chat</Button>}
+      className="pb-[calc(90px+env(safe-area-inset-bottom))]"
+    >
+      <div className="pt-3" style={{ paddingBottom: bottom }}>
+        {msgs.length === 0 && <div className="px-5 py-16 text-center text-muted-foreground">Ask what's coming up, or say "add the … email to my tasks".</div>}
+        {msgs.map((m, i) => (
+          <div key={i} className={cn(
+            'mb-2 max-w-[86%] rounded-[18px] px-3.5 py-2.5 text-[15px] leading-snug break-words',
+            m.who === 'me' ? 'ml-auto rounded-br-md bg-primary/60' : 'rounded-bl-md bg-secondary',
+          )}>
+            <Markdown text={m.text} />
+            {m.status && <div className="text-[13px] text-muted-foreground italic">{m.status}</div>}
+          </div>
+        ))}
+        <div ref={end} />
+      </div>
+      <form
+        onSubmit={submit}
+        autoComplete="off"
         style={{ bottom }}
-        className={cn(
-          'glass-strong fixed inset-x-0 top-[calc(env(safe-area-inset-top)+70px)] z-[45] mx-auto flex max-w-[680px] flex-col rounded-t-3xl border-b-0 shadow-2xl transition-transform duration-300 ease-[cubic-bezier(.2,.8,.2,1)]',
-          asking ? 'translate-y-0' : 'translate-y-[110%]',
-        )}
+        className="glass-strong fixed inset-x-0 z-20 border-x-0 border-b-0 px-3 pt-2.5 pb-[calc(10px+env(safe-area-inset-bottom))]"
       >
-        <header className="flex items-center justify-between px-4 pt-3.5 pb-2.5 font-bold">
-          <Button variant="link" className="px-0 text-sm font-semibold text-muted-foreground" onClick={newChat}>New chat</Button>
-          <span className="inline-flex items-center gap-1.5 text-claude"><SparkleIcon className="size-4 fill-current" />Tars</span>
-          <Button variant="link" className="px-0 text-base font-semibold" onClick={close}>Done</Button>
-        </header>
-        <div ref={log} className="flex-1 overflow-y-auto overscroll-contain px-3.5 pt-1.5 pb-3">
-          {msgs.length === 0 && <div className="px-5 py-10 text-center text-muted-foreground">Ask what's coming up, or say "add the … email to my tasks".</div>}
-          {msgs.map((m, i) => (
-            <div key={i} className={cn(
-              'mb-2 max-w-[86%] rounded-[18px] px-3.5 py-2.5 text-[15px] leading-snug break-words',
-              m.who === 'me' ? 'ml-auto rounded-br-md bg-primary/60' : 'rounded-bl-md bg-white/8',
-            )}>
-              <Markdown text={m.text} />
-              {m.status && <div className="text-[13px] text-muted-foreground italic">{m.status}</div>}
-            </div>
-          ))}
-        </div>
-        <form onSubmit={submit} autoComplete="off" className="flex items-end gap-2 border-t border-white/8 px-3 pt-2.5 pb-[calc(10px+env(safe-area-inset-bottom))]">
+        <div className={cn('mx-auto flex items-end gap-2', pageWidth())}>
           <Textarea
-            ref={input}
-            id="askIn"
+            autoFocus
             rows={1}
             value={text}
             onChange={e => setText(e.target.value)}
-            onKeyDown={e => {
-              if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit() }
-            }}
+            onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit() } }}
             enterKeyHint="send"
             placeholder="Ask anything…"
-            className="max-h-36 min-h-0 flex-1 resize-none rounded-[20px] bg-white/6 px-3.5 py-2 text-base dark:bg-white/6"
+            className="max-h-36 min-h-0 flex-1 resize-none rounded-[20px] bg-secondary px-3.5 py-2 text-base dark:bg-secondary"
           />
           <Button type="submit" size="icon-lg" className="size-[38px] rounded-full" disabled={busy || !text.trim()} aria-label="Send">
             <ArrowUpIcon className="size-[18px]" strokeWidth={2.6} />
           </Button>
-        </form>
-      </section>
-    </>
+        </div>
+      </form>
+    </Page>
   )
 }

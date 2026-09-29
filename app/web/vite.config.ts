@@ -7,5 +7,5 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   resolve: { alias: { '@': path.resolve(import.meta.dirname, './src') } },
   build: { outDir: '../dist', emptyOutDir: true, chunkSizeWarningLimit: 1000 },
-  server: { proxy: { '/api': 'http://127.0.0.1:8400', '/food': 'http://127.0.0.1:8400' } },
+  server: { proxy: { '/api': 'http://127.0.0.1:8400', '/food/app': 'http://127.0.0.1:8400', '/food/photos': 'http://127.0.0.1:8400' } },
 })

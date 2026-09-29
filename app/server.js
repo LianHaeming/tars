@@ -1,4 +1,4 @@
-// tars app: dashboard + tasks API, and the food menu under /food/. Run: node server.js  (listens on :8400, data in data.json)
+// tars app: tasks API, the built UI (dist/, any page path falls back to index.html) and food data/photos under /food/. Run: node server.js  (listens on :8400, data in data.json)
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
@@ -162,6 +162,13 @@ function ask(res, body) {
 const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.json': 'application/json',
   '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.webp': 'image/webp', '.woff2': 'font/woff2' };
 
+function serve(res, file, buf) {
+  if (!buf) return fs.readFile(file, (err, b) => err ? send(res, 404, { error: 'not found' }) : serve(res, file, b));
+  const cache = file.startsWith(path.join(PUBLIC, 'assets') + path.sep) ? 'public, max-age=31536000, immutable' : 'no-cache';
+  res.writeHead(200, { 'content-type': TYPES[path.extname(file).toLowerCase()] || 'application/octet-stream', 'cache-control': cache });
+  res.end(buf);
+}
+
 http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://x');
   if (url.pathname.startsWith('/api/')) {
@@ -171,13 +178,11 @@ http.createServer(async (req, res) => {
   let rel = decodeURIComponent(url.pathname);
   const base = rel.startsWith('/food/') ? FOOD : PUBLIC;
   if (base === FOOD) rel = rel.slice(5);
-  if (rel.endsWith('/')) rel += 'index.html';
   const file = path.join(base, path.normalize(rel));
   if (!file.startsWith(base + path.sep)) return send(res, 403, { error: 'forbidden' });
   fs.readFile(file, (err, buf) => {
+    if (err && !path.extname(rel)) return serve(res, path.join(PUBLIC, 'index.html'));
     if (err) return send(res, 404, { error: 'not found' });
-    const cache = file.startsWith(path.join(PUBLIC, 'assets') + path.sep) ? 'public, max-age=31536000, immutable' : 'no-cache';
-    res.writeHead(200, { 'content-type': TYPES[path.extname(file).toLowerCase()] || 'application/octet-stream', 'cache-control': cache });
-    res.end(buf);
+    serve(res, file, buf);
   });
 }).listen(PORT, '127.0.0.1', () => console.log('Listening on :' + PORT));

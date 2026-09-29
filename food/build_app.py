@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build app/ (the menu page and the menu builder) from recipes.json and the downloaded files.
+"""Build app/data/ (JSON for the Food pages of the tars app, app/web) from recipes.json and the downloaded files.
 
 Usage:
     python3 build_app.py
@@ -67,7 +67,7 @@ def ingredients(r, card, hints):
         qty = parse_amount(amount)
         rows.append({"name": clean(name), "amount": amount, "buy": shop_name(name),
                      "q": qty[0] if qty else None, "u": qty[1] if qty else None,
-                     "img": local(f"photos/ingredients/{i['id']}.png", f"../photos/ingredients/{i['id']}.png")
+                     "img": local(f"photos/ingredients/{i['id']}.png", f"/food/photos/ingredients/{i['id']}.png")
                      or (PHOTO.format(w=160, path=pictures[i["id"]]) if pictures[i["id"]] else None)})
     return rows
 
@@ -122,12 +122,16 @@ def step_image(rid, i, step):
     if not step.get("images"):
         return None
     if (ROOT / "photos" / "steps" / f"{rid}-{i + 1}.jpg").exists():
-        return f"../photos/steps/{rid}-{i + 1}.jpg"
+        return f"/food/photos/steps/{rid}-{i + 1}.jpg"
     return STEP_IMG.format(path=step["images"][0]["path"])
 
 
 def local(path, rel):
     return rel if (ROOT / path).exists() else None
+
+
+def dump(path, obj):
+    path.write_text(json.dumps(obj, ensure_ascii=False, separators=(",", ":")))
 
 
 def main():
@@ -154,12 +158,12 @@ def main():
             "d": r.get("difficulty") or 0,
             "k": kcal,
             "i": sorted({clean(i["name"]) for i in r.get("ingredients") or []}),
-            "img": local(f"photos/{rid}.jpg", f"../photos/{rid}.jpg") or PHOTO.format(w=600, path=r["imagePath"]),
+            "img": local(f"photos/{rid}.jpg", f"/food/photos/{rid}.jpg") or PHOTO.format(w=600, path=r["imagePath"]),
             **dish_tags(r),
         })
         detail = {
             "id": rid,
-            "photo": local(f"photos/large/{rid}.jpg", f"../photos/large/{rid}.jpg") or PHOTO.format(w=1200, path=r["imagePath"]),
+            "photo": local(f"photos/large/{rid}.jpg", f"/food/photos/large/{rid}.jpg") or PHOTO.format(w=1200, path=r["imagePath"]),
             "nutrition": [[n["name"], n["amount"], n.get("unit") or ""] for n in r.get("nutrition") or []
                           if n["name"] != "Energy (kJ)" and n.get("amount") is not None],
             "ingredients": ingredients(r, cards.get(rid), hints),
@@ -170,24 +174,17 @@ def main():
                 for i, s in enumerate(r.get("steps") or [])
             ],
         }
-        (detail_dir / f"{rid}.js").write_text(
-            "window.__recipe(" + json.dumps(detail, ensure_ascii=False, separators=(",", ":")) + ");\n")
+        dump(detail_dir / f"{rid}.json", detail)
 
-    (APP / "data" / "index.js").write_text(
-        "window.RECIPES = " + json.dumps(index, ensure_ascii=False, separators=(",", ":")) + ";\n")
-    (APP / "data" / "menu.js").write_text(
-        "window.MY_MENU = " + (ROOT / "my-menu.json").read_text().strip() + ";\n")
-    (APP / "data" / "sainsburys.js").write_text(
-        "window.SAINSBURYS = " + (ROOT / "sainsburys.json").read_text().strip() + ";\n")
-    (APP / "data" / "ocado.js").write_text(
-        "window.OCADO = " + (ROOT / "ocado.json").read_text().strip() + ";\n")
-    for old in ("shop.js", "plan.js"):
-        (APP / "data" / old).unlink(missing_ok=True)
-    shutil.copy(ROOT / "app.html", APP / "index.html")
-    shutil.copy(ROOT / "builder.html", APP / "build.html")
-    for f in ("common.js", "common.css"):
-        shutil.copy(ROOT / f, APP / f)
-    print(f"wrote {len(index)} dishes; open {APP / 'index.html'}")
+    data = APP / "data"
+    dump(data / "recipes.json", index)
+    for name in ("my-menu", "sainsburys", "ocado"):
+        dump(data / f"{name}.json", json.loads((ROOT / f"{name}.json").read_text()))
+    for old in data.glob("*.js"):
+        old.unlink()
+    for old in ("index.html", "build.html", "common.js", "common.css"):
+        (APP / old).unlink(missing_ok=True)
+    print(f"wrote {len(index)} dishes to {data}")
 
 
 if __name__ == "__main__":
