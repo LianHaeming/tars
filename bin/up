@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# Usage: bin/up <app>   (an apps/<app>/ folder, or "home")
+# Installs/restarts the tars-<app> user service and exposes it on the tailnet over HTTPS.
+set -euo pipefail
+TARS="$(cd "$(dirname "$0")/.." && pwd)"
+name="${1:?usage: bin/up <app>}"
+
+if [ "$name" = home ]; then
+  dir="$TARS/home"; port=8400; public=443
+  start='python3 -m http.server $PORT --bind 127.0.0.1'
+else
+  dir="$TARS/apps/$name"
+  [ -f "$dir/app.json" ] || { echo "no $dir/app.json" >&2; exit 1; }
+  field() { python3 -c 'import json,sys; print(json.load(open(sys.argv[1])).get(sys.argv[2], ""))' "$dir/app.json" "$1"; }
+  port="$(field port)"; public="$port"; start="$(field start)"
+fi
+
+unit="$HOME/.config/systemd/user/tars-$name.service"
+mkdir -p "$(dirname "$unit")"
+cat > "$unit" <<UNIT
+[Unit]
+Description=tars: $name
+
+[Service]
+WorkingDirectory=$dir
+Environment=PORT=$port
+Environment=PATH=%h/.local/share/mise/shims:%h/.local/bin:/usr/local/bin:/usr/bin
+ExecStart=/bin/sh -c 'exec $start'
+Restart=on-failure
+
+[Install]
+WantedBy=default.target
+UNIT
+
+systemctl --user daemon-reload
+systemctl --user enable --quiet "tars-$name.service"
+systemctl --user restart "tars-$name.service"
+tailscale serve --bg --https="$public" "http://127.0.0.1:$port" >/dev/null
+echo "$name -> https://$(tailscale status --json | python3 -c 'import json,sys; print(json.load(sys.stdin)["Self"]["DNSName"].rstrip("."))'):$public/"

@@ -1,0 +1,2684 @@
+{
+"echalion shallot": {
+"unit": "",
+"seen": 739,
+"min": 1.0,
+"max": 2.0
+},
+"garlic clove": {
+"unit": "",
+"seen": 8021,
+"min": 1.0,
+"max": 6.0
+},
+"vegetable stock paste": {
+"unit": "g",
+"seen": 1925,
+"min": 10.0,
+"max": 40.0
+},
+"baby plum tomatoe": {
+"unit": "g",
+"seen": 1029,
+"min": 125.0,
+"max": 250.0
+},
+"mature cheddar cheese": {
+"unit": "g",
+"seen": 1598,
+"min": 30.0,
+"max": 180.0
+},
+"lemon": {
+"unit": "",
+"seen": 1213,
+"min": 0.5,
+"max": 2.0
+},
+"olive oil": {
+"unit": "tbsp",
+"seen": 471,
+"min": 0.75,
+"max": 4.0
+},
+"grated hard italian style cheese": {
+"unit": "g",
+"seen": 2053,
+"min": 20.0,
+"max": 80.0
+},
+"pea shoot": {
+"unit": "g",
+"seen": 104,
+"min": 40.0,
+"max": 80.0
+},
+"onion": {
+"unit": "",
+"seen": 1491,
+"min": 1.0,
+"max": 2.0
+},
+"green pepper": {
+"unit": "",
+"seen": 281,
+"min": 1.0,
+"max": 2.0
+},
+"mixed bean": {
+"unit": "carton(s)",
+"seen": 155,
+"min": 1.0,
+"max": 2.0
+},
+"british beef mince": {
+"unit": "g",
+"seen": 1308,
+"min": 180.0,
+"max": 960.0
+},
+"tomato passata": {
+"unit": "carton(s)",
+"seen": 1464,
+"min": 1.0,
+"max": 2.0
+},
+"beef stock pot": {
+"unit": "",
+"seen": 13,
+"min": 0.5,
+"max": 1.0
+},
+"british chicken breast": {
+"unit": "",
+"seen": 971,
+"min": 2.0,
+"max": 8.0
+},
+"red pepper": {
+"unit": "",
+"seen": 82,
+"min": 0.5,
+"max": 2.0
+},
+"red onion": {
+"unit": "",
+"seen": 1557,
+"min": 0.5,
+"max": 2.0
+},
+"vegetable stock pot": {
+"unit": "",
+"seen": 63,
+"min": 0.5,
+"max": 2.0
+},
+"halloumi": {
+"unit": "g",
+"seen": 275,
+"min": 225.0,
+"max": 675.0
+},
+"wild rocket": {
+"unit": "g",
+"seen": 1452,
+"min": 20.0,
+"max": 80.0
+},
+"cauliflower": {
+"unit": "",
+"seen": 40,
+"min": 0.5,
+"max": 2.0
+},
+"green bean": {
+"unit": "g",
+"seen": 1225,
+"min": 80.0,
+"max": 320.0
+},
+"curry powder mix": {
+"unit": "sachet(s)",
+"seen": 276,
+"min": 1.0,
+"max": 2.0
+},
+"tomato puree": {
+"unit": "g",
+"seen": 1217,
+"min": 30.0,
+"max": 90.0
+},
+"chopped tomatoe": {
+"unit": "tin(s)",
+"seen": 59,
+"min": 0.5,
+"max": 2.0
+},
+"flank steak": {
+"unit": "",
+"seen": 17,
+"min": 1.0,
+"max": 2.0
+},
+"broccoli": {
+"unit": "",
+"seen": 131,
+"min": 0.5,
+"max": 2.0
+},
+"sweet potato": {
+"unit": "",
+"seen": 788,
+"min": 1.0,
+"max": 4.0
+},
+"courgette": {
+"unit": "",
+"seen": 772,
+"min": 1.0,
+"max": 2.0
+},
+"british duck breast": {
+"unit": "",
+"seen": 61,
+"min": 2.0,
+"max": 4.0
+},
+"orange": {
+"unit": "",
+"seen": 27,
+"min": 0.5,
+"max": 2.0
+},
+"portobello mushroom": {
+"unit": "",
+"seen": 102,
+"min": 2.0,
+"max": 8.0
+},
+"soy sauce": {
+"unit": "ml",
+"seen": 1301,
+"min": 10.0,
+"max": 50.0
+},
+"sweet chilli sauce": {
+"unit": "g",
+"seen": 337,
+"min": 32.0,
+"max": 128.0
+},
+"british chicken thigh": {
+"unit": "",
+"seen": 425,
+"min": 2.0,
+"max": 16.0
+},
+"basmati rice": {
+"unit": "g",
+"seen": 1568,
+"min": 150.0,
+"max": 300.0
+},
+"coconut milk": {
+"unit": "ml",
+"seen": 711,
+"min": 180.0,
+"max": 400.0
+},
+"butternut squash": {
+"unit": "",
+"seen": 206,
+"min": 1.0,
+"max": 2.0
+},
+"aubergine": {
+"unit": "",
+"seen": 377,
+"min": 1.0,
+"max": 4.0
+},
+"leek": {
+"unit": "",
+"seen": 398,
+"min": 1.0,
+"max": 3.0
+},
+"bulgur wheat": {
+"unit": "g",
+"seen": 377,
+"min": 120.0,
+"max": 240.0
+},
+"cucumber": {
+"unit": "",
+"seen": 226,
+"min": 0.5,
+"max": 2.0
+},
+"yellow pepper": {
+"unit": "",
+"seen": 88,
+"min": 0.5,
+"max": 2.0
+},
+"carrot": {
+"unit": "",
+"seen": 1525,
+"min": 1.0,
+"max": 6.0
+},
+"baby gem lettuce": {
+"unit": "",
+"seen": 731,
+"min": 1.0,
+"max": 2.0
+},
+"vine tomatoe": {
+"unit": "",
+"seen": 8,
+"min": 1.0,
+"max": 4.0
+},
+"ciabatta": {
+"unit": "",
+"seen": 629,
+"min": 1.0,
+"max": 4.0
+},
+"asparagu": {
+"unit": "g",
+"seen": 214,
+"min": 100.0,
+"max": 400.0
+},
+"tenderstem broccoli": {
+"unit": "g",
+"seen": 856,
+"min": 80.0,
+"max": 320.0
+},
+"spring onion": {
+"unit": "",
+"seen": 787,
+"min": 1.0,
+"max": 4.0
+},
+"tilapia fillet": {
+"unit": "",
+"seen": 11,
+"min": 2.0,
+"max": 85.0
+},
+"panko breadcrumb": {
+"unit": "g",
+"seen": 462,
+"min": 10.0,
+"max": 100.0
+},
+"baby spinach": {
+"unit": "g",
+"seen": 1528,
+"min": 40.0,
+"max": 200.0
+},
+"mozzarella": {
+"unit": "ball(s)",
+"seen": 241,
+"min": 1.0,
+"max": 2.0
+},
+"creme fraiche": {
+"unit": "g",
+"seen": 2133,
+"min": 75.0,
+"max": 300.0
+},
+"pork chop": {
+"unit": "",
+"seen": 6,
+"min": 2.0,
+"max": 4.0
+},
+"netherend butter salted": {
+"unit": "tbsp",
+"seen": 8,
+"min": 1.5,
+"max": 3.0
+},
+"chicken stock pot": {
+"unit": "",
+"seen": 41,
+"min": 0.5,
+"max": 2.0
+},
+"water for the rice": {
+"unit": "ml",
+"seen": 1266,
+"min": 300.0,
+"max": 600.0
+},
+"vegetable stock powder": {
+"unit": "sachet(s)",
+"seen": 280,
+"min": 0.5,
+"max": 3.0
+},
+"lime": {
+"unit": "",
+"seen": 1938,
+"min": 0.5,
+"max": 2.0
+},
+"super soft tortilla with whole wheat": {
+"unit": "",
+"seen": 61,
+"min": 2.0,
+"max": 8.0
+},
+"couscou": {
+"unit": "g",
+"seen": 288,
+"min": 120.0,
+"max": 300.0
+},
+"parsnip": {
+"unit": "",
+"seen": 81,
+"min": 1.0,
+"max": 6.0
+},
+"butter": {
+"unit": "g",
+"seen": 2218,
+"min": 10.0,
+"max": 60.0
+},
+"diced chorizo": {
+"unit": "g",
+"seen": 475,
+"min": 60.0,
+"max": 240.0
+},
+"pork belly": {
+"unit": "g",
+"seen": 27,
+"min": 280.0,
+"max": 800.0
+},
+"parmesan cheese": {
+"unit": "tbsp",
+"seen": 24,
+"min": 2.0,
+"max": 4.0
+},
+"brioche bun": {
+"unit": "",
+"seen": 15,
+"min": 2.0,
+"max": 4.0
+},
+"organic black bean": {
+"unit": "tin(s)",
+"seen": 11,
+"min": 1.0,
+"max": 2.0
+},
+"apple": {
+"unit": "",
+"seen": 281,
+"min": 1.0,
+"max": 4.0
+},
+"gnocchi": {
+"unit": "g",
+"seen": 60,
+"min": 300.0,
+"max": 800.0
+},
+"baby watercre": {
+"unit": "bag(s)",
+"seen": 5,
+"min": 1.0,
+"max": 2.0
+},
+"sea ba fillet": {
+"unit": "",
+"seen": 111,
+"min": 2.0,
+"max": 4.0
+},
+"cider vinegar": {
+"unit": "ml",
+"seen": 699,
+"min": 15.0,
+"max": 60.0
+},
+"red kidney bean": {
+"unit": "carton(s)",
+"seen": 206,
+"min": 0.5,
+"max": 2.0
+},
+"avocado": {
+"unit": "",
+"seen": 314,
+"min": 1.0,
+"max": 2.0
+},
+"salted peanut": {
+"unit": "g",
+"seen": 528,
+"min": 25.0,
+"max": 50.0
+},
+"sea bream fillet": {
+"unit": "",
+"seen": 60,
+"min": 2.0,
+"max": 4.0
+},
+"fusilli": {
+"unit": "g",
+"seen": 9,
+"min": 200.0,
+"max": 440.0
+},
+"lamb mince": {
+"unit": "g",
+"seen": 285,
+"min": 200.0,
+"max": 800.0
+},
+"chickpea": {
+"unit": "carton(s)",
+"seen": 357,
+"min": 0.75,
+"max": 2.0
+},
+"pesto": {
+"unit": "g",
+"seen": 238,
+"min": 32.0,
+"max": 96.0
+},
+"chipotle paste": {
+"unit": "g",
+"seen": 342,
+"min": 20.0,
+"max": 40.0
+},
+"bay leaf": {
+"unit": "",
+"seen": 12,
+"min": 1.0,
+"max": 2.0
+},
+"linguine": {
+"unit": "g",
+"seen": 260,
+"min": 180.0,
+"max": 400.0
+},
+"bbq sauce": {
+"unit": "g",
+"seen": 271,
+"min": 32.0,
+"max": 160.0
+},
+"pea": {
+"unit": "g",
+"seen": 1129,
+"min": 120.0,
+"max": 240.0
+},
+"lilliput caper": {
+"unit": "tbsp",
+"seen": 5,
+"min": 1.0,
+"max": 2.0
+},
+"wheat penne pasta": {
+"unit": "g",
+"seen": 5,
+"min": 200.0,
+"max": 400.0
+},
+"corn on the cob": {
+"unit": "",
+"seen": 42,
+"min": 1.0,
+"max": 4.0
+},
+"organic cannellini bean": {
+"unit": "tin(s)",
+"seen": 5,
+"min": 0.5,
+"max": 2.0
+},
+"cream cheese": {
+"unit": "g",
+"seen": 23,
+"min": 50.0,
+"max": 150.0
+},
+"british pork mince": {
+"unit": "g",
+"seen": 516,
+"min": 240.0,
+"max": 960.0
+},
+"chive": {
+"unit": "bunch(s)",
+"seen": 431,
+"min": 0.75,
+"max": 2.0
+},
+"butter bean": {
+"unit": "carton(s)",
+"seen": 207,
+"min": 1.0,
+"max": 2.0
+},
+"mango chutney": {
+"unit": "g",
+"seen": 523,
+"min": 40.0,
+"max": 80.0
+},
+"pear": {
+"unit": "",
+"seen": 86,
+"min": 1.0,
+"max": 4.0
+},
+"italian style herb": {
+"unit": "sachet(s)",
+"seen": 87,
+"min": 0.5,
+"max": 2.0
+},
+"wheat spaghetti": {
+"unit": "g",
+"seen": 7,
+"min": 180.0,
+"max": 400.0
+},
+"hoisin sauce": {
+"unit": "g",
+"seen": 306,
+"min": 30.0,
+"max": 180.0
+},
+"king prawn": {
+"unit": "g",
+"seen": 718,
+"min": 150.0,
+"max": 500.0
+},
+"gammon steak": {
+"unit": "",
+"seen": 18,
+"min": 2.0,
+"max": 8.0
+},
+"firm tofu": {
+"unit": "g",
+"seen": 86,
+"min": 250.0,
+"max": 1120.0
+},
+"brussel sprout": {
+"unit": "g",
+"seen": 45,
+"min": 200.0,
+"max": 400.0
+},
+"tuscan pork sausage": {
+"unit": "",
+"seen": 8,
+"min": 1.0,
+"max": 8.0
+},
+"dried cranberrie": {
+"unit": "g",
+"seen": 46,
+"min": 15.0,
+"max": 60.0
+},
+"sweetheart cabbage": {
+"unit": "",
+"seen": 9,
+"min": 0.5,
+"max": 2.0
+},
+"chinese rice vinegar": {
+"unit": "tbsp",
+"seen": 5,
+"min": 1.0,
+"max": 2.0
+},
+"dried basil": {
+"unit": "sachet(s)",
+"seen": 22,
+"min": 1.0,
+"max": 2.0
+},
+"british turkey steak": {
+"unit": "",
+"seen": 20,
+"min": 2.0,
+"max": 4.0
+},
+"swede": {
+"unit": "",
+"seen": 5,
+"min": 1.0,
+"max": 2.0
+},
+"easy garlic": {
+"unit": "sachet(s)",
+"seen": 7,
+"min": 0.5,
+"max": 2.0
+},
+"greek style natural yoghurt": {
+"unit": "g",
+"seen": 634,
+"min": 75.0,
+"max": 225.0
+},
+"british honey mustard sausage": {
+"unit": "",
+"seen": 75,
+"min": 4.0,
+"max": 16.0
+},
+"lasagne sheet": {
+"unit": "pack(s)",
+"seen": 38,
+"min": 1.0,
+"max": 2.0
+},
+"desiccated coconut": {
+"unit": "g",
+"seen": 42,
+"min": 15.0,
+"max": 60.0
+},
+"rice vinegar": {
+"unit": "ml",
+"seen": 441,
+"min": 15.0,
+"max": 66.0
+},
+"baby leaf mix": {
+"unit": "g",
+"seen": 983,
+"min": 20.0,
+"max": 100.0
+},
+"seville orange and honey dressing": {
+"unit": "tbsp",
+"seen": 5,
+"min": 1.5,
+"max": 2.0
+},
+"harissa paste": {
+"unit": "g",
+"seen": 420,
+"min": 50.0,
+"max": 100.0
+},
+"baby corn": {
+"unit": "g",
+"seen": 104,
+"min": 60.0,
+"max": 120.0
+},
+"sesame seed": {
+"unit": "g",
+"seen": 67,
+"min": 5.0,
+"max": 25.0
+},
+"british cumberland sausage": {
+"unit": "",
+"seen": 83,
+"min": 4.0,
+"max": 16.0
+},
+"bamboo skewer": {
+"unit": "",
+"seen": 118,
+"min": 2.0,
+"max": 12.0
+},
+"water for the bulgur": {
+"unit": "ml",
+"seen": 307,
+"min": 220.0,
+"max": 480.0
+},
+"ketjap mani": {
+"unit": "g",
+"seen": 631,
+"min": 20.0,
+"max": 100.0
+},
+"orzo": {
+"unit": "g",
+"seen": 129,
+"min": 180.0,
+"max": 360.0
+},
+"cod fillet": {
+"unit": "",
+"seen": 61,
+"min": 2.0,
+"max": 4.0
+},
+"breadcrumb": {
+"unit": "g",
+"seen": 682,
+"min": 10.0,
+"max": 100.0
+},
+"pappardelle": {
+"unit": "g",
+"seen": 19,
+"min": 200.0,
+"max": 400.0
+},
+"pumpkin seed": {
+"unit": "g",
+"seen": 68,
+"min": 15.0,
+"max": 30.0
+},
+"rigatoni pasta": {
+"unit": "g",
+"seen": 406,
+"min": 180.0,
+"max": 400.0
+},
+"cinnamon stick": {
+"unit": "",
+"seen": 11,
+"min": 1.0,
+"max": 2.0
+},
+"black sesame seed": {
+"unit": "g",
+"seen": 93,
+"min": 5.0,
+"max": 15.0
+},
+"redcurrant jelly": {
+"unit": "g",
+"seen": 73,
+"min": 25.0,
+"max": 100.0
+},
+"udon noodle": {
+"unit": "g",
+"seen": 194,
+"min": 220.0,
+"max": 440.0
+},
+"flaked almond": {
+"unit": "g",
+"seen": 45,
+"min": 15.0,
+"max": 40.0
+},
+"unsalted butter": {
+"unit": "g",
+"seen": 311,
+"min": 10.0,
+"max": 80.0
+},
+"black bean": {
+"unit": "carton(s)",
+"seen": 316,
+"min": 0.5,
+"max": 2.0
+},
+"sweetcorn": {
+"unit": "g",
+"seen": 359,
+"min": 150.0,
+"max": 340.0
+},
+"water for the curry": {
+"unit": "ml",
+"seen": 298,
+"min": 50.0,
+"max": 450.0
+},
+"water for the couscou": {
+"unit": "ml",
+"seen": 145,
+"min": 200.0,
+"max": 480.0
+},
+"flora original": {
+"unit": "g",
+"seen": 11,
+"min": 10.0,
+"max": 40.0
+},
+"british smoked bacon lardon": {
+"unit": "g",
+"seen": 764,
+"min": 60.0,
+"max": 240.0
+},
+"water for the sauce": {
+"unit": "ml",
+"seen": 5215,
+"min": 50.0,
+"max": 450.0
+},
+"bell pepper": {
+"unit": "",
+"seen": 1675,
+"min": 1.0,
+"max": 2.0
+},
+"finely chopped tomatoe": {
+"unit": "carton(s)",
+"seen": 170,
+"min": 0.5,
+"max": 2.0
+},
+"low fat natural yoghurt": {
+"unit": "g",
+"seen": 204,
+"min": 75.0,
+"max": 225.0
+},
+"broccoli floret": {
+"unit": "g",
+"seen": 75,
+"min": 200.0,
+"max": 400.0
+},
+"lentil": {
+"unit": "carton(s)",
+"seen": 253,
+"min": 1.0,
+"max": 2.0
+},
+"potatoe": {
+"unit": "g",
+"seen": 3047,
+"min": 450.0,
+"max": 900.0
+},
+"olive oil for the crumb": {
+"unit": "tbsp",
+"seen": 199,
+"min": 0.5,
+"max": 4.0
+},
+"goat  cheese": {
+"unit": "g",
+"seen": 56,
+"min": 75.0,
+"max": 250.0
+},
+"skin on british chicken breast": {
+"unit": "",
+"seen": 143,
+"min": 2.0,
+"max": 8.0
+},
+"water for the stock": {
+"unit": "ml",
+"seen": 57,
+"min": 100.0,
+"max": 1500.0
+},
+"water for the lamb": {
+"unit": "ml",
+"seen": 33,
+"min": 100.0,
+"max": 400.0
+},
+"baking potato": {
+"unit": "",
+"seen": 198,
+"min": 1.0,
+"max": 4.0
+},
+"water for the gravy": {
+"unit": "ml",
+"seen": 92,
+"min": 100.0,
+"max": 800.0
+},
+"arborio rice": {
+"unit": "g",
+"seen": 32,
+"min": 175.0,
+"max": 350.0
+},
+"olive oil for the salsa": {
+"unit": "tbsp",
+"seen": 201,
+"min": 0.5,
+"max": 4.0
+},
+"red thai style paste": {
+"unit": "g",
+"seen": 172,
+"min": 50.0,
+"max": 150.0
+},
+"finely chopped tomatoe with onion and garlic": {
+"unit": "carton(s)",
+"seen": 331,
+"min": 0.5,
+"max": 2.0
+},
+"water for the beef": {
+"unit": "ml",
+"seen": 90,
+"min": 40.0,
+"max": 300.0
+},
+"beef stock powder": {
+"unit": "sachet(s)",
+"seen": 42,
+"min": 0.5,
+"max": 2.0
+},
+"olive oil for the dressing": {
+"unit": "tbsp",
+"seen": 1769,
+"min": 0.5,
+"max": 4.0
+},
+"british pork and oregano sausage meat": {
+"unit": "g",
+"seen": 197,
+"min": 225.0,
+"max": 900.0
+},
+"onion marmalade": {
+"unit": "g",
+"seen": 100,
+"min": 20.0,
+"max": 80.0
+},
+"burger bun": {
+"unit": "",
+"seen": 408,
+"min": 2.0,
+"max": 4.0
+},
+"chicken stock paste": {
+"unit": "g",
+"seen": 2406,
+"min": 10.0,
+"max": 40.0
+},
+"finely chopped tomatoe with basil": {
+"unit": "carton(s)",
+"seen": 106,
+"min": 0.75,
+"max": 2.0
+},
+"british pork loin steak": {
+"unit": "",
+"seen": 119,
+"min": 2.0,
+"max": 8.0
+},
+"prune": {
+"unit": "g",
+"seen": 34,
+"min": 40.0,
+"max": 80.0
+},
+"reserved pasta water": {
+"unit": "ml",
+"seen": 100,
+"min": 50.0,
+"max": 400.0
+},
+"penne pasta": {
+"unit": "g",
+"seen": 247,
+"min": 180.0,
+"max": 400.0
+},
+"red pepper chilli jelly": {
+"unit": "g",
+"seen": 168,
+"min": 25.0,
+"max": 75.0
+},
+"water for the orzo": {
+"unit": "ml",
+"seen": 5,
+"min": 125.0,
+"max": 900.0
+},
+"sugar": {
+"unit": "tsp",
+"seen": 1845,
+"min": 0.5,
+"max": 2.3
+},
+"21 day aged british sirloin steak": {
+"unit": "",
+"seen": 112,
+"min": 2.0,
+"max": 4.0
+},
+"spaghetti": {
+"unit": "g",
+"seen": 229,
+"min": 180.0,
+"max": 400.0
+},
+"diced butternut squash": {
+"unit": "g",
+"seen": 48,
+"min": 300.0,
+"max": 600.0
+},
+"confit british duck leg": {
+"unit": "",
+"seen": 66,
+"min": 2.0,
+"max": 4.0
+},
+"chorizo": {
+"unit": "g",
+"seen": 113,
+"min": 60.0,
+"max": 180.0
+},
+"water for the bean": {
+"unit": "ml",
+"seen": 71,
+"min": 50.0,
+"max": 400.0
+},
+"saffron": {
+"unit": "sachet(s)",
+"seen": 18,
+"min": 0.75,
+"max": 2.0
+},
+"diced chicken thigh": {
+"unit": "g",
+"seen": 95,
+"min": 210.0,
+"max": 560.0
+},
+"pineapple ring": {
+"unit": "tin(s)",
+"seen": 38,
+"min": 0.5,
+"max": 2.0
+},
+"water for the lentil": {
+"unit": "ml",
+"seen": 63,
+"min": 75.0,
+"max": 800.0
+},
+"plain naan": {
+"unit": "",
+"seen": 316,
+"min": 2.0,
+"max": 4.0
+},
+"soured cream": {
+"unit": "g",
+"seen": 647,
+"min": 75.0,
+"max": 300.0
+},
+"caramelised onion sausage": {
+"unit": "",
+"seen": 20,
+"min": 4.0,
+"max": 8.0
+},
+"salad potatoe": {
+"unit": "g",
+"seen": 248,
+"min": 350.0,
+"max": 1050.0
+},
+"central american style spice mix": {
+"unit": "sachet(s)",
+"seen": 517,
+"min": 1.0,
+"max": 2.0
+},
+"jasmine rice": {
+"unit": "g",
+"seen": 776,
+"min": 150.0,
+"max": 300.0
+},
+"british chicken mini fillet": {
+"unit": "g",
+"seen": 27,
+"min": 270.0,
+"max": 1080.0
+},
+"truffle zest": {
+"unit": "sachet(s)",
+"seen": 163,
+"min": 1.0,
+"max": 2.0
+},
+"water for the dal": {
+"unit": "ml",
+"seen": 53,
+"min": 100.0,
+"max": 750.0
+},
+"cauliflower floret": {
+"unit": "g",
+"seen": 126,
+"min": 300.0,
+"max": 600.0
+},
+"diced british chicken thigh": {
+"unit": "g",
+"seen": 136,
+"min": 190.0,
+"max": 520.0
+},
+"reserved pasta water for the sauce": {
+"unit": "ml",
+"seen": 15,
+"min": 50.0,
+"max": 300.0
+},
+"cannellini bean": {
+"unit": "carton(s)",
+"seen": 35,
+"min": 1.0,
+"max": 2.0
+},
+"sun dried tomato paste": {
+"unit": "g",
+"seen": 583,
+"min": 25.0,
+"max": 75.0
+},
+"olive": {
+"unit": "g",
+"seen": 14,
+"min": 30.0,
+"max": 60.0
+},
+"water for the chicken": {
+"unit": "ml",
+"seen": 13,
+"min": 30.0,
+"max": 200.0
+},
+"sugar for the dressing": {
+"unit": "tsp",
+"seen": 812,
+"min": 0.5,
+"max": 2.0
+},
+"diced sweet potato": {
+"unit": "g",
+"seen": 42,
+"min": 200.0,
+"max": 600.0
+},
+"lamb strip": {
+"unit": "g",
+"seen": 6,
+"min": 200.0,
+"max": 480.0
+},
+"caribbean style jerk": {
+"unit": "sachet(s)",
+"seen": 86,
+"min": 1.0,
+"max": 4.0
+},
+"venison leg steak": {
+"unit": "",
+"seen": 28,
+"min": 2.0,
+"max": 4.0
+},
+"teriyaki sauce": {
+"unit": "g",
+"seen": 302,
+"min": 50.0,
+"max": 300.0
+},
+"lamb steak": {
+"unit": "",
+"seen": 70,
+"min": 2.0,
+"max": 4.0
+},
+"red wine stock paste": {
+"unit": "g",
+"seen": 651,
+"min": 28.0,
+"max": 56.0
+},
+"coley fillet": {
+"unit": "",
+"seen": 15,
+"min": 2.0,
+"max": 4.0
+},
+"peri peri seasoning": {
+"unit": "sachet(s)",
+"seen": 245,
+"min": 1.0,
+"max": 4.0
+},
+"chopped chinese leaf": {
+"unit": "g",
+"seen": 7,
+"min": 120.0,
+"max": 240.0
+},
+"venison mince": {
+"unit": "g",
+"seen": 8,
+"min": 200.0,
+"max": 600.0
+},
+"water for the risotto": {
+"unit": "ml",
+"seen": 28,
+"min": 75.0,
+"max": 1500.0
+},
+"british hickory smoked sausage": {
+"unit": "",
+"seen": 74,
+"min": 2.0,
+"max": 6.0
+},
+"sugar for the pickle": {
+"unit": "tsp",
+"seen": 358,
+"min": 0.5,
+"max": 2.0
+},
+"hake fillet": {
+"unit": "",
+"seen": 13,
+"min": 2.0,
+"max": 4.0
+},
+"borlotti bean": {
+"unit": "carton(s)",
+"seen": 13,
+"min": 1.0,
+"max": 2.0
+},
+"plum": {
+"unit": "",
+"seen": 53,
+"min": 1.0,
+"max": 4.0
+},
+"mangetout": {
+"unit": "g",
+"seen": 81,
+"min": 80.0,
+"max": 300.0
+},
+"reduced fat creme fraiche": {
+"unit": "g",
+"seen": 14,
+"min": 75.0,
+"max": 300.0
+},
+"oil for the chicken": {
+"unit": "tbsp",
+"seen": 13,
+"min": 0.5,
+"max": 4.0
+},
+"mango": {
+"unit": "",
+"seen": 32,
+"min": 0.5,
+"max": 2.0
+},
+"garlic and coriander naan": {
+"unit": "",
+"seen": 11,
+"min": 4.0,
+"max": 8.0
+},
+"medium tomato": {
+"unit": "",
+"seen": 616,
+"min": 1.0,
+"max": 4.0
+},
+"21 day aged british fillet steak": {
+"unit": "",
+"seen": 27,
+"min": 2.0,
+"max": 4.0
+},
+"crumbled blue cheese": {
+"unit": "g",
+"seen": 64,
+"min": 30.0,
+"max": 60.0
+},
+"lamb loin": {
+"unit": "",
+"seen": 10,
+"min": 2.0,
+"max": 4.0
+},
+"monkfish medallion": {
+"unit": "g",
+"seen": 30,
+"min": 200.0,
+"max": 400.0
+},
+"sugar for the carrot": {
+"unit": "tsp",
+"seen": 14,
+"min": 0.5,
+"max": 2.0
+},
+"water for the breadcrumb": {
+"unit": "tbsp",
+"seen": 357,
+"min": 1.0,
+"max": 4.0
+},
+"thai style spice mix": {
+"unit": "sachet(s)",
+"seen": 321,
+"min": 1.0,
+"max": 2.0
+},
+"british beef roasting joint": {
+"unit": "g",
+"seen": 16,
+"min": 400.0,
+"max": 900.0
+},
+"water for the ragu": {
+"unit": "ml",
+"seen": 29,
+"min": 50.0,
+"max": 300.0
+},
+"beef strip": {
+"unit": "g",
+"seen": 13,
+"min": 240.0,
+"max": 480.0
+},
+"beef stock paste": {
+"unit": "g",
+"seen": 256,
+"min": 10.0,
+"max": 20.0
+},
+"sliced mushroom": {
+"unit": "g",
+"seen": 962,
+"min": 80.0,
+"max": 360.0
+},
+"sugar for the sauce": {
+"unit": "tsp",
+"seen": 1414,
+"min": 0.5,
+"max": 2.0
+},
+"wild mushroom paste": {
+"unit": "g",
+"seen": 78,
+"min": 15.0,
+"max": 30.0
+},
+"shredded savoy cabbage": {
+"unit": "g",
+"seen": 115,
+"min": 150.0,
+"max": 300.0
+},
+"beef sizzler steak": {
+"unit": "",
+"seen": 9,
+"min": 4.0,
+"max": 8.0
+},
+"cooked pulled chicken": {
+"unit": "g",
+"seen": 10,
+"min": 200.0,
+"max": 480.0
+},
+"fresh tagliatelle": {
+"unit": "g",
+"seen": 82,
+"min": 200.0,
+"max": 500.0
+},
+"chopped kale": {
+"unit": "g",
+"seen": 80,
+"min": 100.0,
+"max": 200.0
+},
+"water for the cabbage": {
+"unit": "ml",
+"seen": 11,
+"min": 50.0,
+"max": 450.0
+},
+"whole british chicken": {
+"unit": "",
+"seen": 19,
+"min": 1.0,
+"max": 1.0
+},
+"greek style flatbread": {
+"unit": "",
+"seen": 65,
+"min": 2.0,
+"max": 8.0
+},
+"water for the ju": {
+"unit": "ml",
+"seen": 105,
+"min": 150.0,
+"max": 600.0
+},
+"miso paste": {
+"unit": "g",
+"seen": 153,
+"min": 15.0,
+"max": 45.0
+},
+"egg": {
+"unit": "",
+"seen": 315,
+"min": 1.0,
+"max": 4.0
+},
+"chocolate chip": {
+"unit": "g",
+"seen": 13,
+"min": 50.0,
+"max": 200.0
+},
+"cooked beetroot": {
+"unit": "g",
+"seen": 39,
+"min": 250.0,
+"max": 500.0
+},
+"sweet potato frie": {
+"unit": "g",
+"seen": 9,
+"min": 250.0,
+"max": 500.0
+},
+"mexican style spice mix": {
+"unit": "sachet(s)",
+"seen": 331,
+"min": 1.0,
+"max": 2.0
+},
+"brioche hot dog bun": {
+"unit": "",
+"seen": 88,
+"min": 2.0,
+"max": 4.0
+},
+"glazed burger bun": {
+"unit": "",
+"seen": 64,
+"min": 2.0,
+"max": 4.0
+},
+"salt": {
+"unit": "tsp",
+"seen": 69,
+"min": 0.25,
+"max": 1.25
+},
+"water for the mayo": {
+"unit": "tbsp",
+"seen": 34,
+"min": 0.5,
+"max": 2.0
+},
+"salt for the burger": {
+"unit": "tsp",
+"seen": 20,
+"min": 0.25,
+"max": 0.5
+},
+"chopped cavolo nero": {
+"unit": "g",
+"seen": 99,
+"min": 100.0,
+"max": 200.0
+},
+"pomegranate": {
+"unit": "",
+"seen": 26,
+"min": 0.5,
+"max": 2.0
+},
+"diced chicken breast": {
+"unit": "g",
+"seen": 39,
+"min": 260.0,
+"max": 560.0
+},
+"radishe": {
+"unit": "g",
+"seen": 101,
+"min": 75.0,
+"max": 200.0
+},
+"worcester sauce": {
+"unit": "g",
+"seen": 203,
+"min": 15.0,
+"max": 30.0
+},
+"kiwi": {
+"unit": "",
+"seen": 55,
+"min": 1.0,
+"max": 2.0
+},
+"korma curry paste": {
+"unit": "g",
+"seen": 272,
+"min": 50.0,
+"max": 100.0
+},
+"bulgogi sauce": {
+"unit": "g",
+"seen": 139,
+"min": 75.0,
+"max": 300.0
+},
+"yellow thai style paste": {
+"unit": "g",
+"seen": 118,
+"min": 45.0,
+"max": 90.0
+},
+"paneer": {
+"unit": "g",
+"seen": 44,
+"min": 225.0,
+"max": 678.0
+},
+"pak choi": {
+"unit": "",
+"seen": 306,
+"min": 1.0,
+"max": 3.0
+},
+"samphire": {
+"unit": "g",
+"seen": 25,
+"min": 40.0,
+"max": 80.0
+},
+"water for the glaze": {
+"unit": "ml",
+"seen": 29,
+"min": 20.0,
+"max": 200.0
+},
+"fresh pesto": {
+"unit": "g",
+"seen": 139,
+"min": 32.0,
+"max": 100.0
+},
+"red leicester": {
+"unit": "g",
+"seen": 55,
+"min": 30.0,
+"max": 180.0
+},
+"plain taco tortilla": {
+"unit": "",
+"seen": 470,
+"min": 4.0,
+"max": 12.0
+},
+"monterey jack cheese": {
+"unit": "g",
+"seen": 14,
+"min": 30.0,
+"max": 120.0
+},
+"risotto rice": {
+"unit": "g",
+"seen": 252,
+"min": 175.0,
+"max": 350.0
+},
+"olive oil for the marinade": {
+"unit": "tbsp",
+"seen": 124,
+"min": 1.0,
+"max": 4.0
+},
+"indonesian style spice mix": {
+"unit": "sachet(s)",
+"seen": 276,
+"min": 1.0,
+"max": 4.0
+},
+"cracked black pepper": {
+"unit": "sachet(s)",
+"seen": 67,
+"min": 1.0,
+"max": 4.0
+},
+"white cumin seed": {
+"unit": "sachet(s)",
+"seen": 89,
+"min": 1.0,
+"max": 2.0
+},
+"sri lankan style curry powder": {
+"unit": "sachet(s)",
+"seen": 26,
+"min": 1.0,
+"max": 4.0
+},
+"water for the pork": {
+"unit": "ml",
+"seen": 23,
+"min": 25.0,
+"max": 200.0
+},
+"oil for the roux": {
+"unit": "tbsp",
+"seen": 7,
+"min": 1.0,
+"max": 3.0
+},
+"olive oil for the garlic bread": {
+"unit": "tbsp",
+"seen": 154,
+"min": 1.0,
+"max": 4.0
+},
+"reserved potato water": {
+"unit": "ml",
+"seen": 49,
+"min": 75.0,
+"max": 200.0
+},
+"oil for the breadcrumb": {
+"unit": "tbsp",
+"seen": 36,
+"min": 0.75,
+"max": 4.0
+},
+"dried rosemary": {
+"unit": "sachet(s)",
+"seen": 233,
+"min": 1.0,
+"max": 3.0
+},
+"macaroni": {
+"unit": "g",
+"seen": 118,
+"min": 180.0,
+"max": 360.0
+},
+"olive oil for the drizzle": {
+"unit": "tbsp",
+"seen": 30,
+"min": 1.0,
+"max": 4.0
+},
+"salt for the meatball": {
+"unit": "tsp",
+"seen": 10,
+"min": 0.25,
+"max": 0.5
+},
+"tikka masala paste": {
+"unit": "g",
+"seen": 103,
+"min": 75.0,
+"max": 150.0
+},
+"sugar for the onion": {
+"unit": "tsp",
+"seen": 136,
+"min": 0.5,
+"max": 2.0
+},
+"water for the carrot": {
+"unit": "ml",
+"seen": 6,
+"min": 50.0,
+"max": 150.0
+},
+"greek style salad cheese": {
+"unit": "g",
+"seen": 733,
+"min": 50.0,
+"max": 200.0
+},
+"rogan josh curry paste": {
+"unit": "g",
+"seen": 78,
+"min": 50.0,
+"max": 100.0
+},
+"sambal paste": {
+"unit": "g",
+"seen": 312,
+"min": 15.0,
+"max": 45.0
+},
+"toasted flaked almond": {
+"unit": "g",
+"seen": 286,
+"min": 15.0,
+"max": 37.5
+},
+"pecan nut halve": {
+"unit": "g",
+"seen": 22,
+"min": 20.0,
+"max": 50.0
+},
+"diced british chicken breast": {
+"unit": "g",
+"seen": 1248,
+"min": 240.0,
+"max": 960.0
+},
+"creamed coconut": {
+"unit": "g",
+"seen": 11,
+"min": 50.0,
+"max": 100.0
+},
+"burger sauce": {
+"unit": "g",
+"seen": 144,
+"min": 30.0,
+"max": 120.0
+},
+"ginger garlic and lemongra puree": {
+"unit": "g",
+"seen": 176,
+"min": 15.0,
+"max": 44.0
+},
+"fig jam": {
+"unit": "g",
+"seen": 44,
+"min": 40.0,
+"max": 160.0
+},
+"water for the veg": {
+"unit": "ml",
+"seen": 11,
+"min": 50.0,
+"max": 200.0
+},
+"water for the laksa": {
+"unit": "ml",
+"seen": 6,
+"min": 150.0,
+"max": 600.0
+},
+"parmigiano reggiano": {
+"unit": "g",
+"seen": 123,
+"min": 20.0,
+"max": 80.0
+},
+"salt for the breadcrumb": {
+"unit": "tsp",
+"seen": 254,
+"min": 0.25,
+"max": 1.0
+},
+"boiled water for the stock": {
+"unit": "ml",
+"seen": 46,
+"min": 0.0,
+"max": 1600.0
+},
+"roasted spice and herb blend": {
+"unit": "sachet(s)",
+"seen": 249,
+"min": 1.0,
+"max": 2.0
+},
+"zhoug style paste": {
+"unit": "g",
+"seen": 52,
+"min": 45.0,
+"max": 100.0
+},
+"roasted white sesame seed": {
+"unit": "g",
+"seen": 536,
+"min": 5.0,
+"max": 14.0
+},
+"mixed herb": {
+"unit": "sachet(s)",
+"seen": 643,
+"min": 1.0,
+"max": 2.0
+},
+"tandoori masala mix": {
+"unit": "sachet(s)",
+"seen": 88,
+"min": 1.0,
+"max": 4.0
+},
+"sugar for the marinade": {
+"unit": "tsp",
+"seen": 6,
+"min": 0.5,
+"max": 2.0
+},
+"boiled water for the couscou": {
+"unit": "ml",
+"seen": 97,
+"min": 200.0,
+"max": 480.0
+},
+"olive oil for the sauce": {
+"unit": "tbsp",
+"seen": 17,
+"min": 1.0,
+"max": 6.0
+},
+"butter for the sauce": {
+"unit": "g",
+"seen": 39,
+"min": 10.0,
+"max": 60.0
+},
+"boiled water for the risotto": {
+"unit": "ml",
+"seen": 114,
+"min": 500.0,
+"max": 1500.0
+},
+"sugar for the salsa": {
+"unit": "tsp",
+"seen": 85,
+"min": 0.5,
+"max": 2.0
+},
+"baby cucumber": {
+"unit": "",
+"seen": 360,
+"min": 1.0,
+"max": 2.0
+},
+"boiled water for the bulgur": {
+"unit": "ml",
+"seen": 27,
+"min": 220.0,
+"max": 480.0
+},
+"lemon and herb seasoning": {
+"unit": "sachet(s)",
+"seen": 79,
+"min": 1.0,
+"max": 3.0
+},
+"boiled water for the sauce": {
+"unit": "ml",
+"seen": 44,
+"min": 75.0,
+"max": 400.0
+},
+"oil for cooking": {
+"unit": "tbsp",
+"seen": 92,
+"min": 0.5,
+"max": 4.0
+},
+"british beef and pork mince": {
+"unit": "g",
+"seen": 100,
+"min": 240.0,
+"max": 960.0
+},
+"chicken broth paste": {
+"unit": "g",
+"seen": 10,
+"min": 15.0,
+"max": 30.0
+},
+"boiled water for the soup": {
+"unit": "ml",
+"seen": 6,
+"min": 450.0,
+"max": 1000.0
+},
+"plain flour for the gravy": {
+"unit": "tbsp",
+"seen": 7,
+"min": 0.5,
+"max": 3.0
+},
+"cashew butter": {
+"unit": "g",
+"seen": 16,
+"min": 30.0,
+"max": 60.0
+},
+"sugar for pickling": {
+"unit": "tsp",
+"seen": 53,
+"min": 0.5,
+"max": 2.0
+},
+"boiled water for the dressing": {
+"unit": "tbsp",
+"seen": 10,
+"min": 1.0,
+"max": 4.0
+},
+"mushroom broth paste": {
+"unit": "g",
+"seen": 7,
+"min": 15.0,
+"max": 30.0
+},
+"basa fillet": {
+"unit": "",
+"seen": 112,
+"min": 2.0,
+"max": 8.0
+},
+"gochujang paste": {
+"unit": "g",
+"seen": 217,
+"min": 30.0,
+"max": 100.0
+},
+"thai green style paste": {
+"unit": "g",
+"seen": 57,
+"min": 45.0,
+"max": 90.0
+},
+"unconventional plant based burger": {
+"unit": "",
+"seen": 61,
+"min": 2.0,
+"max": 6.0
+},
+"ranch dressing": {
+"unit": "g",
+"seen": 38,
+"min": 30.0,
+"max": 120.0
+},
+"boiled water for the rice": {
+"unit": "ml",
+"seen": 24,
+"min": 300.0,
+"max": 1400.0
+},
+"water for the soup": {
+"unit": "ml",
+"seen": 116,
+"min": 100.0,
+"max": 700.0
+},
+"slow cooked british pork": {
+"unit": "g",
+"seen": 29,
+"min": 425.0,
+"max": 850.0
+},
+"marinara sauce": {
+"unit": "g",
+"seen": 26,
+"min": 120.0,
+"max": 240.0
+},
+"slow cooked beef": {
+"unit": "g",
+"seen": 38,
+"min": 280.0,
+"max": 560.0
+},
+"young pea pod": {
+"unit": "g",
+"seen": 366,
+"min": 80.0,
+"max": 240.0
+},
+"sliced burger bun": {
+"unit": "",
+"seen": 12,
+"min": 2.0,
+"max": 4.0
+},
+"indian snack selection": {
+"unit": "pack(s)",
+"seen": 5,
+"min": 1.0,
+"max": 2.0
+},
+"hot sauce": {
+"unit": "g",
+"seen": 158,
+"min": 30.0,
+"max": 100.0
+},
+"chicken gyoza": {
+"unit": "pack(s)",
+"seen": 11,
+"min": 1.0,
+"max": 2.0
+},
+"houmou": {
+"unit": "g",
+"seen": 32,
+"min": 100.0,
+"max": 200.0
+},
+"sliced carrot and cabbage mix": {
+"unit": "g",
+"seen": 185,
+"min": 120.0,
+"max": 240.0
+},
+"chettinad style paste": {
+"unit": "g",
+"seen": 18,
+"min": 25.0,
+"max": 50.0
+},
+"pitta bread": {
+"unit": "",
+"seen": 16,
+"min": 4.0,
+"max": 8.0
+},
+"ditali pasta": {
+"unit": "g",
+"seen": 48,
+"min": 90.0,
+"max": 260.0
+},
+"gunpowder spice mix": {
+"unit": "sachet(s)",
+"seen": 7,
+"min": 1.0,
+"max": 2.0
+},
+"intensetm tomato": {
+"unit": "",
+"seen": 215,
+"min": 1.0,
+"max": 4.0
+},
+"lahori style spice mix": {
+"unit": "sachet(s)",
+"seen": 9,
+"min": 1.0,
+"max": 2.0
+},
+"green chutney": {
+"unit": "g",
+"seen": 8,
+"min": 30.0,
+"max": 60.0
+},
+"yoghurt sauce": {
+"unit": "g",
+"seen": 30,
+"min": 30.0,
+"max": 60.0
+},
+"haddock fillet": {
+"unit": "",
+"seen": 21,
+"min": 2.0,
+"max": 8.0
+},
+"mediterranean style seasoning": {
+"unit": "sachet(s)",
+"seen": 109,
+"min": 1.0,
+"max": 2.0
+},
+"west african style seasoning": {
+"unit": "sachet(s)",
+"seen": 11,
+"min": 1.0,
+"max": 2.0
+},
+"pre cut red cabbage": {
+"unit": "g",
+"seen": 22,
+"min": 120.0,
+"max": 240.0
+},
+"aioli": {
+"unit": "g",
+"seen": 94,
+"min": 50.0,
+"max": 100.0
+},
+"tamarind chutney": {
+"unit": "g",
+"seen": 46,
+"min": 40.0,
+"max": 80.0
+},
+"salted barramundi": {
+"unit": "",
+"seen": 20,
+"min": 2.0,
+"max": 8.0
+},
+"basil pesto with cashew nut": {
+"unit": "g",
+"seen": 215,
+"min": 30.0,
+"max": 90.0
+},
+"blanched broad bean": {
+"unit": "g",
+"seen": 8,
+"min": 80.0,
+"max": 240.0
+},
+"garlic baguette": {
+"unit": "",
+"seen": 13,
+"min": 1.0,
+"max": 2.0
+},
+"large king prawn": {
+"unit": "g",
+"seen": 27,
+"min": 250.0,
+"max": 500.0
+},
+"savoury seasoning": {
+"unit": "sachet(s)",
+"seen": 37,
+"min": 1.0,
+"max": 2.0
+},
+"demi garlic baguette": {
+"unit": "",
+"seen": 44,
+"min": 2.0,
+"max": 4.0
+},
+"pearl couscou": {
+"unit": "g",
+"seen": 46,
+"min": 150.0,
+"max": 300.0
+},
+"amarillo chilli paste": {
+"unit": "g",
+"seen": 20,
+"min": 40.0,
+"max": 80.0
+},
+"passion fruit": {
+"unit": "",
+"seen": 13,
+"min": 1.0,
+"max": 2.0
+},
+"brazilian style spice mix": {
+"unit": "sachet(s)",
+"seen": 51,
+"min": 1.0,
+"max": 2.0
+},
+"mussel": {
+"unit": "g",
+"seen": 14,
+"min": 500.0,
+"max": 2000.0
+},
+"orkney crab meat": {
+"unit": "g",
+"seen": 17,
+"min": 100.0,
+"max": 200.0
+},
+"mushroom": {
+"unit": "g",
+"seen": 41,
+"min": 125.0,
+"max": 500.0
+},
+"char siu paste": {
+"unit": "g",
+"seen": 38,
+"min": 75.0,
+"max": 250.0
+},
+"vegan mince": {
+"unit": "g",
+"seen": 38,
+"min": 150.0,
+"max": 600.0
+},
+"white wine stock powder": {
+"unit": "sachet(s)",
+"seen": 82,
+"min": 1.0,
+"max": 2.0
+},
+"caramelised onion paste": {
+"unit": "g",
+"seen": 69,
+"min": 35.0,
+"max": 70.0
+},
+"vegetable spring roll": {
+"unit": "",
+"seen": 14,
+"min": 4.0,
+"max": 12.0
+},
+"water for the spring green": {
+"unit": "tbsp",
+"seen": 5,
+"min": 1.0,
+"max": 2.0
+},
+"south carolina style bbq sauce": {
+"unit": "g",
+"seen": 8,
+"min": 40.0,
+"max": 80.0
+},
+"water for the meatball": {
+"unit": "tbsp",
+"seen": 15,
+"min": 2.0,
+"max": 4.5
+},
+"ready to eat falafel": {
+"unit": "g",
+"seen": 27,
+"min": 171.0,
+"max": 684.0
+},
+"pineapple chutney": {
+"unit": "g",
+"seen": 37,
+"min": 40.0,
+"max": 80.0
+},
+"pomegranate molasse": {
+"unit": "g",
+"seen": 10,
+"min": 15.0,
+"max": 45.0
+},
+"falafel": {
+"unit": "g",
+"seen": 16,
+"min": 160.0,
+"max": 320.0
+},
+"fresh edamame bean": {
+"unit": "g",
+"seen": 50,
+"min": 80.0,
+"max": 160.0
+},
+"white shimeji": {
+"unit": "g",
+"seen": 7,
+"min": 125.0,
+"max": 250.0
+},
+"vegan xo sauce": {
+"unit": "g",
+"seen": 17,
+"min": 50.0,
+"max": 100.0
+},
+"katsu paste": {
+"unit": "g",
+"seen": 8,
+"min": 65.0,
+"max": 130.0
+},
+"black garlic paste": {
+"unit": "g",
+"seen": 18,
+"min": 20.0,
+"max": 40.0
+},
+"dried mint": {
+"unit": "sachet(s)",
+"seen": 28,
+"min": 1.0,
+"max": 2.0
+},
+"salted pistachio": {
+"unit": "g",
+"seen": 17,
+"min": 25.0,
+"max": 50.0
+},
+"kumato tomato": {
+"unit": "",
+"seen": 12,
+"min": 2.0,
+"max": 4.0
+},
+"butter for the roux": {
+"unit": "g",
+"seen": 16,
+"min": 15.0,
+"max": 40.0
+},
+"jersey royal potatoe": {
+"unit": "g",
+"seen": 12,
+"min": 400.0,
+"max": 800.0
+},
+"slooow stone oven white baguette": {
+"unit": "",
+"seen": 15,
+"min": 1.0,
+"max": 3.0
+},
+"skipjack tuna in water": {
+"unit": "tin(s)",
+"seen": 22,
+"min": 1.0,
+"max": 2.0
+},
+"hot water": {
+"unit": "tbsp",
+"seen": 9,
+"min": 1.0,
+"max": 4.0
+},
+"apricot jam": {
+"unit": "g",
+"seen": 15,
+"min": 27.0,
+"max": 108.0
+},
+"plant based soy protein chicken piece": {
+"unit": "g",
+"seen": 8,
+"min": 160.0,
+"max": 320.0
+},
+"water for the cornflour": {
+"unit": "tbsp",
+"seen": 11,
+"min": 1.0,
+"max": 6.0
+},
+"west african style paste": {
+"unit": "g",
+"seen": 27,
+"min": 50.0,
+"max": 100.0
+},
+"boiled water": {
+"unit": "ml",
+"seen": 28,
+"min": 125.0,
+"max": 1000.0
+},
+"jerk paste": {
+"unit": "g",
+"seen": 46,
+"min": 50.0,
+"max": 100.0
+},
+"egg for binding": {
+"unit": "",
+"seen": 8,
+"min": 1.0,
+"max": 2.0
+},
+"asian broth paste": {
+"unit": "g",
+"seen": 5,
+"min": 25.0,
+"max": 50.0
+},
+"spinach and ricotta ravioli": {
+"unit": "g",
+"seen": 42,
+"min": 250.0,
+"max": 500.0
+},
+"salt for the tofu": {
+"unit": "tsp",
+"seen": 10,
+"min": 0.25,
+"max": 1.0
+},
+"slow cooked british chicken": {
+"unit": "g",
+"seen": 15,
+"min": 290.0,
+"max": 580.0
+},
+"mccain home chip": {
+"unit": "g",
+"seen": 19,
+"min": 400.0,
+"max": 800.0
+},
+"thistm isn t pork sausage": {
+"unit": "",
+"seen": 15,
+"min": 6.0,
+"max": 12.0
+},
+"water for the dauphinoise": {
+"unit": "ml",
+"seen": 9,
+"min": 50.0,
+"max": 200.0
+},
+"parma ham and parmigiano reggiano filled pasta": {
+"unit": "g",
+"seen": 44,
+"min": 250.0,
+"max": 500.0
+},
+"riced cauliflower": {
+"unit": "g",
+"seen": 11,
+"min": 250.0,
+"max": 500.0
+},
+"guinne paste": {
+"unit": "g",
+"seen": 27,
+"min": 40.0,
+"max": 80.0
+},
+"thistm isn t chicken plant based piece": {
+"unit": "g",
+"seen": 5,
+"min": 170.0,
+"max": 340.0
+},
+"rice noodle": {
+"unit": "g",
+"seen": 13,
+"min": 220.0,
+"max": 440.0
+},
+"oyster sauce": {
+"unit": "g",
+"seen": 14,
+"min": 50.0,
+"max": 200.0
+},
+"cured ham tortelloni": {
+"unit": "g",
+"seen": 26,
+"min": 300.0,
+"max": 600.0
+},
+"kashmiri style spice mix": {
+"unit": "sachet(s)",
+"seen": 15,
+"min": 1.0,
+"max": 2.0
+},
+"romanesco": {
+"unit": "",
+"seen": 10,
+"min": 1.0,
+"max": 2.0
+},
+"spinach and ricotta tortelloni": {
+"unit": "g",
+"seen": 31,
+"min": 300.0,
+"max": 600.0
+},
+"instant gravy powder": {
+"unit": "g",
+"seen": 9,
+"min": 20.0,
+"max": 40.0
+},
+"soffritto mix": {
+"unit": "g",
+"seen": 7,
+"min": 160.0,
+"max": 320.0
+},
+"white cabbage and broccoli slaw": {
+"unit": "g",
+"seen": 7,
+"min": 120.0,
+"max": 240.0
+},
+"pumpkin and sage girasoli": {
+"unit": "g",
+"seen": 9,
+"min": 300.0,
+"max": 600.0
+},
+"goan style curry paste": {
+"unit": "g",
+"seen": 11,
+"min": 40.0,
+"max": 80.0
+},
+"cantonese style stir fry sauce": {
+"unit": "g",
+"seen": 6,
+"min": 120.0,
+"max": 240.0
+},
+"cooked spelt": {
+"unit": "g",
+"seen": 6,
+"min": 140.0,
+"max": 280.0
+},
+"breaded fish burger": {
+"unit": "",
+"seen": 6,
+"min": 2.0,
+"max": 8.0
+},
+"pecorino vegetariano": {
+"unit": "g",
+"seen": 13,
+"min": 20.0,
+"max": 60.0
+},
+"sou vide seasoned chicken wing": {
+"unit": "g",
+"seen": 6,
+"min": 400.0,
+"max": 1200.0
+},
+"nduja and red pepper ravioli": {
+"unit": "g",
+"seen": 7,
+"min": 300.0,
+"max": 600.0
+},
+"boiled water for the orzo": {
+"unit": "ml",
+"seen": 6,
+"min": 400.0,
+"max": 1000.0
+},
+"fable slow braised mushroom": {
+"unit": "pack(s)",
+"seen": 6,
+"min": 1.0,
+"max": 2.0
+},
+"yellow courgette": {
+"unit": "",
+"seen": 10,
+"min": 1.0,
+"max": 4.0
+},
+"stringle runner bean": {
+"unit": "g",
+"seen": 10,
+"min": 80.0,
+"max": 160.0
+},
+"tabasco original red sauce": {
+"unit": "ml",
+"seen": 9,
+"min": 6.0,
+"max": 12.0
+}
+}

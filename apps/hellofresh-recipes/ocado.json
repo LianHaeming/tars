@@ -1,0 +1,1008 @@
+{
+ "Garlic Clove": {
+  "n": "Ocado Garlic 4 per pack",
+  "pr": 0.88,
+  "url": "https://www.ocado.com/search?q=Ocado%20Garlic",
+  "ea": 40
+ },
+ "Sugar": {
+  "n": "Ocado Granulated White Sugar 1kg",
+  "pr": 1.2,
+  "url": "https://www.ocado.com/search?q=Ocado%20Granulated%20White%20Sugar",
+  "g": 1000.0
+ },
+ "Creme Fraiche": {
+  "n": "M&S Creme Fraiche 300g",
+  "pr": 1.1,
+  "url": "https://www.ocado.com/search?q=M%26S%20Creme%20Fraiche",
+  "g": 300.0
+ },
+ "Chicken Stock Paste": {
+  "n": "Knorr 8 Chicken Stock Pot 8 x 28g",
+  "pr": 3.25,
+  "url": "https://www.ocado.com/search?q=Knorr%208%20Chicken%20Stock%20Pot",
+  "swap": "swap",
+  "note": "HelloFresh stock paste sachets → Knorr stock pots (1 pot ≈ 1 sachet); Bay's Kitchen concentrated stock is also stocked",
+  "ea": 8,
+  "g": 224.0,
+  "perDish": 1
+ },
+ "Lime": {
+  "n": "Ocado Limes 5 per pack",
+  "pr": 1.2,
+  "url": "https://www.ocado.com/search?q=Ocado%20Limes",
+  "ea": 5
+ },
+ "Baby Spinach": {
+  "n": "Ocado Washed Baby Spinach 220g",
+  "pr": 1.5,
+  "url": "https://www.ocado.com/search?q=Ocado%20Washed%20Baby%20Spinach",
+  "g": 220.0
+ },
+ "Grated Hard Italian Style Cheese": {
+  "n": "Ocado Grated Parmigiano Reggiano 100g",
+  "pr": 2.8,
+  "url": "https://www.ocado.com/search?q=Ocado%20Grated%20Parmigiano%20Reggiano",
+  "g": 100.0
+ },
+ "Soy Sauce": {
+  "n": "Lee Kum Kee Premium Light Soy Sauce 250ml",
+  "pr": 2.1,
+  "url": "https://www.ocado.com/search?q=Lee%20Kum%20Kee%20Premium%20Light%20Soy%20Sauce",
+  "g": 250.0
+ },
+ "Butter": {
+  "n": "Ocado British Salted Butter 250g",
+  "pr": 1.85,
+  "url": "https://www.ocado.com/search?q=Ocado%20British%20Salted%20Butter",
+  "g": 250.0
+ },
+ "Honey": {
+  "n": "Rowse Blossom Pure & Natural Squeezable Honey 340g",
+  "pr": 2,
+  "url": "https://www.ocado.com/search?q=Rowse%20Blossom%20Pure%20%26%20Natural%20Squeezable%20Honey",
+  "g": 340.0
+ },
+ "Sliced Mushrooms": {
+  "n": "Ocado Sliced Mushrooms 250g",
+  "pr": 1.35,
+  "url": "https://www.ocado.com/search?q=Ocado%20Sliced%20Mushrooms",
+  "g": 250.0
+ },
+ "Diced British Chicken Breast": {
+  "n": "Ocado British Chicken Breast Fillets 650g",
+  "pr": 4.9,
+  "url": "https://www.ocado.com/search?q=Ocado%20British%20Chicken%20Breast%20Fillets",
+  "g": 650.0
+ },
+ "Green Beans": {
+  "n": "Ocado Green Beans 220g",
+  "pr": 0.85,
+  "url": "https://www.ocado.com/search?q=Ocado%20Green%20Beans",
+  "g": 220.0
+ },
+ "Ketjap Manis": {
+  "n": "M&S Ketjap Manis Soy Sauce 150ml",
+  "pr": 1.5,
+  "url": "https://www.ocado.com/search?q=M%26S%20Ketjap%20Manis%20Soy%20Sauce",
+  "g": 150.0
+ },
+ "Egg Noodle Nest": {
+  "n": "M&S Medium Egg Noodles 250g",
+  "pr": 1.25,
+  "url": "https://www.ocado.com/search?q=M%26S%20Medium%20Egg%20Noodles",
+  "g": 250.0
+ },
+ "Coconut Milk": {
+  "n": "Pride Coconut Milk 400ml",
+  "pr": 1,
+  "url": "https://www.ocado.com/search?q=Pride%20Coconut%20Milk",
+  "g": 400.0
+ },
+ "British Beef Mince": {
+  "n": "Ocado Lean Beef Steak Mince 5% Fat 500g",
+  "pr": 5.05,
+  "url": "https://www.ocado.com/search?q=Ocado%20Lean%20Beef%20Steak%20Mince%205%25%20Fat",
+  "g": 500.0
+ },
+ "Basmati Rice": {
+  "n": "Ocado Basmati Rice 1kg",
+  "pr": 1.8,
+  "url": "https://www.ocado.com/search?q=Ocado%20Basmati%20Rice",
+  "g": 1000.0
+ },
+ "Jasmine Rice": {
+  "n": "Ocado Fragrant Jasmine Rice 1kg",
+  "pr": 3.95,
+  "url": "https://www.ocado.com/search?q=Ocado%20Fragrant%20Jasmine%20Rice",
+  "g": 1000.0
+ },
+ "Tenderstem Broccoli": {
+  "n": "Ocado British Tenderstem Broccoli 300g",
+  "pr": 2.4,
+  "url": "https://www.ocado.com/search?q=Ocado%20British%20Tenderstem%20Broccoli",
+  "g": 300.0
+ },
+ "Rigatoni Pasta": {
+  "n": "Napolina Rigatoni Pasta 500g",
+  "pr": 1.5,
+  "url": "https://www.ocado.com/search?q=Napolina%20Rigatoni%20Pasta",
+  "g": 500.0
+ },
+ "Tomato Puree": {
+  "n": "Ocado Italian Tomato Puree Double Concentrated 200g",
+  "pr": 0.65,
+  "url": "https://www.ocado.com/search?q=Ocado%20Italian%20Tomato%20Puree%20Double%20Concentrated",
+  "g": 200.0
+ },
+ "British Pork Mince": {
+  "n": "Ocado British Pork Mince 12% Fat 500g",
+  "pr": 2.7,
+  "url": "https://www.ocado.com/search?q=Ocado%20British%20Pork%20Mince%2012%25%20Fat",
+  "g": 500.0
+ },
+ "Vegetable Stock Paste": {
+  "n": "Knorr 4 Vegetable Stock Pot 4 x 28g",
+  "pr": 2,
+  "url": "https://www.ocado.com/search?q=Knorr%204%20Vegetable%20Stock%20Pot",
+  "swap": "swap",
+  "note": "stock paste sachets → veg stock pots",
+  "ea": 4,
+  "g": 112.0,
+  "perDish": 1
+ },
+ "Bell Pepper": {
+  "n": "Ocado Mixed Peppers 3 per pack",
+  "pr": 2.1,
+  "url": "https://www.ocado.com/search?q=Ocado%20Mixed%20Peppers",
+  "ea": 3
+ },
+ "Roasted White Sesame Seeds": {
+  "n": "Ocado Sesame Seeds 100g",
+  "pr": 1.2,
+  "url": "https://www.ocado.com/search?q=Ocado%20Sesame%20Seeds",
+  "g": 100.0
+ },
+ "Carrot": {
+  "n": "Ocado British Carrots 1kg",
+  "pr": 0.69,
+  "url": "https://www.ocado.com/search?q=Ocado%20British%20Carrots",
+  "ea": 8,
+  "g": 1000.0
+ },
+ "Tomato Passata": {
+  "n": "Ocado Italian Passata 680g",
+  "pr": 0.8,
+  "url": "https://www.ocado.com/search?q=Ocado%20Italian%20Passata",
+  "g": 680.0
+ },
+ "Tomato Ketchup": {
+  "n": "Heinz Tomato Ketchup Zero Added Sugar & Salt 425g",
+  "pr": 2.5,
+  "url": "https://www.ocado.com/search?q=Heinz%20Tomato%20Ketchup%20Zero%20Added%20Sugar%20%26%20Salt",
+  "g": 425.0
+ },
+ "Thai Style Spice Mix": {
+  "n": "M&S Thai Red Curry Paste 190g",
+  "pr": 2.5,
+  "url": "https://www.ocado.com/search?q=M%26S%20Thai%20Red%20Curry%20Paste",
+  "swap": "swap",
+  "note": "HF blend, not sold → a spoon of Thai red curry paste",
+  "g": 190.0
+ },
+ "King Prawns": {
+  "n": "Ocado ASC Raw King Prawns 165g",
+  "pr": 3.5,
+  "url": "https://www.ocado.com/search?q=Ocado%20ASC%20Raw%20King%20Prawns",
+  "g": 165.0
+ },
+ "Green Pepper": {
+  "n": "M&S Green Peppers 2 per pack",
+  "pr": 1.55,
+  "url": "https://www.ocado.com/search?q=M%26S%20Green%20Peppers",
+  "ea": 2
+ },
+ "Potatoes": {
+  "n": "Ocado British White Potatoes 1kg",
+  "pr": 0.85,
+  "url": "https://www.ocado.com/search?q=Ocado%20British%20White%20Potatoes",
+  "g": 1000.0
+ },
+ "Cajun Spice Mix": {
+  "n": "M&S Cajun Seasoning 65g",
+  "pr": 2,
+  "url": "https://www.ocado.com/search?q=M%26S%20Cajun%20Seasoning",
+  "g": 65.0
+ },
+ "Spring Onion": {
+  "n": "M&S Spring Onions",
+  "pr": 0.7,
+  "url": "https://www.ocado.com/search?q=M%26S%20Spring%20Onions",
+  "ea": 2
+ },
+ "Gochujang Paste": {
+  "n": "Sun Hee Gochujang Chilli Paste 170g",
+  "pr": 2.2,
+  "url": "https://www.ocado.com/search?q=Sun%20Hee%20Gochujang%20Chilli%20Paste",
+  "g": 170.0
+ },
+ "Peas": {
+  "n": "Ocado Frozen Garden Peas 910g",
+  "pr": 1.55,
+  "url": "https://www.ocado.com/search?q=Ocado%20Frozen%20Garden%20Peas",
+  "g": 910.0
+ },
+ "Yellow Thai Style Paste": {
+  "n": "Bart Yellow Thai Curry Paste 90g",
+  "pr": 2.5,
+  "url": "https://www.ocado.com/search?q=Bart%20Yellow%20Thai%20Curry%20Paste",
+  "g": 90.0
+ },
+ "Teriyaki Sauce": {
+  "n": "Lee Kum Kee Teriyaki Sauce 200g",
+  "pr": 2.3,
+  "url": "https://www.ocado.com/search?q=Lee%20Kum%20Kee%20Teriyaki%20Sauce",
+  "g": 200.0
+ },
+ "Ginger Puree": {
+  "n": "Laila Ginger Paste 300g",
+  "pr": 1.4,
+  "url": "https://www.ocado.com/search?q=Laila%20Ginger%20Paste",
+  "g": 300.0
+ },
+ "Udon Noodles": {
+  "n": "Amoy Straight To Wok Udon Thick Noodles 2 x 150g",
+  "pr": 1.5,
+  "url": "https://www.ocado.com/search?q=Amoy%20Straight%20To%20Wok%20Udon%20Thick%20Noodles",
+  "ea": 2,
+  "g": 300.0
+ },
+ "Mixed Herbs": {
+  "n": "Ocado Dried Mixed Herbs 14g",
+  "pr": 1.1,
+  "url": "https://www.ocado.com/search?q=Ocado%20Dried%20Mixed%20Herbs",
+  "g": 14.0
+ },
+ "Mature Cheddar Cheese": {
+  "n": "Cathedral City Mature Cheddar Cheese 550g",
+  "pr": 4,
+  "url": "https://www.ocado.com/search?q=Cathedral%20City%20Mature%20Cheddar%20Cheese",
+  "g": 550.0
+ },
+ "Red Wine Jus Paste": {
+  "n": "M&S Red Wine Flavour Pots 4 x 24g",
+  "pr": 1.7,
+  "url": "https://www.ocado.com/search?q=M%26S%20Red%20Wine%20Flavour%20Pots",
+  "swap": "swap",
+  "note": "HF jus paste → red wine stock pot",
+  "ea": 4,
+  "g": 96.0,
+  "perDish": 1
+ },
+ "Rice Vinegar": {
+  "n": "Saitaku Japanese Rice Vinegar 150ml",
+  "pr": 1.7,
+  "url": "https://www.ocado.com/search?q=Saitaku%20Japanese%20Rice%20Vinegar",
+  "g": 150.0
+ },
+ "Peanut Butter": {
+  "n": "Pip & Nut Smooth Peanut Butter 300g",
+  "pr": 2.25,
+  "url": "https://www.ocado.com/search?q=Pip%20%26%20Nut%20Smooth%20Peanut%20Butter",
+  "g": 300.0
+ },
+ "Linguine": {
+  "n": "Napolina Linguine Pasta 500g",
+  "pr": 1.5,
+  "url": "https://www.ocado.com/search?q=Napolina%20Linguine%20Pasta",
+  "g": 500.0
+ },
+ "Lemon": {
+  "n": "M&S Lemons 5 per pack",
+  "pr": 1.6,
+  "url": "https://www.ocado.com/search?q=M%26S%20Lemons",
+  "ea": 5
+ },
+ "Echalion Shallot": {
+  "n": "Ocado Echalion Shallots 400g",
+  "pr": 1.55,
+  "url": "https://www.ocado.com/search?q=Ocado%20Echalion%20Shallots",
+  "ea": 6,
+  "g": 400.0
+ },
+ "Cornflour": {
+  "n": "M&S Cornflour 250g",
+  "pr": 1.4,
+  "url": "https://www.ocado.com/search?q=M%26S%20Cornflour",
+  "g": 250.0
+ },
+ "Pak Choi": {
+  "n": "Ocado Pak Choi 250g",
+  "pr": 1.5,
+  "url": "https://www.ocado.com/search?q=Ocado%20Pak%20Choi",
+  "ea": 2,
+  "g": 250.0
+ },
+ "Smashed Avocado": {
+  "n": "Holy Moly Smashed Avocado 150g",
+  "pr": 2.35,
+  "url": "https://www.ocado.com/search?q=Holy%20Moly%20Smashed%20Avocado",
+  "g": 150.0
+ },
+ "Diced British Chicken Thigh": {
+  "n": "Ocado British Chicken Thigh Fillets Boneless 450",
+  "pr": 3.79,
+  "url": "https://www.ocado.com/search?q=Ocado%20British%20Chicken%20Thigh%20Fillets%20Boneless"
+ },
+ "Salmon Fillets": {
+  "n": "Ocado 2 Salmon Skin On Mid/Tail Fillets 240g",
+  "pr": 4.55,
+  "url": "https://www.ocado.com/search?q=Ocado%202%20Salmon%20Skin%20On%20Mid/Tail%20Fillets",
+  "g": 240.0
+ },
+ "Young Pea Pods": {
+  "n": "Ocado Trimmed Mangetout Peas 150g",
+  "pr": 1.25,
+  "url": "https://www.ocado.com/search?q=Ocado%20Trimmed%20Mangetout%20Peas",
+  "swap": "swap",
+  "note": "'young pea pods' = mangetout",
+  "g": 150.0
+ },
+ "Mayonnaise": {
+  "n": "Heinz Seriously Good Mayonnaise 460g",
+  "pr": 2,
+  "url": "https://www.ocado.com/search?q=Heinz%20Seriously%20Good%20Mayonnaise",
+  "g": 460.0
+ },
+ "Salted Peanuts": {
+  "n": "Ocado Salted Peanuts 200g",
+  "pr": 1.4,
+  "url": "https://www.ocado.com/search?q=Ocado%20Salted%20Peanuts",
+  "g": 200.0
+ },
+ "Sweet Chilli Sauce": {
+  "n": "Amoy Sweet Chilli Sauce 332g",
+  "pr": 1.5,
+  "url": "https://www.ocado.com/search?q=Amoy%20Sweet%20Chilli%20Sauce",
+  "g": 332.0
+ },
+ "Indonesian Style Spice Mix": {
+  "n": "M&S Nasi Goreng Paste 190g",
+  "pr": 1.5,
+  "url": "https://www.ocado.com/search?q=M%26S%20Nasi%20Goreng%20Paste",
+  "swap": "swap",
+  "note": "HF blend → nasi goreng paste",
+  "g": 190.0
+ },
+ "Sliced Carrot and Cabbage Mix": {
+  "n": "M&S White Cabbage",
+  "pr": 1,
+  "url": "https://www.ocado.com/search?q=M%26S%20White%20Cabbage"
+ },
+ "Olive Oil": {
+  "n": "Ocado Extra Virgin Olive Oil 500ml",
+  "pr": 6.25,
+  "url": "https://www.ocado.com/search?q=Ocado%20Extra%20Virgin%20Olive%20Oil",
+  "g": 500.0
+ },
+ "Chives": {
+  "n": "Cook With M&S Chives 25g",
+  "pr": 1,
+  "url": "https://www.ocado.com/search?q=Cook%20With%20M%26S%20Chives",
+  "g": 25.0
+ },
+ "Red Onion": {
+  "n": "Ocado Red Onions 3 per pack",
+  "pr": 0.95,
+  "url": "https://www.ocado.com/search?q=Ocado%20Red%20Onions",
+  "ea": 3
+ },
+ "Red Wine Stock Paste": {
+  "n": "Knorr Red Wine Stock Pot 104g",
+  "pr": 2,
+  "url": "https://www.ocado.com/search?q=Knorr%20Red%20Wine%20Stock%20Pot",
+  "swap": "swap",
+  "note": "→ red wine stock pot",
+  "g": 104.0,
+  "perDish": 1
+ },
+ "Baby Leaf Mix": {
+  "n": "Ocado Baby Leaf Salad 90g",
+  "pr": 0.85,
+  "url": "https://www.ocado.com/search?q=Ocado%20Baby%20Leaf%20Salad",
+  "g": 90.0
+ },
+ "Chipotle Paste": {
+  "n": "Cook With M&S Hot Chipotle Chilli Paste 95g",
+  "pr": 2,
+  "url": "https://www.ocado.com/search?q=Cook%20With%20M%26S%20Hot%20Chipotle%20Chilli%20Paste",
+  "g": 95.0
+ },
+ "Beef Stock Paste": {
+  "n": "M&S Beef Stock Pot 4 x 24g",
+  "pr": 1.7,
+  "url": "https://www.ocado.com/search?q=M%26S%20Beef%20Stock%20Pot",
+  "swap": "swap",
+  "note": "→ beef stock pot",
+  "ea": 4,
+  "g": 96.0,
+  "perDish": 1
+ },
+ "Onion": {
+  "n": "Ocado Brown Onions 3 per pack",
+  "pr": 0.95,
+  "url": "https://www.ocado.com/search?q=Ocado%20Brown%20Onions",
+  "ea": 3
+ },
+ "Finely Chopped Tomatoes with Onion and Garlic": {
+  "n": "Mutti Polpa Finely Chopped Italian Tomatoes & Garlic 400g",
+  "pr": 1.9,
+  "url": "https://www.ocado.com/search?q=Mutti%20Polpa%20Finely%20Chopped%20Italian%20Tomatoes%20%26%20Garlic",
+  "g": 400.0
+ },
+ "BBQ Sauce": {
+  "n": "Heinz Classic BBQ Sauce 480g",
+  "pr": 2.5,
+  "url": "https://www.ocado.com/search?q=Heinz%20Classic%20BBQ%20Sauce",
+  "g": 480.0
+ },
+ "Worcester Sauce": {
+  "n": "Lea & Perrins Worcestershire Sauce 290ml",
+  "pr": 3,
+  "url": "https://www.ocado.com/search?q=Lea%20%26%20Perrins%20Worcestershire%20Sauce",
+  "g": 290.0
+ },
+ "Miso Paste": {
+  "n": "Yutaka White Miso Paste 100g",
+  "pr": 1.75,
+  "url": "https://www.ocado.com/search?q=Yutaka%20White%20Miso%20Paste",
+  "g": 100.0
+ },
+ "Sun-Dried Tomato Paste": {
+  "n": "Cook With M&S Sundried Tomato Paste 180g",
+  "pr": 2,
+  "url": "https://www.ocado.com/search?q=Cook%20With%20M%26S%20Sundried%20Tomato%20Paste",
+  "g": 180.0
+ },
+ "Wild Rocket": {
+  "n": "Ocado Washed Wild Rocket 60g",
+  "pr": 1,
+  "url": "https://www.ocado.com/search?q=Ocado%20Washed%20Wild%20Rocket",
+  "g": 60.0
+ },
+ "Courgette": {
+  "n": "Ocado Courgettes 500g",
+  "pr": 1.39,
+  "url": "https://www.ocado.com/search?q=Ocado%20Courgettes",
+  "ea": 2,
+  "g": 500.0
+ },
+ "Parma Ham & Parmigiano Reggiano Filled Pasta": {
+  "n": "Bertagni Parma Ham Tortellini 250g",
+  "pr": 5,
+  "url": "https://www.ocado.com/search?q=Bertagni%20Parma%20Ham%20Tortellini",
+  "g": 250.0
+ },
+ "Chilli Flakes": {
+  "n": "Ocado Chilli Flakes 28g",
+  "pr": 1.1,
+  "url": "https://www.ocado.com/search?q=Ocado%20Chilli%20Flakes",
+  "g": 28.0
+ },
+ "Crispy Onions": {
+  "n": "Kuhne Crispy Fried Onions 100g",
+  "pr": 1.6,
+  "url": "https://www.ocado.com/search?q=Kuhne%20Crispy%20Fried%20Onions",
+  "g": 100.0
+ },
+ "Korma Curry Paste": {
+  "n": "Patak's Korma Curry Paste Pot 2 x 70g",
+  "pr": 2,
+  "url": "https://www.ocado.com/search?q=Patak%27s%20Korma%20Curry%20Paste%20Pot",
+  "ea": 2,
+  "g": 140.0
+ },
+ "Sugar Snap Peas": {
+  "n": "Ocado Trimmed Sugar Snap Peas 150g",
+  "pr": 1.35,
+  "url": "https://www.ocado.com/search?q=Ocado%20Trimmed%20Sugar%20Snap%20Peas",
+  "g": 150.0
+ },
+ "Sambal Paste": {
+  "n": "Rempapa Sambal Tumis Chilli Paste 180g",
+  "pr": 6.9,
+  "url": "https://www.ocado.com/search?q=Rempapa%20Sambal%20Tumis%20Chilli%20Paste",
+  "g": 180.0
+ },
+ "Hoisin Sauce": {
+  "n": "Lee Kum Kee Hoisin Sauce 210g",
+  "pr": 2.3,
+  "url": "https://www.ocado.com/search?q=Lee%20Kum%20Kee%20Hoisin%20Sauce",
+  "g": 210.0
+ },
+ "Thai Green Style Paste": {
+  "n": "Blue Dragon Thai Green Curry Paste 170g",
+  "pr": 2.5,
+  "url": "https://www.ocado.com/search?q=Blue%20Dragon%20Thai%20Green%20Curry%20Paste",
+  "g": 170.0
+ },
+ "Coriander": {
+  "n": "Ocado Coriander 30g",
+  "pr": 0.5,
+  "url": "https://www.ocado.com/search?q=Ocado%20Coriander",
+  "g": 30.0
+ },
+ "Black Sesame Seeds": {
+  "n": "Yutaka Roasted Black Sesame Seeds 100g",
+  "pr": 2.1,
+  "url": "https://www.ocado.com/search?q=Yutaka%20Roasted%20Black%20Sesame%20Seeds",
+  "g": 100.0
+ },
+ "Fresh Edamame Beans": {
+  "n": "Ocado Frozen Edamame Beans 600g",
+  "pr": 2.8,
+  "url": "https://www.ocado.com/search?q=Ocado%20Frozen%20Edamame%20Beans",
+  "g": 600.0
+ },
+ "Baby Cucumber": {
+  "n": "M&S Tastebuds Baby Cucumbers 200g",
+  "pr": 1.3,
+  "url": "https://www.ocado.com/search?q=M%26S%20Tastebuds%20Baby%20Cucumbers",
+  "ea": 3,
+  "g": 200.0
+ },
+ "British Chicken Thighs": {
+  "n": "Ocado British Chicken Thighs 1kg",
+  "pr": 2.99,
+  "url": "https://www.ocado.com/search?q=Ocado%20British%20Chicken%20Thighs",
+  "ea": 7,
+  "g": 1000.0
+ },
+ "Leek": {
+  "n": "Ocado British Leeks 500g",
+  "pr": 1.39,
+  "url": "https://www.ocado.com/search?q=Ocado%20British%20Leeks",
+  "ea": 2,
+  "g": 500.0
+ },
+ "21 Day Aged British Rump Steaks": {
+  "n": "Ocado 1 Beef Rump Steak 255g",
+  "pr": 4.4,
+  "url": "https://www.ocado.com/search?q=Ocado%201%20Beef%20Rump%20Steak",
+  "g": 255.0
+ },
+ "Salad Potatoes": {
+  "n": "Ocado British Baby Potatoes 1kg",
+  "pr": 1.09,
+  "url": "https://www.ocado.com/search?q=Ocado%20British%20Baby%20Potatoes",
+  "g": 1000.0
+ },
+ "Wholegrain Mustard": {
+  "n": "M&S Wholegrain Mustard 185g",
+  "pr": 1,
+  "url": "https://www.ocado.com/search?q=M%26S%20Wholegrain%20Mustard",
+  "g": 185.0
+ },
+ "Flat Leaf Parsley": {
+  "n": "Ocado Flat Leaf Parsley 30g",
+  "pr": 0.5,
+  "url": "https://www.ocado.com/search?q=Ocado%20Flat%20Leaf%20Parsley",
+  "g": 30.0
+ },
+ "Cider Vinegar": {
+  "n": "Aspall Apple Cider Vinegar 350ml",
+  "pr": 1.9,
+  "url": "https://www.ocado.com/search?q=Aspall%20Apple%20Cider%20Vinegar",
+  "g": 350.0
+ },
+ "Bulgur Wheat": {
+  "n": "Cypressa Medium Grain Bulgur Wheat 500g",
+  "pr": 1.75,
+  "url": "https://www.ocado.com/search?q=Cypressa%20Medium%20Grain%20Bulgur%20Wheat",
+  "g": 500.0
+ },
+ "Butternut Squash": {
+  "n": "Ocado Large Roasting Butternut Squash",
+  "pr": 1.6,
+  "url": "https://www.ocado.com/search?q=Ocado%20Large%20Roasting%20Butternut%20Squash",
+  "ea": 1
+ },
+ "Serrano Ham": {
+  "n": "M&S Spanish Serrano Ham 70g",
+  "pr": 2.5,
+  "url": "https://www.ocado.com/search?q=M%26S%20Spanish%20Serrano%20Ham",
+  "g": 70.0
+ },
+ "Penne Pasta": {
+  "n": "Ocado Penne Pasta 500g",
+  "pr": 0.69,
+  "url": "https://www.ocado.com/search?q=Ocado%20Penne%20Pasta",
+  "g": 500.0
+ },
+ "British Beef and Pork Mince": {
+  "n": "Ocado Beef Mince 20% Fat 500g",
+  "pr": 3.4,
+  "url": "https://www.ocado.com/search?q=Ocado%20Beef%20Mince%2020%25%20Fat",
+  "swap": "swap",
+  "note": "no mixed mince → half beef mince, half pork mince",
+  "g": 500.0
+ },
+ "Mushrooms": {
+  "n": "Ocado Chestnut Mushrooms 250g",
+  "pr": 1.1,
+  "url": "https://www.ocado.com/search?q=Ocado%20Chestnut%20Mushrooms",
+  "g": 250.0
+ },
+ "Green Chilli": {
+  "n": "Cook With M&S Green Chillies 50g",
+  "pr": 0.65,
+  "url": "https://www.ocado.com/search?q=Cook%20With%20M%26S%20Green%20Chillies",
+  "ea": 4,
+  "g": 50.0
+ },
+ "Wild Mushroom Paste": {
+  "n": "Belazu Wild Mushroom Pesto 165g",
+  "pr": 2.8,
+  "url": "https://www.ocado.com/search?q=Belazu%20Wild%20Mushroom%20Pesto",
+  "g": 165.0
+ },
+ "British Smoked Bacon Lardons": {
+  "n": "Ocado Smoked Bacon Lardons 2 x 100g",
+  "pr": 1.8,
+  "url": "https://www.ocado.com/search?q=Ocado%20Smoked%20Bacon%20Lardons",
+  "ea": 2,
+  "g": 200.0
+ },
+ "Pesto": {
+  "n": "Sacla' Classic Basil Pesto Pots 2 x 45g",
+  "pr": 1.25,
+  "url": "https://www.ocado.com/search?q=Sacla%27%20Classic%20Basil%20Pesto%20Pots",
+  "ea": 2,
+  "g": 90.0
+ },
+ "Lamb Mince": {
+  "n": "M&S British 10% Fat Lamb Mince 250g",
+  "pr": 5,
+  "url": "https://www.ocado.com/search?q=M%26S%20British%2010%25%20Fat%20Lamb%20Mince",
+  "g": 250.0
+ },
+ "Chopped Cavolo Nero": {
+  "n": "Ocado Cavolo Nero 200g",
+  "pr": 1.5,
+  "url": "https://www.ocado.com/search?q=Ocado%20Cavolo%20Nero",
+  "g": 200.0
+ },
+ "Chestnut Mushrooms": {
+  "n": "Ocado Chestnut Mushrooms 250g",
+  "pr": 1.1,
+  "url": "https://www.ocado.com/search?q=Ocado%20Chestnut%20Mushrooms",
+  "g": 250.0
+ },
+ "Diced Chorizo": {
+  "n": "M&S Spanish Diced Chorizo 2 x 65g",
+  "pr": 3,
+  "url": "https://www.ocado.com/search?q=M%26S%20Spanish%20Diced%20Chorizo",
+  "ea": 2,
+  "g": 130.0
+ },
+ "Spaghetti": {
+  "n": "Ocado Spaghetti Pasta 500g",
+  "pr": 0.75,
+  "url": "https://www.ocado.com/search?q=Ocado%20Spaghetti%20Pasta",
+  "g": 500.0
+ },
+ "Truffle Zest": {
+  "n": "La Drogheria Salt & Pepper with Truffle Salt 85g",
+  "pr": 2.3,
+  "url": "https://www.ocado.com/search?q=La%20Drogheria%20Salt%20%26%20Pepper%20with%20Truffle%20Salt",
+  "g": 85.0
+ },
+ "Balsamic Glaze": {
+  "n": "M&S Glaze with Balsamic Vinegar of Modena 250ml",
+  "pr": 2.6,
+  "url": "https://www.ocado.com/search?q=M%26S%20Glaze%20with%20Balsamic%20Vinegar%20of%20Modena",
+  "g": 250.0
+ },
+ "Fresh Pesto": {
+  "n": "Sacla' Classic Basil Pesto Pots 2 x 45g",
+  "pr": 1.25,
+  "url": "https://www.ocado.com/search?q=Sacla%27%20Classic%20Basil%20Pesto%20Pots",
+  "ea": 2,
+  "g": 90.0
+ },
+ "Ciabatta": {
+  "n": "M&S Ciabatta Rolls 4 x 60g",
+  "pr": 1.6,
+  "url": "https://www.ocado.com/search?q=M%26S%20Ciabatta%20Rolls",
+  "ea": 4,
+  "g": 240.0
+ },
+ "Spinach and Ricotta Ravioli": {
+  "n": "M&S Ricotta & Spinach Ravioli 250g",
+  "pr": 3.75,
+  "url": "https://www.ocado.com/search?q=M%26S%20Ricotta%20%26%20Spinach%20Ravioli",
+  "g": 250.0
+ },
+ "Tandoori Masala Mix": {
+  "n": "Rajah Tandoori Masala Spice Blend 100g",
+  "pr": 1.1,
+  "url": "https://www.ocado.com/search?q=Rajah%20Tandoori%20Masala%20Spice%20Blend%20100g",
+  "g": 100.0
+ },
+ "Mango Chutney": {
+  "n": "Geeta's Mango Chutney 320g",
+  "pr": 2,
+  "url": "https://www.ocado.com/search?q=Geeta%27s%20Mango%20Chutney",
+  "g": 320.0
+ },
+ "Ginger, Garlic & Lemongrass Puree": {
+  "n": "Bart Lemongrass Paste 90g",
+  "pr": 2.6,
+  "url": "https://www.ocado.com/search?q=Bart%20Lemongrass%20Paste",
+  "g": 90.0
+ },
+ "Zanzibar Style Curry Powder": {
+  "n": "Schwartz Medium Curry Powder Drum 90g",
+  "pr": 2.3,
+  "url": "https://www.ocado.com/search?q=Schwartz%20Medium%20Curry%20Powder%20Drum",
+  "swap": "swap",
+  "note": "HF blend → medium curry powder",
+  "g": 90.0
+ },
+ "Toasted Flaked Almonds": {
+  "n": "M&S Toasted Flaked Californian Almonds 100g",
+  "pr": 1.95,
+  "url": "https://www.ocado.com/search?q=M%26S%20Toasted%20Flaked%20Californian%20Almonds",
+  "g": 100.0
+ },
+ "Szechuan Paste": {
+  "n": "Lee Kum Kee Chilli Bean Sauce 195g",
+  "pr": 2.3,
+  "url": "https://www.ocado.com/search?q=Lee%20Kum%20Kee%20Chilli%20Bean%20Sauce",
+  "g": 195.0
+ },
+ "Central American Style Spice Mix": {
+  "n": "Capsicana Mexican Smoked Cumin & Chipotle Fajita Seasoning Mix Medium/Hot 28g",
+  "pr": 1.35,
+  "url": "https://www.ocado.com/search?q=Capsicana%20Mexican%20Smoked%20Cumin%20%26%20Chipotle%20Fajita%20Seasoning%20Mix%20Medium/Hot",
+  "swap": "swap",
+  "note": "HF blend → smoked cumin & chipotle seasoning",
+  "g": 28.0
+ },
+ "Baby Plum Tomatoes": {
+  "n": "Ocado Baby Plum Tomatoes 300g",
+  "pr": 0.95,
+  "url": "https://www.ocado.com/search?q=Ocado%20Baby%20Plum%20Tomatoes",
+  "g": 300.0
+ },
+ "Brazilian Style Spice Mix": {
+  "n": "Capsicana Brazilian Smoked Paprika & Spices Fajita Seasoning Mix Medium 28g",
+  "pr": 1.35,
+  "url": "https://www.ocado.com/search?q=Capsicana%20Brazilian%20Smoked%20Paprika%20%26%20Spices%20Fajita%20Seasoning%20Mix%20Medium",
+  "g": 28.0
+ },
+ "Red Thai Style Paste": {
+  "n": "Blue Dragon Thai Red Curry Paste 170g",
+  "pr": 2.5,
+  "url": "https://www.ocado.com/search?q=Blue%20Dragon%20Thai%20Red%20Curry%20Paste",
+  "g": 170.0
+ },
+ "Intense Tomato": {
+  "n": "Ocado Tomatoes on the Vine 4 per pack",
+  "pr": 1.5,
+  "url": "https://www.ocado.com/search?q=Ocado%20Tomatoes%20on%20the%20Vine",
+  "ea": 4
+ },
+ "Red Chilli": {
+  "n": "Ocado Mild Red Chillies 60g",
+  "pr": 0.51,
+  "url": "https://www.ocado.com/search?q=Ocado%20Mild%20Red%20Chillies",
+  "ea": 4,
+  "g": 60.0
+ },
+ "Goan Style Curry Paste": {
+  "n": "The Spice Tailor Fiery Goan Curry Paste Kit 120g",
+  "pr": 2.75,
+  "url": "https://www.ocado.com/search?q=The%20Spice%20Tailor%20Fiery%20Goan%20Curry%20Paste%20Kit",
+  "g": 120.0
+ },
+ "Basa Fillets": {
+  "n": "Ocado 2 ASC Basa Fillets Skinless & Boneless 250g",
+  "pr": 1.85,
+  "url": "https://www.ocado.com/search?q=Ocado%202%20ASC%20Basa%20Fillets%20Skinless%20%26%20Boneless",
+  "ea": 2,
+  "g": 250.0
+ },
+ "Tikka Masala Paste": {
+  "n": "Patak's Tikka Masala Curry Paste Pot 2 x 70g",
+  "pr": 2,
+  "url": "https://www.ocado.com/search?q=Patak%27s%20Tikka%20Masala%20Curry%20Paste%20Pot",
+  "ea": 2,
+  "g": 140.0
+ },
+ "Hot Sauce": {
+  "n": "Cholula Hot Sauce Original 150ml",
+  "pr": 2.5,
+  "url": "https://www.ocado.com/search?q=Cholula%20Hot%20Sauce%20Original",
+  "g": 150.0
+ },
+ "Oil": {
+  "n": "KTC VEGETABLE OIL 1L",
+  "pr": 1.85,
+  "url": "https://www.ocado.com/search?q=KTC%20VEGETABLE%20OIL",
+  "g": 1000.0
+ },
+ "Red Kidney Beans": {
+  "n": "Ocado Red Kidney Beans in Water 400g",
+  "pr": 0.39,
+  "url": "https://www.ocado.com/search?q=Ocado%20Red%20Kidney%20Beans%20in%20Water",
+  "g": 400.0
+ },
+ "Mexican Style Spice Mix": {
+  "n": "Santa Maria Mild Fajita Seasoning Mix 28g",
+  "pr": 1.4,
+  "url": "https://www.ocado.com/search?q=Santa%20Maria%20Mild%20Fajita%20Seasoning%20Mix",
+  "swap": "swap",
+  "note": "HF blend → fajita seasoning",
+  "g": 28.0
+ },
+ "Ginger": {
+  "n": "Ocado Root Ginger 125g",
+  "pr": 1.56,
+  "url": "https://www.ocado.com/search?q=Ocado%20Root%20Ginger",
+  "ea": 1,
+  "g": 125.0
+ },
+ "Mangetout": {
+  "n": "Ocado Trimmed Mangetout Peas 150g",
+  "pr": 1.25,
+  "url": "https://www.ocado.com/search?q=Ocado%20Trimmed%20Mangetout%20Peas",
+  "g": 150.0
+ },
+ "Diced Chicken Breast": {
+  "n": "Ocado British Chicken Breast Fillets 650g",
+  "pr": 4.9,
+  "url": "https://www.ocado.com/search?q=Ocado%20British%20Chicken%20Breast%20Fillets",
+  "g": 650.0
+ },
+ "Sriracha Sauce": {
+  "n": "M&S Sriracha Sauce 290g",
+  "pr": 2.5,
+  "url": "https://www.ocado.com/search?q=M%26S%20Sriracha%20Sauce",
+  "g": 290.0
+ },
+ "Ground Turmeric": {
+  "n": "Ocado Ground Turmeric 45g",
+  "pr": 1.1,
+  "url": "https://www.ocado.com/search?q=Ocado%20Ground%20Turmeric",
+  "g": 45.0
+ },
+ "Dill": {
+  "n": "Cook With M&S Dill 25g",
+  "pr": 1,
+  "url": "https://www.ocado.com/search?q=Cook%20With%20M%26S%20Dill",
+  "g": 25.0
+ },
+ "Mint": {
+  "n": "Ocado Mint 30g",
+  "pr": 0.5,
+  "url": "https://www.ocado.com/search?q=Ocado%20Mint",
+  "g": 30.0
+ },
+ "Baby Gem Lettuce": {
+  "n": "Ocado Little Gem Lettuce 2 per pack",
+  "pr": 0.77,
+  "url": "https://www.ocado.com/search?q=Ocado%20Little%20Gem%20Lettuce",
+  "ea": 2
+ },
+ "Aioli": {
+  "n": "M&S Aioli Dip 200g",
+  "pr": 1.75,
+  "url": "https://www.ocado.com/search?q=M%26S%20Aioli%20Dip",
+  "g": 200.0
+ },
+ "British Cumberland Sausages": {
+  "n": "M&S Butchers 8 Cumberland Pork Sausages 454g",
+  "pr": 2,
+  "url": "https://www.ocado.com/search?q=M%26S%20Butchers%208%20Cumberland%20Pork%20Sausages",
+  "g": 454.0
+ },
+ "Sea Bass Fillets": {
+  "n": "Ocado 2 Sea Bass Fillets Skin On & Boneless 180g",
+  "pr": 5.75,
+  "url": "https://www.ocado.com/search?q=Ocado%202%20Sea%20Bass%20Fillets%20Skin%20On%20%26%20Boneless",
+  "ea": 2,
+  "g": 180.0
+ },
+ "British Honey Mustard Sausages": {
+  "n": "M&S Dinky Honey & Mustard Sausages 255g",
+  "pr": 4,
+  "url": "https://www.ocado.com/search?q=M%26S%20Dinky%20Honey%20%26%20Mustard%20Sausages",
+  "g": 255.0
+ },
+ "Apple": {
+  "n": "Ocado British Seasonal Apples 6 per pack",
+  "pr": 1.5,
+  "url": "https://www.ocado.com/search?q=Ocado%20British%20Seasonal%20Apples",
+  "ea": 6
+ },
+ "Sweetcorn": {
+  "n": "D'aucy Supersweet Sweetcorn Salt Free 326g",
+  "pr": 1.25,
+  "url": "https://www.ocado.com/search?q=D%27aucy%20Supersweet%20Sweetcorn%20Salt%20Free",
+  "g": 326.0
+ },
+ "Roasted Spice and Herb Blend": {
+  "n": "M&S Roots for Roasting Seasoning 105g",
+  "pr": 2,
+  "url": "https://www.ocado.com/search?q=M%26S%20Roots%20for%20Roasting%20Seasoning",
+  "swap": "swap",
+  "note": "HF blend → roasting seasoning",
+  "g": 105.0
+ },
+ "Couscous": {
+  "n": "Cook With M&S Couscous 500g",
+  "pr": 1.25,
+  "url": "https://www.ocado.com/search?q=Cook%20With%20M%26S%20Couscous",
+  "g": 500.0
+ },
+ "Soured Cream": {
+  "n": "M&S British Soured Cream 300g",
+  "pr": 1.2,
+  "url": "https://www.ocado.com/search?q=M%26S%20British%20Soured%20Cream",
+  "g": 300.0
+ },
+ "Skin-On British Chicken Breasts": {
+  "n": "M&S Oakham Gold Skin On Chicken Breast Fillets 300g",
+  "pr": 4.75,
+  "url": "https://www.ocado.com/search?q=M%26S%20Oakham%20Gold%20Skin%20On%20Chicken%20Breast%20Fillets",
+  "ea": 2,
+  "g": 300.0
+ },
+ "Green Chilli Paste": {
+  "n": "Cook With M&S Green Chillies 50g",
+  "pr": 0.65,
+  "url": "https://www.ocado.com/search?q=Cook%20With%20M%26S%20Green%20Chillies",
+  "swap": "swap",
+  "note": "no paste → 1 fresh green chilli, finely chopped",
+  "g": 50.0
+ },
+ "Vegan XO Sauce": {
+  "n": "itsu crispy chilli oil 100g",
+  "pr": 2.5,
+  "url": "https://www.ocado.com/search?q=itsu%20crispy%20chilli%20oil",
+  "swap": "swap",
+  "note": "no XO sauce → crispy chilli oil",
+  "g": 100.0
+ },
+ "Chickpeas": {
+  "n": "Ocado Chickpeas in Water 400g",
+  "pr": 0.42,
+  "url": "https://www.ocado.com/search?q=Ocado%20Chickpeas%20in%20Water",
+  "g": 400.0
+ },
+ "Cauliflower Florets": {
+  "n": "Ocado Cauliflower Florets 400g",
+  "pr": 1.7,
+  "url": "https://www.ocado.com/search?q=Ocado%20Cauliflower%20Florets",
+  "g": 400.0
+ },
+ "Curry Powder Mix": {
+  "n": "Schwartz Medium Curry Powder Drum 90g",
+  "pr": 2.3,
+  "url": "https://www.ocado.com/search?q=Schwartz%20Medium%20Curry%20Powder%20Drum",
+  "g": 90.0
+ },
+ "Greek Style Salad Cheese": {
+  "n": "M&S Greek Lighter Salad Cheese 200g",
+  "pr": 1.9,
+  "url": "https://www.ocado.com/search?q=M%26S%20Greek%20Lighter%20Salad%20Cheese",
+  "g": 200.0
+ },
+ "Butter Beans": {
+  "n": "Ocado Butter Beans 400g",
+  "pr": 0.45,
+  "url": "https://www.ocado.com/search?q=Ocado%20Butter%20Beans",
+  "g": 400.0
+ }
+}

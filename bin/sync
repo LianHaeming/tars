@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# Usage: bin/sync   pull from GitHub, build apps that have a build step, (re)start every app and the home page.
+set -euo pipefail
+TARS="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$TARS"
+
+if git remote get-url origin >/dev/null 2>&1; then git pull --ff-only; fi
+
+for dir in apps/*/; do
+  name="$(basename "$dir")"
+  build="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1])).get("build", ""))' "$dir/app.json")"
+  if [ -n "$build" ]; then (cd "$dir" && sh -c "$build"); fi
+  bin/up "$name"
+done
+
+python3 bin/home.py
+bin/up home
