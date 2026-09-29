@@ -24,7 +24,7 @@ function Check({ task, onDone }: { task: Task; onDone: () => void }) {
       style={pc(task.priority)}
       onClick={e => { e.stopPropagation(); onDone() }}
       className={cn(
-        'group/check mt-px grid size-[22px] shrink-0 place-items-center rounded-full border-2 border-(--pc) bg-[color-mix(in_srgb,var(--pc)_12%,transparent)] transition-colors',
+        'group/check mt-px grid size-5 shrink-0 place-items-center rounded-full border-2 border-(--pc) bg-(--pc)/12 transition-colors',
         'group-data-[done=true]/task:bg-(--pc)',
       )}
     >
@@ -61,7 +61,7 @@ export function TaskRow({ task, hideProject, hideDue, compact }: { task: Task } 
         <div className="min-w-0 flex-1">
           <div className="break-words group-data-[done=true]/task:text-muted-foreground group-data-[done=true]/task:line-through">{task.title}</div>
           {task.description && !compact && (
-            <div className="line-clamp-2 text-[13px] whitespace-pre-wrap text-muted-foreground">{task.description}</div>
+            <div className="line-clamp-2 text-sm whitespace-pre-wrap text-muted-foreground">{task.description}</div>
           )}
           <Meta task={task} hideDue={hideDue} project={hideProject ? undefined : p} />
         </div>
@@ -87,14 +87,14 @@ function Meta({ task, hideDue, project }: { task: Task; hideDue?: boolean; proje
   }
   if (project) {
     items.push(
-      <span key="proj"><span className="size-[7px] rounded-full" style={{ background: project.color }} />{project.name}</span>,
+      <span key="proj"><span className="size-2 rounded-full" style={{ background: project.color }} />{project.name}</span>,
     )
   }
   if (!items.length) return null
-  return <div className="mt-0.5 flex gap-3 text-xs text-muted-foreground [&>span]:inline-flex [&>span]:items-center [&>span]:gap-1 [&_svg]:size-3">{items}</div>
+  return <div className="mt-1 flex gap-3 text-xs text-muted-foreground [&>span]:inline-flex [&>span]:items-center [&>span]:gap-1 [&_svg]:size-3">{items}</div>
 }
 
-const pill = 'h-8 rounded-lg border-transparent bg-background px-2.5 text-[13px] font-normal data-[on=true]:border-(--pc,var(--foreground)) dark:bg-background dark:hover:bg-accent'
+const pill = 'h-8 rounded-lg border-transparent bg-background px-3 text-sm font-normal data-[on=true]:border-(--pc,var(--foreground)) dark:bg-background dark:hover:bg-accent'
 
 function TaskEditor({ task, onDone }: { task: Task; onDone: () => void }) {
   const { patch, deleteTask, state, setOpenId } = useTars()
@@ -126,7 +126,7 @@ function TaskEditor({ task, onDone }: { task: Task; onDone: () => void }) {
   )
 
   return (
-    <div ref={ref} data-done={task.done} className="group/task -mx-3 my-1.5 rounded-xl bg-muted px-3 pb-3">
+    <div ref={ref} data-done={task.done} className="group/task -mx-3 my-2 rounded-xl bg-muted px-3 pb-3">
       <div className="flex items-start gap-3 py-3">
         <Check task={task} onDone={onDone} />
         <div className="min-w-0 flex-1">
@@ -142,12 +142,12 @@ function TaskEditor({ task, onDone }: { task: Task; onDone: () => void }) {
             placeholder="Add a note"
             rows={1}
             onBlur={e => { const v = e.target.value.trim(); if (v !== task.description) patch(task.id, { description: v }) }}
-            className="mt-0.5 min-h-0 resize-none rounded-none border-0 bg-transparent p-0 text-[13px] text-muted-foreground shadow-none focus-visible:ring-0 dark:bg-transparent"
+            className="mt-1 min-h-0 resize-none rounded-none border-0 bg-transparent p-0 text-field text-muted-foreground shadow-none focus-visible:ring-0 dark:bg-transparent"
           />
         </div>
       </div>
 
-      <div className="ml-[34px] flex flex-wrap gap-1.5">
+      <div className="ml-8 flex flex-wrap gap-2">
         {dateBtn(td, <><CalendarIcon className="text-today" />Today</>)}
         {dateBtn(tm, 'Tomorrow')}
         {dateBtn(nw, 'Next week')}
@@ -166,7 +166,7 @@ function TaskEditor({ task, onDone }: { task: Task; onDone: () => void }) {
           </PopoverContent>
         </Popover>
         {task.due && (
-          <label className={cn(pill, 'relative inline-flex cursor-pointer items-center gap-1 border [&_svg]:size-3.5')} data-on={!!task.dueTime}>
+          <label className={cn(pill, 'relative inline-flex cursor-pointer items-center gap-1 border [&_svg]:size-4')} data-on={!!task.dueTime}>
             <ClockIcon />{task.dueTime || 'Time'}
             <input
               type="time"
@@ -181,7 +181,7 @@ function TaskEditor({ task, onDone }: { task: Task; onDone: () => void }) {
         )}
       </div>
 
-      <div className="mt-2 ml-[34px] flex flex-wrap items-center gap-1.5">
+      <div className="mt-2 ml-8 flex flex-wrap items-center gap-2">
         <ToggleGroup
           type="single"
           spacing={1}
@@ -196,7 +196,7 @@ function TaskEditor({ task, onDone }: { task: Task; onDone: () => void }) {
           ))}
         </ToggleGroup>
         <Select value={task.projectId ?? 'inbox'} onValueChange={v => patch(task.id, { projectId: v === 'inbox' ? null : v })}>
-          <SelectTrigger size="sm" className="h-8 border-transparent bg-background text-[13px] dark:bg-background">
+          <SelectTrigger size="sm" className="h-8 border-transparent bg-background text-sm dark:bg-background">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>

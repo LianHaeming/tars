@@ -11,7 +11,7 @@ export function Upcoming() {
     <section>
       <SectionHead title="Upcoming" link="Month" to="/month" />
       {items.map(x => <TaskRow key={x.id} task={x} compact />)}
-      {!items.length && <div className="py-3.5 text-sm text-muted-foreground">Nothing else dated{next ? '' : ' coming up'}.</div>}
+      {!items.length && <div className="py-4 text-sm text-muted-foreground">Nothing else dated{next ? '' : ' coming up'}.</div>}
     </section>
   )
 }

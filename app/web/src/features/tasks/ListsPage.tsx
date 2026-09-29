@@ -36,9 +36,9 @@ function ListTabs({ current }: { current: string }) {
         {tab('today', 'Today', open.filter(x => x.due && x.due <= t).length, overdue ? <Dot color="var(--overdue)" /> : undefined)}
         {tab('inbox', 'Inbox', open.filter(x => !x.projectId).length)}
         {state.projects.map(p => tab(p.id, p.name, open.filter(x => x.projectId === p.id).length, <Dot color={p.color} />))}
-        {tab('completed', 'Completed', 0, <CheckIcon className="size-3.5 text-today" />)}
-        <button onClick={() => setAdding(true)} className="inline-flex shrink-0 items-center gap-1 rounded-full border border-dashed border-border px-3 py-1.5 text-sm text-muted-foreground">
-          <PlusIcon className="size-3.5" />List
+        {tab('completed', 'Completed', 0, <CheckIcon className="size-4 text-today" />)}
+        <button onClick={() => setAdding(true)} className="inline-flex shrink-0 items-center gap-1 rounded-full border border-dashed border-border px-3 py-2 text-sm text-muted-foreground">
+          <PlusIcon className="size-4" />List
         </button>
       </PillBar>
       <NameDialog open={adding} onOpenChange={setAdding} title="New list" action="Create"
@@ -93,7 +93,7 @@ export function ListBody() {
           <>
             <Section className="text-overdue">
               <span>Overdue · {overdue.length}</span>
-              <button className="font-medium text-primary" onClick={rescheduleOverdue}>Move all to today</button>
+              <button className="font-semibold text-primary" onClick={rescheduleOverdue}>Move all to today</button>
             </Section>
             {overdue.map(x => <TaskRow key={x.id} task={x} />)}
           </>
@@ -116,7 +116,7 @@ export function ListBody() {
           const name = !day ? 'Earlier' : dayDiff(day) === 0 ? 'Today' : dayDiff(day) === -1 ? 'Yesterday' : parseYmd(day).toLocaleDateString(undefined, { weekday: 'long' })
           return (
             <div key={x.id}>
-              {head && <Section><span>{name}{day && <span className="font-medium text-muted-foreground"> · {shortDate(parseYmd(day))}</span>}</span></Section>}
+              {head && <Section><span>{name}{day && <span className="font-semibold text-muted-foreground"> · {shortDate(parseYmd(day))}</span>}</span></Section>}
               <TaskRow task={x} hideDue />
             </div>
           )

@@ -14,7 +14,7 @@ type Props = {
   children: ReactNode
 }
 
-export const pageWidth = (wide?: boolean) => (wide ? 'max-w-5xl' : 'max-w-[680px]')
+export const pageWidth = (wide?: boolean) => (wide ? 'max-w-5xl' : 'max-w-page')
 
 export function Page({ title, back = '/', actions, wide, bare, className, children }: Props) {
   const navigate = useNavigate()
@@ -23,7 +23,7 @@ export function Page({ title, back = '/', actions, wide, bare, className, childr
 
   return (
     <div className="min-h-dvh animate-in duration-200 fade-in slide-in-from-right-3">
-      <header className="glass-strong sticky top-0 z-20 border-x-0 border-t-0 pt-[env(safe-area-inset-top)]">
+      <header className="glass-strong sticky top-0 z-20 border-x-0 border-t-0 pt-safe-0">
         <div className={cn('mx-auto flex h-14 items-center gap-1 px-2', pageWidth(wide))}>
           <Button variant="ghost" size="icon-lg" onClick={goBack} aria-label="Back" className="text-primary">
             <ChevronLeftIcon className="size-6" />
@@ -33,7 +33,7 @@ export function Page({ title, back = '/', actions, wide, bare, className, childr
         </div>
       </header>
       {bare ? children : (
-        <main className={cn('mx-auto px-4 pb-[calc(120px+env(safe-area-inset-bottom))]', pageWidth(wide), className)}>
+        <main className={cn('mx-auto px-4 pb-safe-30', pageWidth(wide), className)}>
           {children}
         </main>
       )}

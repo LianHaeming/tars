@@ -30,13 +30,13 @@ export function MonthPage() {
     return (
       <CalendarDayButton
         {...props}
-        className="aspect-auto h-full justify-start gap-1 pt-1.5 data-[selected-single=true]:bg-muted data-[selected-single=true]:text-foreground [&>span]:opacity-100"
+        className="aspect-auto h-full justify-start gap-1 pt-2 data-[selected-single=true]:bg-muted data-[selected-single=true]:text-foreground [&>span]:opacity-100"
       >
         <span className={props.modifiers.today ? 'grid size-6 place-items-center rounded-full bg-primary font-bold text-white' : 'grid size-6 place-items-center'}>
           {props.children}
         </span>
-        <span className="flex h-[5px] gap-[3px]">
-          {dots.map(x => <i key={x.id} className="block size-[5px] rounded-full" style={{ background: `var(--p${x.priority})` }} />)}
+        <span className="flex h-1 gap-1">
+          {dots.map(x => <i key={x.id} className="block size-1 rounded-full" style={{ background: `var(--p${x.priority})` }} />)}
         </span>
       </CalendarDayButton>
     )
@@ -58,9 +58,9 @@ export function MonthPage() {
           classNames={{
             root: 'w-full',
             month_caption: 'flex h-(--cell-size) items-center justify-start px-0',
-            caption_label: 'text-[19px] font-bold tracking-tight',
-            nav: 'absolute top-0 right-12 flex items-center gap-1.5',
-            day: 'group/day relative h-[54px] w-full p-0 text-center select-none',
+            caption_label: 'text-xl font-bold tracking-tight',
+            nav: 'absolute top-0 right-12 flex items-center gap-2',
+            day: 'group/day relative h-14 w-full p-0 text-center select-none',
             today: '',
           }}
         />
@@ -74,7 +74,7 @@ export function MonthPage() {
         </Button>
       </div>
       <Section>
-        <span>{rel || full}{rel && <span className="font-medium text-muted-foreground"> · {full}</span>}</span>
+        <span>{rel || full}{rel && <span className="font-semibold text-muted-foreground"> · {full}</span>}</span>
       </Section>
       {list.map(x => <TaskRow key={x.id} task={x} hideDue />)}
       {!list.length && <Empty>Nothing on this day. Tap Add task to add one.</Empty>}

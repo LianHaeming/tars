@@ -34,7 +34,7 @@ export function ShopName({ shop, buy, fallback, price = true }: { shop: Shop | n
 
 export function Thumb({ src, className }: { src: string | null; className?: string }) {
   return src
-    ? <img loading="lazy" src={src} alt="" className={cn('size-8 shrink-0 rounded-full bg-white object-contain p-0.5', className)} />
+    ? <img loading="lazy" src={src} alt="" className={cn('size-8 shrink-0 rounded-full bg-white object-contain p-1', className)} />
     : <span className={cn('size-8 shrink-0 rounded-full bg-secondary', className)} />
 }
 
@@ -63,16 +63,16 @@ export function BasketButton({ id, size = 'default' }: { id: string; size?: 'def
 export function RecipeCard({ r }: { r: Recipe }) {
   return (
     <Link to={`/food/${r.id}`} className="group block">
-      <Card className="h-full gap-0 overflow-hidden py-0 transition-transform group-active:scale-[.98]">
+      <Card className="h-full gap-0 overflow-hidden py-0 transition-transform group-active:scale-98">
         <div className="relative aspect-4/3 bg-secondary">
           <img loading="lazy" src={r.img} alt="" className="size-full object-cover" />
           <div className="absolute top-2 right-2"><BasketButton id={r.id} size="xs" /></div>
         </div>
-        <div className="flex flex-1 flex-col gap-0.5 p-3">
+        <div className="flex flex-1 flex-col gap-1 p-3">
           <div className="text-xs font-semibold text-primary">{tagline(r)}</div>
-          <div className="text-[15px] leading-snug font-semibold">{r.n}</div>
-          <div className="text-[13px] leading-snug text-muted-foreground">{r.h}</div>
-          <div className="mt-auto pt-1.5 text-[13px] text-muted-foreground">{meta(r)}</div>
+          <div className="text-base leading-snug font-semibold">{r.n}</div>
+          <div className="text-sm leading-snug text-muted-foreground">{r.h}</div>
+          <div className="mt-auto pt-2 text-sm text-muted-foreground">{meta(r)}</div>
         </div>
       </Card>
     </Link>

@@ -19,21 +19,21 @@ function countdown(x: Task) {
 export function NextUp() {
   const { open } = useTars()
   const x = nextItem(open)
-  const box = 'glass mb-2.5 block w-full rounded-[20px] px-4 py-[15px] text-left'
+  const box = 'glass mb-3 block w-full rounded-2xl px-4 py-4 text-left'
   if (!x) {
     return (
       <div className={box}>
-        <div className="text-[13px] font-bold text-muted-foreground">Next up</div>
-        <div className="mt-0.5 text-[21px] leading-tight font-extrabold tracking-tight">Nothing scheduled</div>
+        <div className="text-sm font-bold text-muted-foreground">Next up</div>
+        <div className="mt-1 text-xl leading-tight font-bold tracking-tight">Nothing scheduled</div>
       </div>
     )
   }
   const where = x.description.split('\n')[0]
   return (
-    <Link className={`${box} transition-transform active:scale-[.98]`} to={`/month?d=${x.due}`}>
-      <div className="text-[13px] font-bold" style={{ color: dueColor(x.due!) }}>{countdown(x)} · Next up</div>
-      <div className="mt-0.5 text-[21px] leading-tight font-extrabold tracking-tight">{x.title}</div>
-      {where && <div className="mt-0.5 truncate text-[13px] text-muted-foreground">{where}</div>}
+    <Link className={`${box} transition-transform active:scale-98`} to={`/month?d=${x.due}`}>
+      <div className="text-sm font-bold" style={{ color: dueColor(x.due!) }}>{countdown(x)} · Next up</div>
+      <div className="mt-1 text-xl leading-tight font-bold tracking-tight">{x.title}</div>
+      {where && <div className="mt-1 truncate text-sm text-muted-foreground">{where}</div>}
     </Link>
   )
 }

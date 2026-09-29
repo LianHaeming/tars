@@ -73,7 +73,7 @@ export function MenuPage() {
         <Button asChild size="sm" className="rounded-full">
           <Link to="/food/list">
             <ShoppingBasketIcon />List
-            {basket.ids.length > 0 && <Badge variant="secondary" className="h-4 min-w-4 rounded-full px-1 text-[11px]">{basket.ids.length}</Badge>}
+            {basket.ids.length > 0 && <Badge variant="secondary" className="h-4 min-w-4 rounded-full px-1 text-xs">{basket.ids.length}</Badge>}
           </Link>
         </Button>
       }
@@ -82,7 +82,7 @@ export function MenuPage() {
         <SearchIcon className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
         <Input type="search" value={f.q} onChange={e => set('q')(e.target.value)} placeholder="Search dish or ingredient" className="h-10 rounded-full pl-9" />
       </div>
-      <div className="scrollbar-none -mx-4 mt-2.5 flex items-center gap-1.5 overflow-x-auto px-4 pb-1">
+      <div className="scrollbar-none -mx-4 mt-3 flex items-center gap-2 overflow-x-auto px-4 pb-1">
         <Filter value={f.protein} onChange={set('protein')} any="Any protein" options={uniq('p')} />
         <Filter value={f.cuisine} onChange={set('cuisine')} any="Any cuisine" options={uniq('cu')} />
         <Filter value={f.time} onChange={set('time')} any="Any time" options={[['15', '15 min or less'], ['20', '20 min or less'], ['25', '25 min or less']]} />

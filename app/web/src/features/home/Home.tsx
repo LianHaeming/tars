@@ -3,8 +3,8 @@ import { SECTIONS } from './sections'
 
 export function Home() {
   return (
-    <main className="mx-auto max-w-[680px] px-4 pt-[calc(18px+env(safe-area-inset-top))] pb-[calc(120px+env(safe-area-inset-bottom))]">
-      <header className="px-0.5 pt-2 pb-2.5 text-xs font-bold tracking-[.12em] text-[#9fb6cc] uppercase">{longDate(today())}</header>
+    <main className="mx-auto max-w-page px-4 pt-safe-5 pb-safe-30">
+      <header className="px-1 pt-2 pb-3 text-xs font-bold tracking-widest text-muted-foreground uppercase">{longDate(today())}</header>
       {SECTIONS.map((S, i) => <S key={i} />)}
     </main>
   )

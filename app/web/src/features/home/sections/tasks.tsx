@@ -9,7 +9,7 @@ export function Tasks() {
     <section>
       <SectionHead title="Tasks" count={items.length} link="All lists" to="/lists" />
       {items.map(x => <TaskRow key={x.id} task={x} compact />)}
-      {!items.length && <div className="py-3.5 text-sm text-muted-foreground">All clear.</div>}
+      {!items.length && <div className="py-4 text-sm text-muted-foreground">All clear.</div>}
     </section>
   )
 }

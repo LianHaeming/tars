@@ -63,7 +63,7 @@ export function ListPage() {
           <SectionHead title="Dishes" count={basket.ids.length} />
           <ul>
             {basket.ids.map(id => food.byId.get(id)).filter(r => !!r).map(r => (
-              <li key={r.id} className="flex items-center gap-3 border-b border-border py-2.5">
+              <li key={r.id} className="flex items-center gap-3 border-b border-border py-3">
                 <img src={r.img} alt="" className="h-10 w-13 shrink-0 rounded-md object-cover" />
                 <Link to={`/food/${r.id}`} className="min-w-0 flex-1 truncate">{r.n}</Link>
                 <Button variant="ghost" size="icon-sm" aria-label="Remove" className="text-muted-foreground" onClick={() => basket.toggle(r.id)}><XIcon /></Button>
@@ -76,8 +76,8 @@ export function ListPage() {
           </div>
 
           <div className="mt-6 flex flex-wrap items-end justify-between gap-2 border-b border-border pb-2">
-            <div className="text-[13px] font-bold tracking-[.08em] text-muted-foreground uppercase">
-              Ingredients <span className="font-medium tracking-normal normal-case opacity-70">· 2 servings each</span>
+            <div className="text-sm font-bold tracking-wider text-muted-foreground uppercase">
+              Ingredients <span className="font-semibold tracking-normal normal-case opacity-70">· 2 servings each</span>
             </div>
             <ShopSwitch shops={food.shops} />
           </div>

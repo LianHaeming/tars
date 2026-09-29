@@ -50,11 +50,11 @@ function Ingredients({ d, shops }: { d: Detail; shops: Shop[] }) {
         <span className="text-sm text-muted-foreground">For 2 servings</span>
         <ShopSwitch shops={shops} />
       </div>
-      <ul className="grid grid-cols-3 gap-2.5 sm:grid-cols-4 md:grid-cols-5">
+      <ul className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5">
         {d.ingredients.map((i, n) => (
-          <li key={n} className="flex flex-col items-center gap-1 rounded-xl bg-card px-1.5 py-2.5 text-center text-[13px] leading-tight ring-1 ring-foreground/10">
+          <li key={n} className="flex flex-col items-center gap-1 rounded-xl bg-card px-2 py-3 text-center text-sm leading-tight ring-1 ring-foreground/10">
             {i.img
-              ? <img loading="lazy" src={i.img} alt="" className="size-14 rounded-full bg-white object-contain p-1.5" />
+              ? <img loading="lazy" src={i.img} alt="" className="size-14 rounded-full bg-white object-contain p-2" />
               : <span className="size-14 rounded-full bg-secondary" />}
             <span className="font-semibold">{i.amount}</span>
             <span>{shop ? <ShopName shop={shop} buy={i.buy} fallback={i.name} /> : i.name}</span>
@@ -69,21 +69,21 @@ function Method({ d }: { d: Detail }) {
   return (
     <ol className="flex flex-col gap-5">
       {d.steps.map((s, i) => (
-        <li key={i} className="grid gap-3 sm:grid-cols-[180px_1fr]">
+        <li key={i} className="grid gap-3 sm:grid-cols-3">
           {s.image ? <img loading="lazy" src={s.image} alt="" className="aspect-4/3 w-full rounded-xl bg-secondary object-cover" /> : <div />}
-          <div>
-            <div className="mb-2 flex items-center gap-2.5 text-base font-bold">
-              <span className="grid size-7 shrink-0 place-items-center rounded-full bg-primary/15 text-[13px] text-primary">{i + 1}</span>
+          <div className="sm:col-span-2">
+            <div className="mb-2 flex items-center gap-3 text-base font-bold">
+              <span className="grid size-7 shrink-0 place-items-center rounded-full bg-primary/15 text-sm text-primary">{i + 1}</span>
               {s.title}
             </div>
-            <ul className="flex flex-col gap-1.5">
+            <ul className="flex flex-col gap-2">
               {s.points.map((p, j) => (
-                <li key={j} className="relative pl-4 leading-relaxed before:absolute before:top-[.62em] before:left-0.5 before:size-[5px] before:rounded-full before:bg-muted-foreground" dangerouslySetInnerHTML={richText(p)} />
+                <li key={j} className="flex gap-3"><span className="mt-2 size-1 shrink-0 rounded-full bg-muted-foreground" /><span dangerouslySetInnerHTML={richText(p)} /></li>
               ))}
             </ul>
             {s.notes.map((n, j) => (
-              <div key={j} className={cn('mt-2.5 rounded-lg px-3 py-2 text-sm leading-relaxed', n.kind === 'tip' ? 'bg-primary/10' : 'rounded-l-none border-l-3 border-tomorrow')}>
-                <b className={cn('block text-[11px] tracking-wider uppercase', n.kind === 'tip' ? 'text-primary' : 'text-tomorrow')}>{n.kind === 'tip' ? 'Tip' : 'Important'}</b>
+              <div key={j} className={cn('mt-3 rounded-lg px-3 py-2 text-sm leading-relaxed', n.kind === 'tip' ? 'bg-primary/10' : 'rounded-l-none border-l-3 border-tomorrow')}>
+                <b className={cn('block text-xs tracking-wider uppercase', n.kind === 'tip' ? 'text-primary' : 'text-tomorrow')}>{n.kind === 'tip' ? 'Tip' : 'Important'}</b>
                 <span dangerouslySetInnerHTML={richText(n.text)} />
               </div>
             ))}
@@ -101,16 +101,16 @@ function Nutrition({ d }: { d: Detail }) {
   if (!tiles.length) return <p className="text-sm text-muted-foreground">No nutrition information for this dish.</p>
   return (
     <>
-      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         {tiles.map(([k, label, subK, subLabel]) => {
           const p = pct(k), sub = subK && n[subK]
           return (
-            <Card key={k} className="gap-0 px-4 py-3.5">
-              <div className="text-[13px] font-semibold text-muted-foreground">{label}</div>
-              <div className="mt-0.5 mb-2.5 text-[28px] leading-tight font-bold">
-                {n[k].amount}<span className="ml-0.5 text-[15px] font-semibold text-muted-foreground">{n[k].unit}</span>
+            <Card key={k} className="gap-0 px-4 py-4">
+              <div className="text-sm font-semibold text-muted-foreground">{label}</div>
+              <div className="mt-1 mb-3 text-2xl leading-tight font-bold">
+                {n[k].amount}<span className="ml-1 text-base font-semibold text-muted-foreground">{n[k].unit}</span>
               </div>
-              {p != null && <><Progress value={Math.min(100, p)} className="mb-1.5 h-1.5" /><div className="text-xs text-muted-foreground">{p}% RI</div></>}
+              {p != null && <><Progress value={Math.min(100, p)} className="mb-2 h-2" /><div className="text-xs text-muted-foreground">{p}% RI</div></>}
               {sub && <div className="text-xs text-muted-foreground">{subLabel} {sub.amount} {sub.unit}{pct(subK!) != null && ` · ${pct(subK!)}% RI`}</div>}
             </Card>
           )
@@ -135,14 +135,14 @@ export function RecipePage() {
           <div className="mt-4 flex flex-wrap items-start gap-4">
             <div className="min-w-60 flex-1">
               <div className="text-xs font-semibold text-primary">{tagline(r)}</div>
-              <h2 className="mt-0.5 text-2xl leading-tight font-bold tracking-tight">{r.n}</h2>
+              <h2 className="mt-1 text-2xl leading-tight font-bold tracking-tight">{r.n}</h2>
               <div className="text-muted-foreground">{r.h}</div>
-              <div className="mt-1.5 text-sm text-muted-foreground">{meta(r)}</div>
+              <div className="mt-2 text-sm text-muted-foreground">{meta(r)}</div>
             </div>
             <BasketButton id={r.id} />
           </div>
           <Tabs defaultValue="ingredients" className="mt-5">
-            <TabsList variant="line" className="sticky top-[calc(3.5rem+env(safe-area-inset-top))] z-10 w-full justify-start gap-4 border-b border-border bg-background">
+            <TabsList variant="line" className="sticky top-below-header z-10 w-full justify-start gap-4 border-b border-border bg-background">
               <TabsTrigger value="ingredients" className="flex-none">Ingredients</TabsTrigger>
               <TabsTrigger value="method" className="flex-none">Method</TabsTrigger>
               <TabsTrigger value="nutrition" className="flex-none">Nutrition</TabsTrigger>
