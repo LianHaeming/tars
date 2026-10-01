@@ -1,4 +1,5 @@
 import { RouterProvider, createBrowserRouter } from 'react-router'
+import { AppsPage } from '@/features/apps/AppsPage'
 import { ListPage } from '@/features/food/ListPage'
 import { MenuPage } from '@/features/food/MenuPage'
 import { RecipePage } from '@/features/food/RecipePage'
@@ -14,6 +15,7 @@ const router = createBrowserRouter([
     element: <Layout />,
     children: [
       { path: '/', element: <Home /> },
+      { path: '/apps', element: <AppsPage /> },
       { path: '/lists/:key?', element: <ListsPage /> },
       { path: '/month', element: <MonthPage /> },
       { path: '/shopping', element: <ShoppingPage /> },

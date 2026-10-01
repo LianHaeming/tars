@@ -20,13 +20,16 @@ app/
 bin/             sync, up, backup, gmail
 ```
 
-- **The app** (Lian's phone, over Tailscale): Home — Next up card, Food / Shopping buttons, then flat lists at the root:
-  Upcoming (dated) and Tasks (undated, not Shopping). When the top cards scroll away, a compact navy bar with the
-  quick links fades in (`features/home/quick-links.tsx` is the one list both use). Dock: a small **Add task** pill and a
-  separate round **Tars** (chat) button. Safari's status strip is `theme-color` = `--chrome` (#15263a) — keep them equal
-  so the top reads as one navy surface; added to the Home Screen it runs standalone (manifest) under the Dynamic Island.
-  Everything else is a **page** with its own URL and a back button — Lian doesn't want pop-up windows: `/lists/:key`,
-  `/month?d=`, `/shopping`, `/tars`, `/food`, `/food/:id`, `/food/list`. No bottom tabs. "Todo"/"calendar" = this app.
+- **The app** (Lian's phone, over Tailscale): two tabs. **Schedule** (`/`) — greeting + date, a row of list filter
+  labels (All + one per list, in the list's colour; choice kept in browser storage), **Upcoming** grouped by day
+  (Overdue first; today's next timed task is a highlighted "main event" pill that expands in place for notes / Mark done /
+  Edit), then **To-do · no date**. Rows show the list as a coloured tag under All. **Apps** (`/apps`) — a 3-column grid of
+  tiles: Food, Shopping, Calendar (`/month`), Lists. Dock (on Schedule, Apps and app pages, not `/tars`): round **Add task**
+  button, centred Schedule | Apps pill (Apps stays lit on app pages), round **Tars** (chat) button. Safari's status strip
+  is `theme-color` = `--chrome` (#15263a) — keep them equal so the top reads as one navy surface; added to the Home
+  Screen it runs standalone (manifest) under the Dynamic Island. Everything else is a **page** with its own URL and a
+  back button (app pages go back to `/apps`) — Lian doesn't want pop-up windows: `/lists/:key`, `/month?d=`,
+  `/shopping`, `/tars`, `/food`, `/food/:id`, `/food/list`. "Todo"/"calendar" = this app.
 - **API** (`app/server/index.js`): `GET /api/state` · `POST|PATCH|DELETE /api/tasks[/id]` · `/api/projects[/id]` ·
   `POST /api/shopping {items}` (replaces the Shopping list's unticked items) · `GET|PATCH /api/food {basket, shop}` ·
   `GET|DELETE /api/chat` · `POST /api/ask {message}` (runs `claude -p` in `~/tars`, streams NDJSON text/status/error/done,
@@ -35,8 +38,8 @@ bin/             sync, up, backup, gmail
 - **Frontend** (`app/web/src/`), grouped by feature:
   - `app/` — App.tsx (routes), Layout.tsx (dock, quick-add, toasts), Dock.tsx.
   - `features/tasks/` — store.tsx (`useTars()`: all task state + actions), parse-quick-add.ts, TaskRow, QuickAdd,
-    NameDialog, ListsPage (+ ShoppingPage), MonthPage. `features/home/` — Home, CompactBar, quick-links + `sections/`
-    (`sections/index.ts`: TOP_SECTIONS next-up, actions — these collapse into the bar; LIST_SECTIONS upcoming, tasks). `features/food/` — data.ts (content + server-backed basket/shop),
+    NameDialog, ListsPage (+ ShoppingPage), MonthPage. `features/home/` — Home (the Schedule tab), MainEvent.
+    `features/apps/` — AppsPage (the tile list lives in it). `features/food/` — data.ts (content + server-backed basket/shop),
     parts.tsx, MenuPage, RecipePage, ListPage. `features/tars/` — TarsPage.
   - `components/` — Page.tsx (every page's header/back/width), common.tsx (SectionHead, Section, Empty, PillBar, pill),
     `ui/` (shadcn: `cd app/web && npx shadcn@latest add <name>`). `lib/` — api.ts, dates.ts, utils.ts.

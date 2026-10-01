@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 
-type Opts = { hideProject?: boolean; hideDue?: boolean; compact?: boolean }
+type Opts = { hideProject?: boolean; hideDue?: boolean; compact?: boolean; tag?: boolean }
 
 const pc = (p: number) => ({ '--pc': `var(--p${p})` }) as CSSProperties
 
@@ -33,7 +33,7 @@ function Check({ task, onDone }: { task: Task; onDone: () => void }) {
   )
 }
 
-export function TaskRow({ task, hideProject, hideDue, compact }: { task: Task } & Opts) {
+export function TaskRow({ task, hideProject, hideDue, compact, tag }: { task: Task } & Opts) {
   const { openId, setOpenId, toggleDone, project } = useTars()
   const [completing, setCompleting] = useState(false)
   const p = project(task.projectId)
@@ -63,14 +63,14 @@ export function TaskRow({ task, hideProject, hideDue, compact }: { task: Task } 
           {task.description && !compact && (
             <div className="line-clamp-2 text-sm whitespace-pre-wrap text-muted-foreground">{task.description}</div>
           )}
-          <Meta task={task} hideDue={hideDue} project={hideProject ? undefined : p} />
+          <Meta task={task} hideDue={hideDue} project={hideProject || (compact && !tag) ? undefined : p} tag={tag} />
         </div>
       </div>
     </div>
   )
 }
 
-function Meta({ task, hideDue, project }: { task: Task; hideDue?: boolean; project?: { name: string; color: string } }) {
+function Meta({ task, hideDue, project, tag }: { task: Task; hideDue?: boolean; project?: { name: string; color: string }; tag?: boolean }) {
   const items = []
   if (task.due && !hideDue) {
     items.push(
@@ -85,7 +85,9 @@ function Meta({ task, hideDue, project }: { task: Task; hideDue?: boolean; proje
       </span>,
     )
   }
-  if (project) {
+  if (project && tag) {
+    items.unshift(<span key="proj" className="font-semibold tracking-wider uppercase" style={{ color: project.color }}>{project.name}</span>)
+  } else if (project) {
     items.push(
       <span key="proj"><span className="size-2 rounded-full" style={{ background: project.color }} />{project.name}</span>,
     )

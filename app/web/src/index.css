@@ -192,10 +192,6 @@
   bottom: calc(--spacing(--value(integer)) + env(safe-area-inset-bottom));
 }
 
-@utility above-header {
-  top: calc(-1 * (--spacing(14) + env(safe-area-inset-top)));
-}
-
 @utility top-below-header {
   top: calc(--spacing(14) + env(safe-area-inset-top));
 }

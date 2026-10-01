@@ -153,6 +153,7 @@ export function ListsPage() {
   return (
     <Page
       title="All lists"
+      back="/apps"
       actions={v.project && <ProjectTools id={v.project.id} name={v.project.name} after={() => navigate('/lists/inbox', { replace: true })} />}
     >
       <ListTabs current={current} />
@@ -166,7 +167,7 @@ export function ShoppingPage() {
   const { shoppingList } = useTars()
   useListView(shoppingList ? 'project:' + shoppingList.id : null)
   return (
-    <Page title="Shopping" actions={<Button asChild variant="ghost" size="sm" className="text-primary"><Link to="/food/list">From Food</Link></Button>}>
+    <Page title="Shopping" back="/apps" actions={<Button asChild variant="ghost" size="sm" className="text-primary"><Link to="/food/list">From Food</Link></Button>}>
       <div className="pt-2">{shoppingList && <ListBody />}</div>
     </Page>
   )

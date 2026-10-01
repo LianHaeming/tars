@@ -68,6 +68,7 @@ export function MenuPage() {
   return (
     <Page
       title="Food"
+      back="/apps"
       wide
       actions={
         <Button asChild size="sm" className="rounded-full">

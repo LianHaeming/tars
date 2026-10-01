@@ -43,7 +43,7 @@ export function MonthPage() {
   }
 
   return (
-    <Page title="Month">
+    <Page title="Month" back="/apps">
       <div className="relative">
         <Calendar
           mode="single"
