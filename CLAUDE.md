@@ -22,7 +22,7 @@ bin/             sync, up, backup, gmail
 
 - **The app** (Lian's phone, over Tailscale): two tabs. **Schedule** (`/`) — greeting + date, a row of list filter
   labels (All + one per list, in the list's colour; choice kept in browser storage), **Upcoming** grouped by day
-  (Overdue first; expected Monzo payments for the next 35 days mixed in as teal Money rows with a Money filter label;
+  (next 14 days only, then an "N more · See Month" link; Overdue first; expected Monzo payments mixed in as teal Money rows with a Money filter label;
   today's next timed task is a highlighted "main event" pill that expands in place for notes / Mark done /
   Edit), then **To-do · no date**. Rows show the list as a coloured tag under All. **Apps** (`/apps`) — a 3-column grid of
   tiles: Food, Shopping, Calendar (`/month`), Lists, Money (`/money` — Monzo balance, pots, spending charts by

@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from 'react'
+import { Link } from 'react-router'
 import { cn } from '@/lib/utils'
 import { localGet, localSet, type Task } from '@/lib/api'
 import { addDays, dayDiff, hhmm, longDate, parseYmd, today, ymd } from '@/lib/dates'
@@ -9,7 +10,7 @@ import { PaymentRow, useExpected, type Expected } from '@/features/money/expecte
 import { MainEvent } from './MainEvent'
 
 type Entry = { day: string; task?: Task; pay?: Expected }
-const PAY_DAYS = 35
+const UPCOMING_DAYS = 14
 
 function greeting() {
   const h = new Date().getHours()
@@ -138,9 +139,11 @@ export function Home() {
   const main = todaysEvent(dated)
   const t = ymd(today())
   const tag = active === 'all'
-  const payUntil = ymd(addDays(today(), active === 'money' ? 90 : PAY_DAYS))
-  const pays = active === 'all' || active === 'money' ? expected.filter(p => p.date <= payUntil) : []
-  const entries: Entry[] = [...dated.map(task => ({ day: task.due!, task })), ...pays.map(pay => ({ day: pay.date, pay }))]
+  const until = ymd(addDays(today(), UPCOMING_DAYS - 1))
+  const pays = active === 'all' || active === 'money' ? expected : []
+  const all: Entry[] = [...dated.map(task => ({ day: task.due!, task })), ...pays.map(pay => ({ day: pay.date, pay }))]
+  const entries = all.filter(e => e.day <= until)
+  const later = all.length - entries.length
 
   return (
     <main className="mx-auto max-w-page px-4 pt-safe-5 pb-safe-30">
@@ -169,7 +172,12 @@ export function Home() {
               : <PaymentRow key={e.pay!.id} p={e.pay!} tag={tag} />)}
           </div>
         ))}
-        {!entries.length && <div className="py-4 text-sm text-muted-foreground">Nothing coming up.</div>}
+        {!entries.length && <div className="py-4 text-sm text-muted-foreground">Nothing in the next {UPCOMING_DAYS} days.</div>}
+        {later > 0 && (
+          <Link to="/month" className="block py-3 text-sm text-muted-foreground">
+            {later} more after {dayHeading(until)} · <span className="font-semibold text-primary">See Month</span>
+          </Link>
+        )}
       </section>
 
       {active !== 'money' && <section>
