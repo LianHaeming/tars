@@ -11,6 +11,7 @@ Usage:
     bin/monzo status                   check the token works and the app approval went through
     bin/monzo balance                  current account balance, spent today, and pots
     bin/monzo transactions [-d DAYS]   recent transactions (default 14 days, max 89 - Monzo blocks older without re-verifying)
+    bin/monzo json                     balance, pots and 89 days of transactions as JSON (for the app's /api/money)
 
 Client: ~/.config/tars/monzo-client.json. Token: ~/.config/tars/monzo-token.json.
 """
@@ -182,16 +183,19 @@ def balance():
             print(f"  {p['name']:<28} {money(p['balance'], p['currency'])}")
 
 
-def transactions(days):
-    acc = current_account()
+def fetch_transactions(acc, days):
     since = (datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=days)).strftime("%Y-%m-%dT%H:%M:%SZ")
     txs = []
     while True:
         page = api("transactions", account_id=acc["id"], since=since, limit=100, **{"expand[]": "merchant"})["transactions"]
         txs += page
         if len(page) < 100:
-            break
+            return txs
         since = page[-1]["id"]
+
+
+def transactions(days):
+    txs = fetch_transactions(current_account(), days)
     if not txs:
         print(f"no transactions in the last {days} days")
     for t in txs:
@@ -200,6 +204,29 @@ def transactions(days):
         flag = f"  [declined: {t['decline_reason']}]" if t.get("decline_reason") else ""
         print(f"{t['created'][:10]}  {money(t['amount'], t['currency']):>11}  {t.get('category', ''):<14} "
               f"{name or t.get('description', '')}{flag}")
+
+
+def slim(t):
+    merchant = t.get("merchant") if isinstance(t.get("merchant"), dict) else {}
+    counterparty = t.get("counterparty") or {}
+    return {
+        "id": t["id"], "created": t["created"], "amount": t["amount"], "currency": t["currency"],
+        "category": t.get("category", ""), "name": merchant.get("name") or counterparty.get("name") or t.get("description", ""),
+        "logo": merchant.get("logo") or None, "spending": bool(t.get("include_in_spending")),
+        "declined": bool(t.get("decline_reason")), "pending": bool(t.get("amount_is_pending")),
+    }
+
+
+def dump_json():
+    acc = current_account()
+    b = api("balance", account_id=acc["id"])
+    pots = [p for p in api("pots", current_account_id=acc["id"])["pots"] if not p.get("deleted")]
+    json.dump({
+        "fetchedAt": int(time.time() * 1000),
+        "balance": {"balance": b["balance"], "spendToday": b["spend_today"], "currency": b["currency"]},
+        "pots": [{"id": p["id"], "name": p["name"], "balance": p["balance"], "currency": p["currency"]} for p in pots],
+        "transactions": [slim(t) for t in fetch_transactions(acc, 89)],
+    }, sys.stdout)
 
 
 def main():
@@ -215,6 +242,7 @@ def main():
     sub.add_parser("balance")
     s = sub.add_parser("transactions")
     s.add_argument("-d", "--days", type=int, default=14)
+    sub.add_parser("json")
     a = p.parse_args()
     try:
         if a.cmd == "setup":
@@ -225,6 +253,8 @@ def main():
             status()
         elif a.cmd == "balance":
             balance()
+        elif a.cmd == "json":
+            dump_json()
         else:
             transactions(min(a.days, 89))
     except LoginNeeded:

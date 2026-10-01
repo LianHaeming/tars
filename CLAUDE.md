@@ -24,23 +24,25 @@ bin/             sync, up, backup, gmail
   labels (All + one per list, in the list's colour; choice kept in browser storage), **Upcoming** grouped by day
   (Overdue first; today's next timed task is a highlighted "main event" pill that expands in place for notes / Mark done /
   Edit), then **To-do · no date**. Rows show the list as a coloured tag under All. **Apps** (`/apps`) — a 3-column grid of
-  tiles: Food, Shopping, Calendar (`/month`), Lists. Dock (on Schedule, Apps and app pages, not `/tars`): round **Add task**
+  tiles: Food, Shopping, Calendar (`/month`), Lists, Money (`/money` — Monzo balance, pots, spending charts by
+  day/week and category, top places, transactions; period 7/30/89 days). Dock (on Schedule, Apps and app pages, not `/tars`): round **Add task**
   button, centred Schedule | Apps pill (Apps stays lit on app pages), round **Tars** (chat) button. Safari's status strip
   is `theme-color` = `--chrome` (#15263a) — keep them equal so the top reads as one navy surface; added to the Home
   Screen it runs standalone (manifest) under the Dynamic Island. Everything else is a **page** with its own URL and a
   back button (app pages go back to `/apps`) — Lian doesn't want pop-up windows: `/lists/:key`, `/month?d=`,
-  `/shopping`, `/tars`, `/food`, `/food/:id`, `/food/list`. "Todo"/"calendar" = this app.
+  `/shopping`, `/money`, `/tars`, `/food`, `/food/:id`, `/food/list`. "Todo"/"calendar" = this app.
 - **API** (`app/server/index.js`): `GET /api/state` · `POST|PATCH|DELETE /api/tasks[/id]` · `/api/projects[/id]` ·
   `POST /api/shopping {items}` (replaces the Shopping list's unticked items) · `GET|PATCH /api/food {basket, shop}` ·
   `GET|DELETE /api/chat` · `POST /api/ask {message}` (runs `claude -p` in `~/tars`, streams NDJSON text/status/error/done,
-  saves the conversation in chat.json; read-only tools + `bin/gmail` + curl to the API, never edits code).
+  saves the conversation in chat.json; read-only tools + `bin/gmail` + curl to the API, never edits code) ·
+  `GET /api/money[/fresh]` (runs `bin/monzo json` via `server/money.js`, cached 2 min; 503 with the message if sign-in is needed).
   Static: `/data/food/*` from data/food; anything else is the built app (page URLs fall back to index.html).
 - **Frontend** (`app/web/src/`), grouped by feature:
   - `app/` — App.tsx (routes), Layout.tsx (dock, quick-add, toasts), Dock.tsx.
   - `features/tasks/` — store.tsx (`useTars()`: all task state + actions), parse-quick-add.ts, TaskRow, QuickAdd,
     NameDialog, ListsPage (+ ShoppingPage), MonthPage. `features/home/` — Home (the Schedule tab), MainEvent.
     `features/apps/` — AppsPage (the tile list lives in it). `features/food/` — data.ts (content + server-backed basket/shop),
-    parts.tsx, MenuPage, RecipePage, ListPage. `features/tars/` — TarsPage.
+    parts.tsx, MenuPage, RecipePage, ListPage. `features/tars/` — TarsPage. `features/money/` — data.ts (fetch + spend maths), charts.tsx, MoneyPage.
   - `components/` — Page.tsx (every page's header/back/width), common.tsx (SectionHead, Section, Empty, PillBar, pill),
     `ui/` (shadcn: `cd app/web && npx shadcn@latest add <name>`). `lib/` — api.ts, dates.ts, utils.ts.
   - **One look everywhere**: shadcn components + the shared pieces above; never hard-code colours — use the tokens in
@@ -48,7 +50,7 @@ bin/             sync, up, backup, gmail
   - **Crispness rules** (see UI-CRISPNESS-BRIEF.md): type ramp only — `text-xs/sm/base/lg/xl/2xl` = 12/13/15/17/20/24,
     `text-field` (16) for every text input so iOS never zooms; weights 400 body / 600 labels / 700 headings.
     4px spacing scale, no half steps, **no arbitrary `[..px]` values** — add a named token/utility in index.css
-    instead (e.g. `max-w-page`, `pt-safe-*`/`pb-safe-*`/`bottom-safe-*`, `top-below-header`, `ease-sheet`).
+    instead (e.g. `text-hero`, `rounded-mark`, `max-w-page`, `pt-safe-*`/`pb-safe-*`/`bottom-safe-*`, `top-below-header`, `ease-sheet`).
     Separators are `hairline`/`hairline-t`/`hairline-b` (0.5px). Sticky/fixed bars use solid `chrome-bar`/`bg-chrome`;
     **no backdrop blur except the dock**. No visible scrollbars. Cards: `glass` (translucent, no blur). Motion: transform/opacity only,
     150–250ms (`ease-sheet` for sheets); reduced motion is handled globally.

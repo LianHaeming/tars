@@ -19,6 +19,9 @@
     --text-xl--line-height: 26px;
     --text-2xl: 24px;
     --text-2xl--line-height: 30px;
+    --text-hero: 48px;
+    --text-hero--line-height: 52px;
+    --radius-mark: 4px;
     --container-page: 680px;
     --ease-sheet: cubic-bezier(.2, .8, .2, 1);
 }

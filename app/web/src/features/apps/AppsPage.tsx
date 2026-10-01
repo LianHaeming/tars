@@ -1,5 +1,5 @@
 import { Link } from 'react-router'
-import { CalendarDaysIcon, ListChecksIcon, ShoppingCartIcon, UtensilsIcon } from 'lucide-react'
+import { CalendarDaysIcon, ListChecksIcon, ShoppingCartIcon, UtensilsIcon, WalletIcon } from 'lucide-react'
 import { today, ymd } from '@/lib/dates'
 import { useBasket } from '@/features/food/data'
 import { useTars } from '@/features/tasks/store'
@@ -16,6 +16,7 @@ function useApps() {
     { to: '/shopping', label: 'Shopping', sub: `${toBuy} to buy`, icon: <ShoppingCartIcon /> },
     { to: '/month', label: 'Calendar', sub: `${coming} coming up`, icon: <CalendarDaysIcon /> },
     { to: '/lists', label: 'Lists', sub: `${tasks} tasks`, icon: <ListChecksIcon /> },
+    { to: '/money', label: 'Money', sub: 'Monzo', icon: <WalletIcon /> },
   ]
 }
 

@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils'
 import { useTars } from '@/features/tasks/store'
 import { openQuickAdd } from '@/features/tasks/QuickAdd'
 
-export const showsDock = (path: string) => path === '/' || /^\/(apps|lists|month|shopping|food)(\/|$)/.test(path)
+export const showsDock = (path: string) => path === '/' || /^\/(apps|lists|month|money|shopping|food)(\/|$)/.test(path)
 
 export function Dock() {
   const { adding, setAdding } = useTars()
