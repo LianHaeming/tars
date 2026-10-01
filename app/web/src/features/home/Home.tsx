@@ -8,6 +8,7 @@ import { TaskRow } from '@/features/tasks/TaskRow'
 import { SectionHead } from '@/components/common'
 import { PaymentRow, useExpected, type Expected } from '@/features/money/expected'
 import { MainEvent } from './MainEvent'
+import { BurmeseCard } from '@/features/burmese/BurmeseCard'
 
 type Entry = { day: string; task?: Task; pay?: Expected }
 const UPCOMING_DAYS = 14
@@ -137,6 +138,7 @@ export function Home() {
   return (
     <main className="mx-auto max-w-page px-4 pt-safe-5 pb-safe-30">
       <LifeBar />
+      <div className="mt-3"><BurmeseCard /></div>
       <header className="px-1 pt-4">
         <h1 className="text-2xl font-bold tracking-tight">{greeting()}, Lian</h1>
         <p className="mt-1 text-xs font-semibold tracking-widest text-muted-foreground uppercase">{longDate(today())}</p>

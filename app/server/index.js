@@ -7,6 +7,7 @@ const crypto = require('crypto');
 const store = require('./store');
 const { ask, isBusy } = require('./ask');
 const { money, expected } = require('./money');
+const burmese = require('./burmese');
 
 const PORT = process.env.PORT || 8400;
 const DIST = path.join(__dirname, '..', 'dist');
@@ -119,6 +120,14 @@ async function api(req, res, parts) {
   if (resource === 'expected' && req.method === 'GET') {
     try { return send(res, 200, await expected()); }
     catch (e) { return send(res, 503, { error: e.message }); }
+  }
+
+  if (resource === 'burmese') {
+    if (req.method === 'GET') return send(res, 200, burmese.current());
+    if (req.method === 'POST') {
+      try { return send(res, 200, { ...(await burmese.generate()), stale: false }); }
+      catch (e) { return send(res, 503, { error: e.message }); }
+    }
   }
 
   if (resource === 'ask' && req.method === 'POST') {
