@@ -1,11 +1,15 @@
 import { useState, type ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 import { localGet, localSet, type Task } from '@/lib/api'
-import { dayDiff, hhmm, longDate, parseYmd, today, ymd } from '@/lib/dates'
+import { addDays, dayDiff, hhmm, longDate, parseYmd, today, ymd } from '@/lib/dates'
 import { byPriority, byWhen, useTars } from '@/features/tasks/store'
 import { TaskRow } from '@/features/tasks/TaskRow'
 import { SectionHead } from '@/components/common'
+import { PaymentRow, useExpected, type Expected } from '@/features/money/expected'
 import { MainEvent } from './MainEvent'
+
+type Entry = { day: string; task?: Task; pay?: Expected }
+const PAY_DAYS = 35
 
 function greeting() {
   const h = new Date().getHours()
@@ -63,12 +67,12 @@ function todaysEvent(dated: Task[]) {
   return timed.find(x => x.dueTime! >= now) ?? timed.at(-1)
 }
 
-function byDay(dated: Task[]) {
+function byDay(entries: Entry[]) {
   const t = ymd(today())
-  const groups = new Map<string, Task[]>()
-  for (const x of dated) {
-    const k = x.due! < t ? 'overdue' : x.due!
-    groups.set(k, [...(groups.get(k) ?? []), x])
+  const key = (e: Entry) => (e.day < t ? 'overdue' : e.day)
+  const groups = new Map<string, Entry[]>()
+  for (const e of [...entries].sort((a, b) => (key(a) === 'overdue' ? '' : a.day).localeCompare(key(b) === 'overdue' ? '' : b.day))) {
+    groups.set(key(e), [...(groups.get(key(e)) ?? []), e])
   }
   return [...groups]
 }
@@ -100,8 +104,9 @@ function DayHead({ day, onMove }: { day: string; onMove: () => void }) {
 
 export function Home() {
   const { open, state, rescheduleOverdue } = useTars()
+  const expected = useExpected()
   const [filter, setFilter] = useState(() => localGet('home-filter') || 'all')
-  const active = state.projects.some(p => p.id === filter) ? filter : 'all'
+  const active = filter === 'money' || state.projects.some(p => p.id === filter) ? filter : 'all'
   const pick = (k: string) => { setFilter(k); localSet('home-filter', k) }
 
   const shown = active === 'all' ? open : open.filter(x => x.projectId === active)
@@ -110,6 +115,9 @@ export function Home() {
   const main = todaysEvent(dated)
   const t = ymd(today())
   const tag = active === 'all'
+  const payUntil = ymd(addDays(today(), active === 'money' ? 90 : PAY_DAYS))
+  const pays = active === 'all' || active === 'money' ? expected.filter(p => p.date <= payUntil) : []
+  const entries: Entry[] = [...dated.map(task => ({ day: task.due!, task })), ...pays.map(pay => ({ day: pay.date, pay }))]
 
   return (
     <main className="mx-auto max-w-page px-4 pt-safe-5 pb-safe-30">
@@ -124,25 +132,28 @@ export function Home() {
         {state.projects.map(p => (
           <FilterLabel key={p.id} on={active === p.id} color={p.color} onClick={() => pick(p.id)}>{p.name}</FilterLabel>
         ))}
+        {expected.length > 0 && <FilterLabel on={active === 'money'} color="var(--money)" onClick={() => pick('money')}>Money</FilterLabel>}
       </nav>
 
       <section>
         <SectionHead title="Upcoming" link="Month" to="/month" />
-        {byDay(dated).map(([day, list]) => (
+        {byDay(entries).map(([day, list]) => (
           <div key={day}>
             <DayHead day={day} onMove={rescheduleOverdue} />
             {day === t && main && <MainEvent task={main} />}
-            {list.filter(x => x !== main).map(x => <TaskRow key={x.id} task={x} compact tag={tag} hideDue={day !== 'overdue'} />)}
+            {list.map(e => e.task
+              ? e.task !== main && <TaskRow key={e.task.id} task={e.task} compact tag={tag} hideDue={day !== 'overdue'} />
+              : <PaymentRow key={e.pay!.id} p={e.pay!} tag={tag} />)}
           </div>
         ))}
-        {!dated.length && <div className="py-4 text-sm text-muted-foreground">Nothing coming up.</div>}
+        {!entries.length && <div className="py-4 text-sm text-muted-foreground">Nothing coming up.</div>}
       </section>
 
-      <section>
+      {active !== 'money' && <section>
         <SectionHead title="To-do · no date" count={undated.length} link="All lists" to="/lists" />
         {undated.map(x => <TaskRow key={x.id} task={x} compact tag={tag} />)}
         {!undated.length && <div className="py-4 text-sm text-muted-foreground">All clear.</div>}
-      </section>
+      </section>}
     </main>
   )
 }

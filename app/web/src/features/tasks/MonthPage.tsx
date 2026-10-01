@@ -9,6 +9,7 @@ import { Calendar, CalendarDayButton } from '@/components/ui/calendar'
 import { Empty, Section } from '@/components/common'
 import { Page } from '@/components/Page'
 import { TaskRow } from '@/features/tasks/TaskRow'
+import { PaymentRow, useExpected, type Expected } from '@/features/money/expected'
 
 export function MonthPage() {
   const { open, calSel, setCalSel } = useTars()
@@ -18,15 +19,21 @@ export function MonthPage() {
   useListView('calendar')
   useEffect(() => { if (/^\d{4}-\d{2}-\d{2}$/.test(start)) setCalSel(start) }, [start])
 
+  const expected = useExpected()
   const byDay: Record<string, Task[]> = {}
   open.forEach(x => { if (x.due) (byDay[x.due] ||= []).push(x) })
+  const paysByDay: Record<string, Expected[]> = {}
+  expected.forEach(p => { (paysByDay[p.date] ||= []).push(p) })
 
   const rel = relDay(calSel)
   const full = longDate(parseYmd(calSel))
   const list = (byDay[calSel] || []).sort(byTime)
+  const pays = paysByDay[calSel] || []
 
   function Day(props: ComponentProps<typeof DayButton>) {
-    const dots = (byDay[ymd(props.day.date)] || []).slice(0, 3)
+    const d = ymd(props.day.date)
+    const hasPay = !!paysByDay[d]
+    const dots = (byDay[d] || []).slice(0, hasPay ? 2 : 3)
     return (
       <CalendarDayButton
         {...props}
@@ -37,6 +44,7 @@ export function MonthPage() {
         </span>
         <span className="flex h-1 gap-1">
           {dots.map(x => <i key={x.id} className="block size-1 rounded-full" style={{ background: `var(--p${x.priority})` }} />)}
+          {hasPay && <i className="block size-1 rounded-full bg-money" />}
         </span>
       </CalendarDayButton>
     )
@@ -77,7 +85,8 @@ export function MonthPage() {
         <span>{rel || full}{rel && <span className="font-semibold text-muted-foreground"> · {full}</span>}</span>
       </Section>
       {list.map(x => <TaskRow key={x.id} task={x} hideDue />)}
-      {!list.length && <Empty>Nothing on this day. Tap Add task to add one.</Empty>}
+      {pays.map(p => <PaymentRow key={p.id} p={p} />)}
+      {!list.length && !pays.length && <Empty>Nothing on this day. Tap Add task to add one.</Empty>}
     </Page>
   )
 }

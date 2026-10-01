@@ -34,6 +34,7 @@
     --color-tomorrow: var(--tomorrow);
     --color-week: var(--week);
     --color-claude: var(--claude);
+    --color-money: var(--money);
     --color-p1: var(--p1);
     --color-p2: var(--p2);
     --color-p3: var(--p3);
@@ -109,6 +110,7 @@
     --tomorrow: #ffb547;
     --week: #b18cff;
     --claude: #b18cff;
+    --money: #2bc4b4;
     --p1: #ff6a5f;
     --p2: #ffa22e;
     --p3: #4f9dff;

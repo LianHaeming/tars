@@ -21,7 +21,10 @@ present a single chronological list. Timezone is **Europe/London**.
 2. **Todo app** — `GET http://127.0.0.1:8400/api/state` returns `{ tasks, projects }`.
    Tasks have `title`, `due` (`YYYY-MM-DD`), `dueTime` (`HH:MM` or null),
    `description`, `done`. Include not-`done` tasks with a `due` of today or later.
-3. **Google Calendar** — if the calendar connector tools are present in the
+3. **Expected payments** — `curl -s http://127.0.0.1:8400/api/expected` lists repeating Monzo payments and income
+   predicted from history (`date`, `name`, `amount` in pence — negative is money out, `kind`, `varies`, `late`).
+   Include bills/direct debits and income in the list, marked as expected.
+4. **Google Calendar** — if the calendar connector tools are present in the
    session, list events for the next ~2 weeks too. If not present, skip silently.
 
 ## How to answer

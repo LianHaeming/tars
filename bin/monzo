@@ -214,6 +214,7 @@ def slim(t):
         "category": t.get("category", ""), "name": merchant.get("name") or counterparty.get("name") or t.get("description", ""),
         "logo": merchant.get("logo") or None, "spending": bool(t.get("include_in_spending")),
         "declined": bool(t.get("decline_reason")), "pending": bool(t.get("amount_is_pending")),
+        "scheme": t.get("scheme", ""),
     }
 
 

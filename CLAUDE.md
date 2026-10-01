@@ -22,7 +22,8 @@ bin/             sync, up, backup, gmail
 
 - **The app** (Lian's phone, over Tailscale): two tabs. **Schedule** (`/`) — greeting + date, a row of list filter
   labels (All + one per list, in the list's colour; choice kept in browser storage), **Upcoming** grouped by day
-  (Overdue first; today's next timed task is a highlighted "main event" pill that expands in place for notes / Mark done /
+  (Overdue first; expected Monzo payments for the next 35 days mixed in as teal Money rows with a Money filter label;
+  today's next timed task is a highlighted "main event" pill that expands in place for notes / Mark done /
   Edit), then **To-do · no date**. Rows show the list as a coloured tag under All. **Apps** (`/apps`) — a 3-column grid of
   tiles: Food, Shopping, Calendar (`/month`), Lists, Money (`/money` — Monzo balance, pots, spending charts by
   day/week and category, top places, transactions; period 7/30/89 days). Dock (on Schedule, Apps and app pages, not `/tars`): round **Add task**
@@ -35,14 +36,16 @@ bin/             sync, up, backup, gmail
   `POST /api/shopping {items}` (replaces the Shopping list's unticked items) · `GET|PATCH /api/food {basket, shop}` ·
   `GET|DELETE /api/chat` · `POST /api/ask {message}` (runs `claude -p` in `~/tars`, streams NDJSON text/status/error/done,
   saves the conversation in chat.json; read-only tools + `bin/gmail` + curl to the API, never edits code) ·
-  `GET /api/money[/fresh]` (runs `bin/monzo json` via `server/money.js`, cached 2 min; 503 with the message if sign-in is needed).
+  `GET /api/money[/fresh]` (runs `bin/monzo json` via `server/money.js`, cached 2 min; 503 with the message if sign-in is needed) ·
+  `GET /api/expected` (repeating payments/income predicted from the last 89 days — monthly or weekly, split by amount when a
+  payee has several, stopped ones dropped, late ones shown today; next 90 days; Monzo data reused up to 1 h).
   Static: `/data/food/*` from data/food; anything else is the built app (page URLs fall back to index.html).
 - **Frontend** (`app/web/src/`), grouped by feature:
   - `app/` — App.tsx (routes), Layout.tsx (dock, quick-add, toasts), Dock.tsx.
   - `features/tasks/` — store.tsx (`useTars()`: all task state + actions), parse-quick-add.ts, TaskRow, QuickAdd,
     NameDialog, ListsPage (+ ShoppingPage), MonthPage. `features/home/` — Home (the Schedule tab), MainEvent.
     `features/apps/` — AppsPage (the tile list lives in it). `features/food/` — data.ts (content + server-backed basket/shop),
-    parts.tsx, MenuPage, RecipePage, ListPage. `features/tars/` — TarsPage. `features/money/` — data.ts (fetch + spend maths), charts.tsx, MoneyPage.
+    parts.tsx, MenuPage, RecipePage, ListPage. `features/tars/` — TarsPage. `features/money/` — data.ts (fetch + spend maths), charts.tsx, MoneyPage, expected.tsx (useExpected + PaymentRow, used by Home and MonthPage).
   - `components/` — Page.tsx (every page's header/back/width), common.tsx (SectionHead, Section, Empty, PillBar, pill),
     `ui/` (shadcn: `cd app/web && npx shadcn@latest add <name>`). `lib/` — api.ts, dates.ts, utils.ts.
   - **One look everywhere**: shadcn components + the shared pieces above; never hard-code colours — use the tokens in

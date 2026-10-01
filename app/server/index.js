@@ -6,7 +6,7 @@ const path = require('path');
 const crypto = require('crypto');
 const store = require('./store');
 const { ask, isBusy } = require('./ask');
-const { money } = require('./money');
+const { money, expected } = require('./money');
 
 const PORT = process.env.PORT || 8400;
 const DIST = path.join(__dirname, '..', 'dist');
@@ -113,6 +113,11 @@ async function api(req, res, parts) {
 
   if (resource === 'money' && req.method === 'GET') {
     try { return send(res, 200, await money(rid === 'fresh')); }
+    catch (e) { return send(res, 503, { error: e.message }); }
+  }
+
+  if (resource === 'expected' && req.method === 'GET') {
+    try { return send(res, 200, await expected()); }
     catch (e) { return send(res, 503, { error: e.message }); }
   }
 
