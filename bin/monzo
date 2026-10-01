@@ -162,7 +162,8 @@ def status():
     who = api("ping/whoami")
     print(f"token ok (user {who['user_id']})")
     acc = current_account()
-    print(f"app approval ok - account: {acc.get('description', acc['id'])}")
+    name = acc.get("description", "")
+    print(f"app approval ok - account: {'Current account' if not name or name.startswith('user_') else name}")
 
 
 def balance():
