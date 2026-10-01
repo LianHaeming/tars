@@ -1,0 +1,225 @@
+#!/usr/bin/env python3
+"""Read-only Monzo access for tars.
+
+Usage:
+    bin/monzo setup <client_id> <client_secret>  save the OAuth client from developers.monzo.com
+    bin/monzo login                    print a Monzo sign-in link (step 1)
+    bin/monzo login '<address>'        finish sign-in with the localhost address the browser ended on (step 2),
+                                       then approve the request in the Monzo app
+    bin/monzo status                   check the token works and the app approval went through
+    bin/monzo balance                  current account balance, spent today, and pots
+    bin/monzo transactions [-d DAYS]   recent transactions (default 14 days; Monzo allows 90)
+
+Client: ~/.config/tars/monzo-client.json. Token: ~/.config/tars/monzo-token.json.
+"""
+import argparse
+import datetime
+import json
+import os
+import secrets
+import sys
+import time
+import urllib.error
+import urllib.parse
+import urllib.request
+from pathlib import Path
+
+CONFIG = Path.home() / ".config" / "tars"
+CLIENT = CONFIG / "monzo-client.json"
+TOKEN = CONFIG / "monzo-token.json"
+PENDING = CONFIG / "monzo-login-pending.json"
+REDIRECT = "http://localhost:8766/"
+AUTH = "https://auth.monzo.com/"
+API = "https://api.monzo.com"
+
+
+class LoginNeeded(Exception):
+    pass
+
+
+class NotApproved(Exception):
+    pass
+
+
+def write_private(path, data):
+    CONFIG.mkdir(mode=0o700, parents=True, exist_ok=True)
+    fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    with os.fdopen(fd, "w") as f:
+        json.dump(data, f)
+
+
+def client():
+    if not CLIENT.exists():
+        sys.exit(f"missing {CLIENT} - run: bin/monzo setup <client_id> <client_secret>")
+    return json.loads(CLIENT.read_text())
+
+
+def request(method, url, fields=None, token=None):
+    data = urllib.parse.urlencode(fields).encode() if fields else None
+    req = urllib.request.Request(url, data, method=method)
+    if token:
+        req.add_header("Authorization", f"Bearer {token}")
+    try:
+        with urllib.request.urlopen(req, timeout=30) as r:
+            return json.load(r)
+    except urllib.error.HTTPError as e:
+        try:
+            body = json.loads(e.read() or b"{}")
+        except ValueError:
+            body = {}
+        code = body.get("code", "")
+        if e.code == 401 or code.startswith("unauthorized") or code == "bad_request.invalid_grant":
+            raise LoginNeeded()
+        if e.code == 403 and "insufficient_permissions" in code:
+            raise NotApproved()
+        sys.exit(f"Monzo error {e.code}: {body.get('message') or body}")
+
+
+def save_token(tok):
+    write_private(TOKEN, {"access_token": tok["access_token"], "refresh_token": tok.get("refresh_token"),
+                          "expires_at": time.time() + tok.get("expires_in", 0) - 60})
+
+
+def setup(client_id, client_secret):
+    write_private(CLIENT, {"client_id": client_id, "client_secret": client_secret})
+    print(f"saved client to {CLIENT}. Next: bin/monzo login")
+
+
+def login_start():
+    c = client()
+    state = secrets.token_urlsafe(16)
+    write_private(PENDING, {"state": state, "at": time.time()})
+    url = AUTH + "?" + urllib.parse.urlencode({
+        "client_id": c["client_id"], "redirect_uri": REDIRECT, "response_type": "code", "state": state,
+    })
+    print("1. Open this link, enter your Monzo email, then tap the link Monzo emails you "
+          "(open it in the same browser):\n")
+    print(url)
+    print("\n2. The browser then lands on a localhost:8766 page that won't load - that's expected.\n"
+          "   Copy that page's full address and run:  bin/monzo login '<address>'")
+
+
+def login_finish(address):
+    if not PENDING.exists():
+        sys.exit("run 'bin/monzo login' first to get a sign-in link")
+    pending = json.loads(PENDING.read_text())
+    query = urllib.parse.parse_qs(urllib.parse.urlparse(address).query)
+    if query.get("error"):
+        sys.exit(f"Monzo said: {query['error'][0]}")
+    if query.get("state", [""])[0] != pending["state"]:
+        sys.exit("that address is from a different sign-in attempt; run 'bin/monzo login' again")
+    c = client()
+    tok = request("POST", f"{API}/oauth2/token", {
+        "grant_type": "authorization_code", "client_id": c["client_id"], "client_secret": c["client_secret"],
+        "redirect_uri": REDIRECT, "code": query["code"][0],
+    })
+    save_token(tok)
+    PENDING.unlink()
+    print("signed in. Now open the Monzo app and approve the 'allow access to your data' request,\n"
+          "then run: bin/monzo status")
+    if not tok.get("refresh_token"):
+        print("note: no refresh token came back - set the client to Confidential on developers.monzo.com,\n"
+              "otherwise you'll need to log in again every few hours")
+
+
+def access_token():
+    if not TOKEN.exists():
+        raise LoginNeeded()
+    tok = json.loads(TOKEN.read_text())
+    if time.time() < tok.get("expires_at", 0):
+        return tok["access_token"]
+    if not tok.get("refresh_token"):
+        raise LoginNeeded()
+    c = client()
+    fresh = request("POST", f"{API}/oauth2/token", {
+        "grant_type": "refresh_token", "client_id": c["client_id"], "client_secret": c["client_secret"],
+        "refresh_token": tok["refresh_token"],
+    })
+    save_token(fresh)
+    return fresh["access_token"]
+
+
+def api(path, **params):
+    url = f"{API}/{path}" + ("?" + urllib.parse.urlencode(params, doseq=True) if params else "")
+    return request("GET", url, token=access_token())
+
+
+def money(pennies, currency="GBP"):
+    sign = "-" if pennies < 0 else ""
+    sym = "£" if currency == "GBP" else currency + " "
+    return f"{sign}{sym}{abs(pennies) / 100:,.2f}"
+
+
+def current_account():
+    accounts = [a for a in api("accounts")["accounts"] if not a.get("closed")]
+    retail = [a for a in accounts if a.get("type") == "uk_retail"]
+    if not (retail or accounts):
+        sys.exit("no open Monzo accounts found")
+    return (retail or accounts)[0]
+
+
+def status():
+    who = api("ping/whoami")
+    print(f"token ok (user {who['user_id']})")
+    acc = current_account()
+    print(f"app approval ok - account: {acc.get('description', acc['id'])}")
+
+
+def balance():
+    acc = current_account()
+    b = api("balance", account_id=acc["id"])
+    print(f"Balance:      {money(b['balance'], b['currency'])}")
+    print(f"Spent today:  {money(b['spend_today'], b['currency'])}")
+    pots = [p for p in api("pots", current_account_id=acc["id"])["pots"] if not p.get("deleted")]
+    if pots:
+        print("\nPots:")
+        for p in pots:
+            print(f"  {p['name']:<28} {money(p['balance'], p['currency'])}")
+
+
+def transactions(days):
+    acc = current_account()
+    since = (datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=days)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    txs = api("transactions", account_id=acc["id"], since=since, limit=100, **{"expand[]": "merchant"})["transactions"]
+    if not txs:
+        print(f"no transactions in the last {days} days")
+    for t in txs:
+        merchant = t.get("merchant")
+        name = merchant.get("name") if isinstance(merchant, dict) else None
+        flag = f"  [declined: {t['decline_reason']}]" if t.get("decline_reason") else ""
+        print(f"{t['created'][:10]}  {money(t['amount'], t['currency']):>11}  {t.get('category', ''):<14} "
+              f"{name or t.get('description', '')}{flag}")
+
+
+def main():
+    p = argparse.ArgumentParser(description="Read-only Monzo access for tars")
+    sub = p.add_subparsers(dest="cmd", required=True)
+    s = sub.add_parser("setup")
+    s.add_argument("client_id")
+    s.add_argument("client_secret")
+    s = sub.add_parser("login")
+    s.add_argument("address", nargs="?")
+    sub.add_parser("status")
+    sub.add_parser("balance")
+    s = sub.add_parser("transactions")
+    s.add_argument("-d", "--days", type=int, default=14)
+    a = p.parse_args()
+    try:
+        if a.cmd == "setup":
+            setup(a.client_id, a.client_secret)
+        elif a.cmd == "login":
+            login_finish(a.address) if a.address else login_start()
+        elif a.cmd == "status":
+            status()
+        elif a.cmd == "balance":
+            balance()
+        else:
+            transactions(min(a.days, 90))
+    except LoginNeeded:
+        sys.exit("Monzo sign-in missing or expired - run: bin/monzo login")
+    except NotApproved:
+        sys.exit("Monzo hasn't been approved yet - open the Monzo app and allow access, then try again")
+
+
+if __name__ == "__main__":
+    main()
