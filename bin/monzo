@@ -2,9 +2,11 @@
 """Read-only Monzo access for tars.
 
 Usage:
-    bin/monzo setup <client_id> <client_secret>  save the OAuth client from developers.monzo.com
+    bin/monzo setup <client_id> <client_secret> [redirect_url]
+                                       save the OAuth client from developers.monzo.com (redirect_url must match
+                                       the one registered there; default https://omarchy.tail0bf266.ts.net/monzo-callback)
     bin/monzo login                    print a Monzo sign-in link (step 1)
-    bin/monzo login '<address>'        finish sign-in with the localhost address the browser ended on (step 2),
+    bin/monzo login '<address>'        finish sign-in with the address the browser ended on (step 2),
                                        then approve the request in the Monzo app
     bin/monzo status                   check the token works and the app approval went through
     bin/monzo balance                  current account balance, spent today, and pots
@@ -28,7 +30,7 @@ CONFIG = Path.home() / ".config" / "tars"
 CLIENT = CONFIG / "monzo-client.json"
 TOKEN = CONFIG / "monzo-token.json"
 PENDING = CONFIG / "monzo-login-pending.json"
-REDIRECT = "http://localhost:8766/"
+DEFAULT_REDIRECT = "https://omarchy.tail0bf266.ts.net/monzo-callback"
 AUTH = "https://auth.monzo.com/"
 API = "https://api.monzo.com"
 
@@ -51,7 +53,9 @@ def write_private(path, data):
 def client():
     if not CLIENT.exists():
         sys.exit(f"missing {CLIENT} - run: bin/monzo setup <client_id> <client_secret>")
-    return json.loads(CLIENT.read_text())
+    c = json.loads(CLIENT.read_text())
+    c.setdefault("redirect_uri", DEFAULT_REDIRECT)
+    return c
 
 
 def request(method, url, fields=None, token=None):
@@ -80,9 +84,9 @@ def save_token(tok):
                           "expires_at": time.time() + tok.get("expires_in", 0) - 60})
 
 
-def setup(client_id, client_secret):
-    write_private(CLIENT, {"client_id": client_id, "client_secret": client_secret})
-    print(f"saved client to {CLIENT}. Next: bin/monzo login")
+def setup(client_id, client_secret, redirect):
+    write_private(CLIENT, {"client_id": client_id, "client_secret": client_secret, "redirect_uri": redirect})
+    print(f"saved client to {CLIENT} (redirect {redirect}). Next: bin/monzo login")
 
 
 def login_start():
@@ -90,13 +94,13 @@ def login_start():
     state = secrets.token_urlsafe(16)
     write_private(PENDING, {"state": state, "at": time.time()})
     url = AUTH + "?" + urllib.parse.urlencode({
-        "client_id": c["client_id"], "redirect_uri": REDIRECT, "response_type": "code", "state": state,
+        "client_id": c["client_id"], "redirect_uri": c["redirect_uri"], "response_type": "code", "state": state,
     })
     print("1. Open this link, enter your Monzo email, then tap the link Monzo emails you "
           "(open it in the same browser):\n")
     print(url)
-    print("\n2. The browser then lands on a localhost:8766 page that won't load - that's expected.\n"
-          "   Copy that page's full address and run:  bin/monzo login '<address>'")
+    print(f"\n2. The browser then lands on {c['redirect_uri']}?code=... (if it's a localhost page it won't load -\n"
+          "   that's expected). Copy that page's full address and run:  bin/monzo login '<address>'")
 
 
 def login_finish(address):
@@ -111,7 +115,7 @@ def login_finish(address):
     c = client()
     tok = request("POST", f"{API}/oauth2/token", {
         "grant_type": "authorization_code", "client_id": c["client_id"], "client_secret": c["client_secret"],
-        "redirect_uri": REDIRECT, "code": query["code"][0],
+        "redirect_uri": c["redirect_uri"], "code": query["code"][0],
     })
     save_token(tok)
     PENDING.unlink()
@@ -198,6 +202,7 @@ def main():
     s = sub.add_parser("setup")
     s.add_argument("client_id")
     s.add_argument("client_secret")
+    s.add_argument("redirect_url", nargs="?", default=DEFAULT_REDIRECT)
     s = sub.add_parser("login")
     s.add_argument("address", nargs="?")
     sub.add_parser("status")
@@ -207,7 +212,7 @@ def main():
     a = p.parse_args()
     try:
         if a.cmd == "setup":
-            setup(a.client_id, a.client_secret)
+            setup(a.client_id, a.client_secret, a.redirect_url)
         elif a.cmd == "login":
             login_finish(a.address) if a.address else login_start()
         elif a.cmd == "status":
