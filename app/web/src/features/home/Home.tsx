@@ -27,51 +27,40 @@ const QUIPS = [
   'spend it well',
 ]
 
-// UK males, ONS life tables: period LE ~81, cohort (most likely) ~87,
-// ~1 in 4 reach 90, ~1 in 9 reach 100. Shorter target => fuller bar.
-const SCENARIOS = [
-  { to: 81, label: 'Today’s rates', note: 'period life expectancy' },
-  { to: 87, label: 'ONS average', note: 'cohort — most likely', main: true },
-  { to: 90, label: 'Reach 90', note: '~1 in 4 men' },
-  { to: 100, label: 'Reach 100', note: '~1 in 9 men' },
+// One 0–100yr bar. UK males, ONS life tables: period LE ~81, cohort (most
+// likely) ~87, ~1 in 4 reach 90, ~1 in 9 reach 100 (the skull at the end).
+const SPAN = 100
+const MARKS = [
+  { at: 81, label: 'today’s rates' },
+  { at: 87, label: 'likely', main: true },
+  { at: 90, label: '≈1 in 4' },
 ]
-
-function LifeFill({ pct }: { pct: number }) {
-  return (
-    <div className="relative h-2 overflow-hidden rounded-full bg-secondary">
-      <div className="absolute inset-y-0 left-0 overflow-hidden rounded-full" style={{ width: `${pct}%` }}>
-        <div className="h-full" style={{ width: `${10000 / pct}%`, background: 'linear-gradient(90deg, var(--today), var(--tomorrow), var(--overdue))' }} />
-      </div>
-    </div>
-  )
-}
 
 function LifeBar() {
   const age = (Date.now() - +BIRTH) / (365.25 * 864e5)
+  const pct = (age / SPAN) * 100
+  const toAvg = Math.round((age / 87) * 100)
   const quip = QUIPS[Math.floor(+today() / 864e5) % QUIPS.length]
   return (
     <div className="glass rounded-2xl p-3">
       <div className="flex items-baseline justify-between">
         <span className="text-sm font-semibold">Life, so far — you’re {Math.floor(age)}</span>
-        <span className="text-lg leading-none" title="Memento mori — make it count" aria-hidden>💀</span>
+        <span className="text-xs text-muted-foreground">{toAvg}% to the average</span>
       </div>
-      <div className="mt-2 flex flex-col gap-2">
-        {SCENARIOS.map(s => {
-          const pct = Math.min(100, (age / s.to) * 100)
-          return (
-            <div key={s.to}>
-              <div className="flex items-baseline justify-between text-xs">
-                <span className={cn('font-semibold', s.main && 'text-foreground')}>{s.label} · {s.to}</span>
-                <span className="text-muted-foreground">{Math.round(s.to - age)}y left · {Math.round(pct)}%</span>
-              </div>
-              <div className="mt-1">
-                <LifeFill pct={pct} />
-              </div>
-            </div>
-          )
-        })}
+      <div className="mt-3 flex items-center gap-2">
+        <div className="relative h-2 flex-1 overflow-hidden rounded-full bg-secondary">
+          <div className="absolute inset-y-0 left-0 overflow-hidden rounded-full" style={{ width: `${pct}%` }}>
+            <div className="h-full" style={{ width: `${10000 / pct}%`, background: 'linear-gradient(90deg, var(--today), var(--tomorrow), var(--overdue))' }} />
+          </div>
+          {MARKS.map(m => (
+            <div key={m.at} className={cn('absolute inset-y-0 w-px', m.main ? 'bg-primary' : 'bg-foreground/50')} style={{ left: `${(m.at / SPAN) * 100}%` }} title={`${m.at} — ${m.label}`} />
+          ))}
+        </div>
+        <span className="text-lg leading-none" title="100 — ~1 in 9 men. Memento mori." aria-hidden>💀</span>
       </div>
-      <p className="mt-2 text-xs text-muted-foreground">{quip}</p>
+      <p className="mt-2 text-xs text-muted-foreground">
+        81 today’s rates · <span className="text-primary">87 likely</span> · 90 ≈ 1 in 4 · 💀 100 ≈ 1 in 9 · {quip}
+      </p>
     </div>
   )
 }
