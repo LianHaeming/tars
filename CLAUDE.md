@@ -68,7 +68,7 @@ bin/             sync, up, backup, gmail
   OAuth client + token live in `~/.config/tars/` (outside the repo — never copy them into it or print them).
   If it says sign-in expired: `bin/gmail login`, give Lian the link, then `bin/gmail login '<localhost address they paste back>'`.
 - `bin/monzo` — read-only Monzo (balance, pots, transactions; never moves money): `bin/monzo status|balance`,
-  `bin/monzo transactions [-d DAYS]` (Monzo allows the last 90 days). Client + token in `~/.config/tars/monzo-*.json`
+  `bin/monzo transactions [-d DAYS]` (max 89 days - older needs re-verification). Client + token in `~/.config/tars/monzo-*.json`
   (never copy into the repo or print). Sign-in: `bin/monzo login`, give Lian the link, `bin/monzo login '<address>'`,
   then Lian approves in the Monzo app. Not yet available to Tars chat (`app/server/ask.js` allowlist).
 

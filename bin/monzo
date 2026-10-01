@@ -10,7 +10,7 @@ Usage:
                                        then approve the request in the Monzo app
     bin/monzo status                   check the token works and the app approval went through
     bin/monzo balance                  current account balance, spent today, and pots
-    bin/monzo transactions [-d DAYS]   recent transactions (default 14 days; Monzo allows 90)
+    bin/monzo transactions [-d DAYS]   recent transactions (default 14 days, max 89 - Monzo blocks older without re-verifying)
 
 Client: ~/.config/tars/monzo-client.json. Token: ~/.config/tars/monzo-token.json.
 """
@@ -226,7 +226,7 @@ def main():
         elif a.cmd == "balance":
             balance()
         else:
-            transactions(min(a.days, 90))
+            transactions(min(a.days, 89))
     except LoginNeeded:
         sys.exit("Monzo sign-in missing or expired - run: bin/monzo login")
     except NotApproved:
