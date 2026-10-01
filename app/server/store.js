@@ -26,5 +26,5 @@ module.exports = {
   tasks: doc('tasks', () => ({ projects: [], tasks: [] })),
   food: doc('food', () => ({ basket: [], shop: '' })),
   chat: doc('chat', () => ({ messages: [], sessionId: null })),
-  burmese: doc('burmese', () => ({ date: null, burmese: '', phonetic: '', english: '', note: '', history: [] })),
+  burmese: doc('burmese', () => ({ phrases: [], index: 0, lastDay: null })),
 };

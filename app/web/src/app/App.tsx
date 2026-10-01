@@ -1,5 +1,6 @@
 import { RouterProvider, createBrowserRouter } from 'react-router'
 import { AppsPage } from '@/features/apps/AppsPage'
+import { BurmesePage } from '@/features/burmese/BurmesePage'
 import { ListPage } from '@/features/food/ListPage'
 import { MenuPage } from '@/features/food/MenuPage'
 import { RecipePage } from '@/features/food/RecipePage'
@@ -17,6 +18,7 @@ const router = createBrowserRouter([
     children: [
       { path: '/', element: <Home /> },
       { path: '/apps', element: <AppsPage /> },
+      { path: '/burmese', element: <BurmesePage /> },
       { path: '/lists/:key?', element: <ListsPage /> },
       { path: '/month', element: <MonthPage /> },
       { path: '/money', element: <MoneyPage /> },

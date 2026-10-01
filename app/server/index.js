@@ -123,11 +123,8 @@ async function api(req, res, parts) {
   }
 
   if (resource === 'burmese') {
-    if (req.method === 'GET') return send(res, 200, burmese.current());
-    if (req.method === 'POST') {
-      try { return send(res, 200, { ...(await burmese.generate()), stale: false }); }
-      catch (e) { return send(res, 503, { error: e.message }); }
-    }
+    if (req.method === 'GET') return send(res, 200, rid === 'all' ? burmese.all() : burmese.current());
+    if (req.method === 'POST') return send(res, 200, burmese.advance());
   }
 
   if (resource === 'ask' && req.method === 'POST') {
