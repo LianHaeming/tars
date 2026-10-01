@@ -17,7 +17,6 @@ function greeting() {
 }
 
 const BIRTH = new Date(1998, 1, 10)
-const LIFESPAN = 90
 const QUIPS = [
   'make today count',
   'the clock’s ticking ⏳',
@@ -27,27 +26,51 @@ const QUIPS = [
   'spend it well',
 ]
 
-function lifeProgress() {
-  const now = Date.now()
-  const death = new Date(BIRTH.getFullYear() + LIFESPAN, BIRTH.getMonth(), BIRTH.getDate())
-  const pct = ((now - +BIRTH) / (+death - +BIRTH)) * 100
-  return Math.min(100, Math.max(0.1, pct))
+// UK males, ONS life tables: period LE ~81, cohort (most likely) ~87,
+// ~1 in 4 reach 90, ~1 in 9 reach 100. Shorter target => fuller bar.
+const SCENARIOS = [
+  { to: 81, label: 'Today’s rates', note: 'period life expectancy' },
+  { to: 87, label: 'ONS average', note: 'cohort — most likely', main: true },
+  { to: 90, label: 'Reach 90', note: '~1 in 4 men' },
+  { to: 100, label: 'Reach 100', note: '~1 in 9 men' },
+]
+
+function LifeFill({ pct }: { pct: number }) {
+  return (
+    <div className="relative h-2 overflow-hidden rounded-full bg-secondary">
+      <div className="absolute inset-y-0 left-0 overflow-hidden rounded-full" style={{ width: `${pct}%` }}>
+        <div className="h-full" style={{ width: `${10000 / pct}%`, background: 'linear-gradient(90deg, var(--today), var(--tomorrow), var(--overdue))' }} />
+      </div>
+    </div>
+  )
 }
 
 function LifeBar() {
-  const pct = lifeProgress()
+  const age = (Date.now() - +BIRTH) / (365.25 * 864e5)
   const quip = QUIPS[Math.floor(+today() / 864e5) % QUIPS.length]
   return (
-    <div className="px-1 pt-1">
-      <div className="flex items-center gap-2">
-        <div className="relative h-2 flex-1 overflow-hidden rounded-full bg-secondary">
-          <div className="absolute inset-y-0 left-0 overflow-hidden rounded-full" style={{ width: `${pct}%` }}>
-            <div className="h-full" style={{ width: `${10000 / pct}%`, background: 'linear-gradient(90deg, var(--today), var(--tomorrow), var(--overdue))' }} />
-          </div>
-        </div>
+    <div className="glass rounded-2xl p-3">
+      <div className="flex items-baseline justify-between">
+        <span className="text-sm font-semibold">Life, so far — you’re {Math.floor(age)}</span>
         <span className="text-lg leading-none" title="Memento mori — make it count" aria-hidden>💀</span>
       </div>
-      <p className="mt-1 text-xs text-muted-foreground">{pct.toFixed(1)}% of the way to 90 · {quip}</p>
+      <div className="mt-2 flex flex-col gap-2">
+        {SCENARIOS.map(s => {
+          const pct = Math.min(100, (age / s.to) * 100)
+          return (
+            <div key={s.to}>
+              <div className="flex items-baseline justify-between text-xs">
+                <span className={cn('font-semibold', s.main && 'text-foreground')}>{s.label} · {s.to}</span>
+                <span className="text-muted-foreground">{Math.round(s.to - age)}y left · {Math.round(pct)}%</span>
+              </div>
+              <div className="mt-1">
+                <LifeFill pct={pct} />
+              </div>
+            </div>
+          )
+        })}
+      </div>
+      <p className="mt-2 text-xs text-muted-foreground">{quip}</p>
     </div>
   )
 }
