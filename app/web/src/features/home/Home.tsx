@@ -12,6 +12,42 @@ function greeting() {
   return h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening'
 }
 
+const BIRTH = new Date(1998, 1, 10)
+const LIFESPAN = 90
+const QUIPS = [
+  'make today count',
+  'the clock’s ticking ⏳',
+  'go make a memory',
+  'carpe that diem',
+  'you can’t bank the unused days',
+  'spend it well',
+]
+
+function lifeProgress() {
+  const now = Date.now()
+  const death = new Date(BIRTH.getFullYear() + LIFESPAN, BIRTH.getMonth(), BIRTH.getDate())
+  const pct = ((now - +BIRTH) / (+death - +BIRTH)) * 100
+  return Math.min(100, Math.max(0.1, pct))
+}
+
+function LifeBar() {
+  const pct = lifeProgress()
+  const quip = QUIPS[Math.floor(+today() / 864e5) % QUIPS.length]
+  return (
+    <div className="px-1 pt-1">
+      <div className="flex items-center gap-2">
+        <div className="relative h-2 flex-1 overflow-hidden rounded-full bg-secondary">
+          <div className="absolute inset-y-0 left-0 overflow-hidden rounded-full" style={{ width: `${pct}%` }}>
+            <div className="h-full" style={{ width: `${10000 / pct}%`, background: 'linear-gradient(90deg, var(--today), var(--tomorrow), var(--overdue))' }} />
+          </div>
+        </div>
+        <span className="text-lg leading-none" title="Memento mori — make it count" aria-hidden>💀</span>
+      </div>
+      <p className="mt-1 text-xs text-muted-foreground">{pct.toFixed(1)}% of the way to 90 · {quip}</p>
+    </div>
+  )
+}
+
 function dayHeading(d: string) {
   const n = dayDiff(d)
   if (n === 0) return 'Today'
@@ -77,7 +113,8 @@ export function Home() {
 
   return (
     <main className="mx-auto max-w-page px-4 pt-safe-5 pb-safe-30">
-      <header className="px-1 pt-2">
+      <LifeBar />
+      <header className="px-1 pt-4">
         <h1 className="text-2xl font-bold tracking-tight">{greeting()}, Lian</h1>
         <p className="mt-1 text-xs font-semibold tracking-widest text-muted-foreground uppercase">{longDate(today())}</p>
       </header>
