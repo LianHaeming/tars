@@ -5,6 +5,7 @@ import { ListPage } from '@/features/food/ListPage'
 import { MenuPage } from '@/features/food/MenuPage'
 import { RecipePage } from '@/features/food/RecipePage'
 import { Home } from '@/features/home/Home'
+import { InboxPage } from '@/features/inbox/InboxPage'
 import { MoneyPage } from '@/features/money/MoneyPage'
 import { TarsPage } from '@/features/tars/TarsPage'
 import { ListsPage, ShoppingPage } from '@/features/tasks/ListsPage'
@@ -18,6 +19,7 @@ const router = createBrowserRouter([
     children: [
       { path: '/', element: <Home /> },
       { path: '/apps', element: <AppsPage /> },
+      { path: '/inbox', element: <InboxPage /> },
       { path: '/burmese', element: <BurmesePage /> },
       { path: '/lists/:key?', element: <ListsPage /> },
       { path: '/month', element: <MonthPage /> },

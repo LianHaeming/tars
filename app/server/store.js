@@ -27,4 +27,5 @@ module.exports = {
   food: doc('food', () => ({ basket: [], shop: '' })),
   chat: doc('chat', () => ({ messages: [], sessionId: null })),
   burmese: doc('burmese', () => ({ phrases: [], index: 0, lastDay: null })),
+  inbox: doc('inbox', () => ({ candidates: [], seen: [] })),
 };

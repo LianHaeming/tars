@@ -1,0 +1,99 @@
+#!/usr/bin/env node
+// Poll Gmail for new mail, let Claude judge each one, and queue the actionable ones in the tars
+// review inbox (GET /api/inbox, then Add/Dismiss on the /inbox page). Never creates tasks directly.
+//   bin/email-tasks            one poll (run by the timer)
+//   bin/email-tasks install    install the systemd user timer (every 30 min)
+const { execFileSync, spawnSync } = require('child_process');
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
+
+const TARS = path.join(__dirname, '..');
+const GMAIL = path.join(TARS, 'bin', 'gmail');
+const PORT = process.env.PORT || 8400;
+const API = `http://127.0.0.1:${PORT}/api`;
+const FILTER = 'in:inbox newer_than:3d -category:promotions -category:social -category:forums';
+const MAX_PER_RUN = 12;
+const log = (...a) => console.log(new Date().toISOString(), ...a);
+
+function install() {
+  const dir = path.join(os.homedir(), '.config', 'systemd', 'user');
+  fs.mkdirSync(dir, { recursive: true });
+  const envPath = 'Environment=PATH=%h/.local/share/mise/shims:%h/.local/bin:/usr/local/bin:/usr/bin';
+  fs.writeFileSync(path.join(dir, 'tars-email.service'),
+    `[Unit]\nDescription=tars: turn new email into review-inbox tasks\n\n[Service]\nType=oneshot\n` +
+    `WorkingDirectory=${TARS}\n${envPath}\nExecStart=${path.join(TARS, 'bin', 'email-tasks')}\n`);
+  fs.writeFileSync(path.join(dir, 'tars-email.timer'),
+    `[Unit]\nDescription=tars: poll Gmail for new email every 30 min\n\n[Timer]\nOnCalendar=*:0/30\n` +
+    `Persistent=true\n\n[Install]\nWantedBy=timers.target\n`);
+  for (const a of [['daemon-reload'], ['enable', '--now', 'tars-email.timer'],
+    ['list-timers', 'tars-email.timer', '--no-pager']])
+    spawnSync('systemctl', ['--user', ...a], { stdio: 'inherit' });
+}
+
+async function http(method, p, body) {
+  const r = await fetch(API + p, {
+    method, headers: body ? { 'content-type': 'application/json' } : {},
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  if (!r.ok) throw new Error(`${method} ${p} -> ${r.status}`);
+  return r.status === 204 ? null : r.json();
+}
+
+function gmail(args) {
+  return execFileSync(GMAIL, args, { encoding: 'utf8', maxBuffer: 10e6, timeout: 60e3 });
+}
+
+const PROMPT = email => `You triage one of Lian's emails into a to-do task. Today is ${
+  new Date().toLocaleDateString('en-CA', { timeZone: 'Europe/London' })}, timezone Europe/London.
+
+Decide if it needs Lian to DO something or marks a dated commitment: an appointment, booking, delivery, deadline, bill due, a reply that's needed, or an explicit action required. Marketing, newsletters, social/app notifications, read-only FYIs, and receipts with nothing left to do are NOT actionable.
+
+Reply with ONE line of JSON and nothing else, no code fence, no tools:
+{"actionable":true|false,"title":"","due":"YYYY-MM-DD"|null,"dueTime":"HH:MM"|null,"description":""}
+- title: short and specific — what + who/where (e.g. "Dentist check-up — Smile Dental").
+- due / dueTime: only if the email states a date/time; never guess. 24h London time.
+- description: location/address, reference or booking numbers, what to bring — else "".
+
+EMAIL:
+${email.slice(0, 4000)}`;
+
+function judge(email) {
+  const r = spawnSync('claude', ['-p', PROMPT(email)], { encoding: 'utf8', timeout: 120e3, cwd: TARS });
+  if (r.status !== 0) throw new Error('claude: ' + (r.stderr || r.error?.message || r.status));
+  const m = r.stdout.match(/\{[\s\S]*\}/);
+  if (!m) throw new Error('no JSON in reply: ' + r.stdout.slice(0, 200));
+  return JSON.parse(m[0]);
+}
+
+async function poll() {
+  const { seen } = await http('GET', '/inbox');
+  const seenSet = new Set(seen);
+  const listing = gmail(['search', FILTER, '-n', '30']);
+  const ids = [...listing.matchAll(/^([0-9a-f]{16,})\s/gm)].map(m => m[1]);
+  const fresh = ids.filter(x => !seenSet.has(x)).slice(0, MAX_PER_RUN);
+  if (!fresh.length) return log(`no new mail (${ids.length} in window)`);
+  log(`${fresh.length} new to triage`);
+  let queued = 0;
+  for (const gmailId of fresh) {
+    try {
+      const raw = gmail(['read', gmailId]);
+      const head = Object.fromEntries(
+        raw.split('\n').slice(0, 5).map(l => l.split(/:\s(.+)/)).filter(p => p[1]).map(p => [p[0].toLowerCase(), p[1]]));
+      const v = judge(raw);
+      await http('POST', '/inbox', {
+        gmailId, actionable: !!v.actionable, title: v.title, due: v.due, dueTime: v.dueTime,
+        description: v.description, sender: head.from || '', subject: head.subject || '', emailDate: head.date || '',
+      });
+      if (v.actionable) { queued++; log('queued:', v.title); }
+    } catch (e) {
+      log('skip', gmailId, '-', e.message); // left unseen, retried next run
+    }
+  }
+  log(`done, queued ${queued}`);
+}
+
+(async () => {
+  if (process.argv[2] === 'install') return install();
+  try { await poll(); } catch (e) { log('error:', e.message); process.exit(1); }
+})();

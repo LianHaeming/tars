@@ -127,6 +127,39 @@ async function api(req, res, parts) {
     if (req.method === 'POST') return send(res, 200, burmese.advance());
   }
 
+  if (resource === 'inbox') {
+    const inbox = store.inbox.get();
+    if (req.method === 'GET') return send(res, 200, inbox);
+    if (req.method === 'POST' && !rid) {
+      // Called by bin/email-tasks: record the Gmail id as seen, and queue a candidate when actionable.
+      if (!body.gmailId) return send(res, 400, { error: 'gmailId required' });
+      if (!inbox.seen.includes(body.gmailId)) inbox.seen.push(body.gmailId);
+      inbox.seen = inbox.seen.slice(-500);
+      if (body.actionable && body.title?.trim()) {
+        inbox.candidates.push({
+          id: id(), gmailId: body.gmailId, title: body.title.trim(),
+          due: body.due || null, dueTime: body.dueTime || null, description: body.description || '',
+          sender: body.sender || '', subject: body.subject || '', emailDate: body.emailDate || '',
+          createdAt: Date.now(),
+        });
+      }
+      store.inbox.save();
+      return send(res, 200, { candidates: inbox.candidates.length });
+    }
+    const candidate = inbox.candidates.find(c => c.id === rid);
+    if (!candidate) return send(res, 404, { error: 'not found' });
+    if (req.method === 'POST' && parts[2] === 'accept') {
+      const task = newTask({ ...pick(candidate, TASK_FIELDS), ...pick(body, TASK_FIELDS) });
+      db.tasks.push(task); save();
+      inbox.candidates = inbox.candidates.filter(c => c.id !== rid); store.inbox.save();
+      return send(res, 201, task);
+    }
+    if (req.method === 'DELETE') {
+      inbox.candidates = inbox.candidates.filter(c => c.id !== rid); store.inbox.save();
+      return send(res, 204);
+    }
+  }
+
   if (resource === 'ask' && req.method === 'POST') {
     const message = String(body.message || '').trim();
     if (!message) return send(res, 400, { error: 'message required' });
