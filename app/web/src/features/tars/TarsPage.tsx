@@ -61,7 +61,7 @@ export function TarsPage() {
     let reply: Msg = { who: 'ai', text: '', status: 'Thinking…' }
     let all = [...msgs, { who: 'me', text: message } as Msg, reply]
     const update = (r: Partial<Msg>) => { reply = { ...reply, ...r }; all = [...all.slice(0, -1), reply]; setMsgs(all) }
-    const note = (t: string) => update({ text: reply.text + (reply.text ? '\n\n' : '') + '⚠️ ' + t })
+    const note = (t: string) => update({ text: reply.text + (reply.text ? '\n\n' : '') + t })
     setMsgs(all)
     try {
       const r = await fetch('/api/ask', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ message }) })

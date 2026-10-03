@@ -30,7 +30,7 @@ export function BurmesePage() {
   const seen = bank.index + 1
 
   return (
-    <Page title="Burmese 🇲🇲">
+    <Page title="Burmese">
       <div className="glass rounded-2xl p-5 pt-safe-2">
         <div className="flex items-center justify-between text-xs font-semibold tracking-wider text-muted-foreground uppercase">
           <span>{isToday ? "Today's phrase" : `Phrase ${sel + 1}`}</span>

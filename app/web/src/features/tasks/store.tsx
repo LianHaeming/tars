@@ -17,6 +17,7 @@ function useStoreValue() {
   const [view, setView] = useState<string | null>(null)
   const [openId, setOpenId] = useState<string | null>(null)
   const [calSel, setCalSel] = useState(() => ymd(today()))
+  const [calMonth, setCalMonth] = useState(() => ymd(today()).slice(0, 7))
   const [dayView, setDayView] = useState(false)
   const [adding, setAdding] = useState(false)
   const [pendingAdd, setPendingAdd] = useState(false)
@@ -170,6 +171,7 @@ function useStoreValue() {
     view, setView, viewInfo, addDefaults, inView,
     openId, setOpenId, calSel, setCalSel: (ds: string) => { setCalSel(ds); setOpenId(null) }, pickDay: (ds: string) => setCalSel(ds),
     dayView, enterDay: (ds: string) => { setCalSel(ds); setDayView(true) }, exitDay: () => { setDayView(false); setOpenId(null) }, closeDay: () => setDayView(false),
+    calMonth, setCalMonth,
     adding, setAdding, pendingAdd, setPendingAdd, flash, clearFlash,
     patch, addTask, addDraft, discardIfEmpty, toggleDone, deleteTask, rescheduleOverdue, whereAdded,
     addProject, renameProject, deleteProject,

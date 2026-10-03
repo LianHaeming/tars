@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { CalendarIcon, CheckIcon, ClockIcon, TagIcon, XIcon } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { cn, dim } from '@/lib/utils'
 import type { Task } from '@/lib/api'
 import { dueColor, dueLabel, today, whenLabel, ymd } from '@/lib/dates'
 import { useTars } from '@/features/tasks/store'
-import { Dot, pill } from '@/components/common'
+import { Dot } from '@/components/common'
 import { TagManager } from '@/features/tasks/TagManager'
 
-type Opts = { hideProject?: boolean; hideDue?: boolean; compact?: boolean; tag?: boolean; forceEditor?: boolean }
+type Opts = { hideProject?: boolean; hideDue?: boolean; compact?: boolean; tag?: boolean }
 
 function Check({ task, color, onDone }: { task: Task; color: string; onDone: () => void }) {
   return (
@@ -28,8 +28,8 @@ function Check({ task, color, onDone }: { task: Task; color: string; onDone: () 
 
 const checkColor = (_color?: string) => 'var(--p4)'
 
-export function TaskRow({ task, hideProject, hideDue, compact, tag, forceEditor }: { task: Task } & Opts) {
-  const { openId, setOpenId, toggleDone, project, dayView } = useTars()
+export function TaskRow({ task, hideProject, hideDue, compact, tag }: { task: Task } & Opts) {
+  const { openId, setOpenId, toggleDone, project } = useTars()
   const [completing, setCompleting] = useState(false)
   const p = project(task.projectId)
 
@@ -43,7 +43,7 @@ export function TaskRow({ task, hideProject, hideDue, compact, tag, forceEditor 
     setCompleting(false)
   }
 
-  if (openId === task.id && (forceEditor || !dayView)) return <TaskEditor task={task} onDone={done} />
+  if (openId === task.id) return <TaskEditor task={task} onDone={done} />
 
   return (
     <div
@@ -81,7 +81,7 @@ function Meta({ task, hideDue, project, tag }: { task: Task; hideDue?: boolean; 
     )
   }
   if (project && tag) {
-    items.unshift(<span key="proj" className="font-semibold tracking-wider uppercase" style={{ color: project.color }}>{project.name}</span>)
+    items.unshift(<span key="proj" className="text-xxs font-semibold" style={{ color: dim(project.color) }}>{project.name}</span>)
   } else if (project) {
     items.push(
       <span key="proj"><span className="size-2 rounded-full" style={{ background: project.color }} />{project.name}</span>,
@@ -91,7 +91,7 @@ function Meta({ task, hideDue, project, tag }: { task: Task; hideDue?: boolean; 
   return <div className="mt-1 flex gap-3 text-xs text-muted-foreground [&>span]:inline-flex [&>span]:items-center [&>span]:gap-1 [&_svg]:size-3">{items}</div>
 }
 
-const chip = cn(pill, 'px-3 py-2 [&_svg]:size-4')
+const tbtn = 'inline-flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold whitespace-nowrap text-muted-foreground transition-colors data-[on=true]:bg-secondary data-[on=true]:text-foreground [&_svg]:size-4'
 
 const grow = (el: HTMLTextAreaElement | null) => { if (el) { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px' } }
 
@@ -136,7 +136,7 @@ function TaskEditor({ task, onDone }: { task: Task; onDone: () => void }) {
   const finish = () => { saveTitle(); setOpenId(null) }
 
   return (
-    <div ref={ref} data-editor data-done={task.done} className="group/task -mx-3 my-2 scroll-mb-dock rounded-xl bg-muted px-3 pb-3">
+    <div ref={ref} data-editor data-done={task.done} className="group/task glass -mx-3 my-2 scroll-mb-dock rounded-xl px-3 pb-3">
       <div className="flex items-start gap-3 pt-3">
         <Check task={task} color={checkColor(p?.color)} onDone={onDone} />
         <div className="min-w-0 flex-1">
@@ -159,36 +159,38 @@ function TaskEditor({ task, onDone }: { task: Task; onDone: () => void }) {
             rows={1}
             onInput={e => grow(e.currentTarget)}
             onBlur={e => { const v = e.target.value.trim(); if (v !== task.description) patch(task.id, { description: v }) }}
-            className="mt-2 block w-full resize-none overflow-hidden rounded-lg bg-background/60 px-3 py-2 text-field text-muted-foreground outline-none placeholder:text-muted-foreground"
+            className="mt-1 block w-full resize-none overflow-hidden bg-transparent text-field text-muted-foreground outline-none placeholder:text-muted-foreground"
           />
         </div>
       </div>
 
-      <div className="scrollbar-none mt-3 ml-8 flex gap-2 overflow-x-auto">
-        <button type="button" data-on={!task.projectId} className={chip} onClick={() => patch(task.id, { projectId: null })}>Inbox</button>
-        {state.projects.map(pr => (
-          <button key={pr.id} type="button" data-on={task.projectId === pr.id} className={chip} onClick={() => patch(task.id, { projectId: pr.id })}>
-            <Dot color={pr.color} />{pr.name}
-          </button>
-        ))}
-        <TagManager
-          onCreate={id => patch(task.id, { projectId: id })}
-          trigger={<button type="button" className={cn(chip, 'text-muted-foreground')}><TagIcon />Tags</button>}
-        />
-      </div>
+      <div className="mt-3 -mx-3 flex flex-col gap-1 hairline-t px-2 pt-2">
+        <div className="scrollbar-none flex gap-1 overflow-x-auto">
+          <button type="button" data-on={!task.projectId} className={tbtn} onClick={() => patch(task.id, { projectId: null })}>Inbox</button>
+          {state.projects.map(pr => (
+            <button key={pr.id} type="button" data-on={task.projectId === pr.id} className={tbtn} onClick={() => patch(task.id, { projectId: pr.id })}>
+              <Dot color={pr.color} />{pr.name}
+            </button>
+          ))}
+          <TagManager
+            onCreate={id => patch(task.id, { projectId: id })}
+            trigger={<button type="button" className={tbtn}><TagIcon />Tags</button>}
+          />
+        </div>
 
-      <div className="mt-2 ml-8 flex flex-wrap items-center gap-2">
-        <label className={cn(chip, 'relative cursor-pointer')} data-on={!!task.due}>
-          <CalendarIcon />{task.due ? dueLabel(task.due) : 'Add date'}
-          <input type="date" value={task.due || ''} onChange={e => patch(task.id, { due: e.target.value || null, ...(e.target.value ? {} : { dueTime: null }) })} className="absolute inset-0 opacity-0" />
-        </label>
-        <label className={cn(chip, 'relative cursor-pointer')} data-on={!!task.dueTime}>
-          <ClockIcon />{task.dueTime || 'Add time'}
-          <input type="time" value={task.dueTime || ''} onChange={e => patch(task.id, { dueTime: e.target.value || null })} className="absolute inset-0 opacity-0" />
-        </label>
-        {(task.due || task.dueTime) && (
-          <button type="button" className={cn(chip, 'text-muted-foreground')} onClick={() => patch(task.id, { due: null, dueTime: null })}><XIcon />Clear</button>
-        )}
+        <div className="flex flex-wrap items-center gap-1">
+          <label className={cn(tbtn, 'relative cursor-pointer')} data-on={!!task.due}>
+            <CalendarIcon />{task.due ? dueLabel(task.due) : 'Add date'}
+            <input type="date" value={task.due || ''} onChange={e => patch(task.id, { due: e.target.value || null, ...(e.target.value ? {} : { dueTime: null }) })} className="absolute inset-0 opacity-0" />
+          </label>
+          <label className={cn(tbtn, 'relative cursor-pointer')} data-on={!!task.dueTime}>
+            <ClockIcon />{task.dueTime || 'Add time'}
+            <input type="time" value={task.dueTime || ''} onChange={e => patch(task.id, { dueTime: e.target.value || null })} className="absolute inset-0 opacity-0" />
+          </label>
+          {(task.due || task.dueTime) && (
+            <button type="button" className={tbtn} onClick={() => patch(task.id, { due: null, dueTime: null })}><XIcon />Clear</button>
+          )}
+        </div>
       </div>
     </div>
   )

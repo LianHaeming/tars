@@ -92,7 +92,7 @@ export function MoneyPage() {
   if (!data) {
     return (
       <Page title="Money" back="/apps" actions={refreshBtn}>
-        <Empty icon={error ? '🔒' : undefined}>
+        <Empty>
           {error ? <>Couldn't reach Monzo.<br /><span className="text-sm">{error}</span></> : 'Loading your Monzo account…'}
         </Empty>
       </Page>

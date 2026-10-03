@@ -10,7 +10,7 @@ export function BurmeseCard() {
   return (
     <Link to="/burmese" className="glass block rounded-2xl p-4 transition-transform active:scale-98">
       <div className="flex items-baseline justify-between">
-        <span className="text-sm font-semibold">Burmese, daily 🇲🇲</span>
+        <span className="text-sm font-semibold">Burmese, daily</span>
         <span className="inline-flex items-center text-xs font-semibold text-primary">
           Browse<ChevronRightIcon className="size-4" />
         </span>

@@ -7,10 +7,13 @@ export function Section({ children, className }: { children: ReactNode; classNam
   return <div className={cn('flex items-baseline justify-between hairline-b pt-5 pb-2 text-sm font-semibold', className)}>{children}</div>
 }
 
-export function SectionHead({ title, count, link, to }: { title: string; count?: number; link?: string; to?: string }) {
+export function SectionHead({ title, count, link, to, sticky, onToggle }: { title: string; count?: number; link?: string; to?: string; sticky?: boolean; collapsed?: boolean; onToggle?: () => void }) {
+  const label = <span>{title}{count !== undefined && <span className="ml-1 opacity-70">{count}</span>}</span>
   return (
-    <div className="flex items-baseline justify-between hairline-b pt-6 pb-1 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
-      <span>{title}{count !== undefined && <span className="ml-1 opacity-70">{count}</span>}</span>
+    <div className={cn('flex items-center justify-between pt-6 pb-1 font-semibold tracking-wider text-muted-foreground uppercase', sticky ? 'bg-page sticky top-below-filters z-20 text-lg' : 'hairline-b text-sm')}>
+      {onToggle
+        ? <button type="button" onClick={onToggle} className="-my-1 py-1 uppercase">{label}</button>
+        : label}
       {link && to && (
         <Link to={to} className="inline-flex items-center text-sm font-semibold tracking-normal text-primary normal-case">
           {link}<ChevronRightIcon className="size-4" />

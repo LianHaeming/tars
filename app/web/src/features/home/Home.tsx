@@ -1,81 +1,17 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { useSearchParams } from 'react-router'
 import { focusDraft } from '@/app/Dock'
-import { cn } from '@/lib/utils'
+import { cn, dim } from '@/lib/utils'
 import { localGet, localSet, type Task } from '@/lib/api'
-import { addDays, dayDiff, hhmm, longDate, parseYmd, shortDate, today, ymd } from '@/lib/dates'
+import { dayDiff, hhmm, parseYmd, relDay, shortDate, today, ymd } from '@/lib/dates'
 import { byPriority, byWhen, useTars } from '@/features/tasks/store'
 import { TaskRow } from '@/features/tasks/TaskRow'
 import { CalendarPanel } from '@/features/tasks/calendar'
 import { Section, SectionHead } from '@/components/common'
 import { PaymentRow, useExpected, type Expected } from '@/features/money/expected'
 import { MainEvent } from './MainEvent'
-import { BurmeseCard } from '@/features/burmese/BurmeseCard'
 
 type Entry = { day: string; task?: Task; pay?: Expected }
-const UPCOMING_DAYS = 14
-
-function greeting() {
-  const h = new Date().getHours()
-  return h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening'
-}
-
-const BIRTH = new Date(1998, 1, 10)
-const QUIPS = [
-  'make today count',
-  'the clock’s ticking ⏳',
-  'go make a memory',
-  'carpe that diem',
-  'you can’t bank the unused days',
-  'spend it well',
-]
-
-// One 0–100yr bar. UK males, ONS life tables: period LE ~81, cohort (most
-// likely) ~87, ~1 in 4 reach 90, ~1 in 9 reach 100 (the skull at the end).
-const SPAN = 100
-const MARKS = [
-  { at: 81, label: 'today’s rates' },
-  { at: 87, label: 'likely', main: true },
-  { at: 90, label: '≈1 in 4' },
-]
-
-function LifeBar() {
-  const age = (Date.now() - +BIRTH) / (365.25 * 864e5)
-  const pct = (age / SPAN) * 100
-  const toAvg = Math.round((age / 87) * 100)
-  const quip = QUIPS[Math.floor(+today() / 864e5) % QUIPS.length]
-  return (
-    <div className="glass rounded-2xl p-3">
-      <div className="flex items-baseline justify-between">
-        <span className="text-sm font-semibold">Life, so far — you’re {Math.floor(age)}</span>
-        <span className="text-xs text-muted-foreground">{toAvg}% to the average</span>
-      </div>
-      <div className="mt-3 flex items-center gap-2">
-        <div className="relative h-2 flex-1 overflow-hidden rounded-full bg-secondary">
-          <div className="absolute inset-y-0 left-0 overflow-hidden rounded-full" style={{ width: `${pct}%` }}>
-            <div className="h-full" style={{ width: `${10000 / pct}%`, background: 'linear-gradient(90deg, var(--today), var(--tomorrow), var(--overdue))' }} />
-          </div>
-          {MARKS.map(m => (
-            <div key={m.at} className={cn('absolute inset-y-0 w-px', m.main ? 'bg-primary' : 'bg-foreground/50')} style={{ left: `${(m.at / SPAN) * 100}%` }} title={`${m.at} — ${m.label}`} />
-          ))}
-        </div>
-        <span className="text-lg leading-none" title="100 — ~1 in 9 men. Memento mori." aria-hidden>💀</span>
-      </div>
-      <p className="mt-2 text-xs text-muted-foreground">
-        81 today’s rates · <span className="text-primary">87 likely</span> · 90 ≈ 1 in 4 · 💀 100 ≈ 1 in 9 · {quip}
-      </p>
-    </div>
-  )
-}
-
-function dayHeading(d: string) {
-  const n = dayDiff(d)
-  if (n === 0) return 'Today'
-  if (n === 1) return 'Tomorrow'
-  const dt = parseYmd(d)
-  if (n < 7) return dt.toLocaleDateString(undefined, { weekday: 'long' })
-  return dt.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' })
-}
 
 function todaysEvent(dated: Task[]) {
   const t = ymd(today()), now = hhmm(new Date())
@@ -83,12 +19,10 @@ function todaysEvent(dated: Task[]) {
   return timed.find(x => x.dueTime! >= now) ?? timed.at(-1)
 }
 
-function byDay(entries: Entry[]) {
-  const t = ymd(today())
-  const key = (e: Entry) => (e.day < t ? 'overdue' : e.day)
+function groupByDay(entries: Entry[]) {
   const groups = new Map<string, Entry[]>()
-  for (const e of [...entries].sort((a, b) => (key(a) === 'overdue' ? '' : a.day).localeCompare(key(b) === 'overdue' ? '' : b.day))) {
-    groups.set(key(e), [...(groups.get(key(e)) ?? []), e])
+  for (const e of [...entries].sort((a, b) => a.day.localeCompare(b.day))) {
+    groups.set(e.day, [...(groups.get(e.day) ?? []), e])
   }
   return [...groups]
 }
@@ -99,21 +33,22 @@ function FilterLabel({ on, color, onClick, children }: { on: boolean; color: str
       type="button"
       aria-pressed={on}
       onClick={onClick}
-      style={{ color }}
-      className="inline-flex shrink-0 items-center gap-2 py-2 text-xs font-semibold tracking-wider whitespace-nowrap uppercase"
+      style={on ? undefined : { color }}
+      className={cn('shrink-0 rounded-full px-3 py-2 text-base font-semibold whitespace-nowrap transition-colors', on && 'bg-secondary text-foreground')}
     >
-      {on && <span className="size-2 rounded-full" style={{ background: color }} />}
       {children}
     </button>
   )
 }
 
-function DayHead({ day, onMove }: { day: string; onMove: () => void }) {
-  const overdue = day === 'overdue'
+function DayHead({ day, overdue }: { day: string; overdue?: boolean }) {
+  const dt = parseYmd(day)
+  const n = dayDiff(day)
+  const label = n === 0 ? 'Today' : n === 1 ? 'Tomorrow' : n === -1 ? 'Yesterday' : dt.toLocaleDateString(undefined, { weekday: 'long' })
   return (
-    <div className={cn('flex items-baseline justify-between pt-4 pb-1 text-xs font-semibold tracking-wider uppercase', overdue ? 'text-overdue' : 'text-muted-foreground')}>
-      <span>{overdue ? 'Overdue' : dayHeading(day)}</span>
-      {overdue && <button type="button" onClick={onMove} className="text-sm tracking-normal text-primary normal-case">Move to today</button>}
+    <div className={cn('flex items-baseline gap-2 pt-4 pb-1 text-xs font-semibold tracking-wider uppercase', overdue ? 'text-overdue' : n === 0 ? 'text-primary' : 'text-muted-foreground')}>
+      <span>{label}</span>
+      <span className="opacity-60">{shortDate(dt)}</span>
     </div>
   )
 }
@@ -142,7 +77,7 @@ function Completed({ tasks }: { tasks: Task[] }) {
 }
 
 export function Home() {
-  const { open, state, rescheduleOverdue, pendingAdd, setPendingAdd, addDraft, dayView, calSel } = useTars()
+  const { open, state, rescheduleOverdue, pendingAdd, setPendingAdd, addDraft, dayView, calSel, closeDay, calMonth } = useTars()
   const expected = useExpected()
   const [params, setParams] = useSearchParams()
   const urlFilter = params.get('filter')
@@ -158,6 +93,10 @@ export function Home() {
   const known = (k: string) => k === 'all' || k === 'money' || k === 'completed' || state.projects.some(p => p.id === k)
   const active = known(filter) ? filter : 'all'
   const pick = (k: string) => { setFilter(k); localSet('home-filter', k) }
+  const [todoShut, setTodoShut] = useState(() => localGet('home-todo') === '1')
+  const toggleTodo = () => setTodoShut(v => { localSet('home-todo', v ? '0' : '1'); return !v })
+  const [upShut, setUpShut] = useState(() => localGet('home-up') === '1')
+  const toggleUp = () => setUpShut(v => { localSet('home-up', v ? '0' : '1'); return !v })
   useEffect(() => {
     if (!urlFilter) return
     if (known(urlFilter)) { pick(urlFilter); setParams({}, { replace: true }) }
@@ -165,34 +104,30 @@ export function Home() {
   }, [urlFilter, state.projects])
 
   const completed = active === 'completed'
-  const shown = active === 'all' || completed ? open : open.filter(x => x.projectId === active)
-  const dated = shown.filter(x => x.due).sort(byWhen)
-  const undated = shown.filter(x => !x.due).sort(byPriority)
-  const main = todaysEvent(dated)
   const t = ymd(today())
   const tag = active === 'all'
-  const until = ymd(addDays(today(), UPCOMING_DAYS - 1))
+  const matchTag = (x: Task) => active === 'all' || x.projectId === active
+  const datedAll = (active === 'money' ? [] : state.tasks.filter(x => x.due && matchTag(x))).sort(byWhen)
+  const undated = (active === 'money' ? [] : open.filter(x => !x.due && matchTag(x))).sort(byPriority)
   const pays = active === 'all' || active === 'money' ? expected : []
-  const all: Entry[] = [...dated.map(task => ({ day: task.due!, task })), ...pays.map(pay => ({ day: pay.date, pay }))]
-  const windowed = all.filter(e => e.day <= until)
-  const entries = dayView ? windowed.filter(e => e.day !== calSel) : windowed
-  const later = all.length - windowed.length
+  const main = todaysEvent(datedAll.filter(x => !x.done))
+  const overdueOpen = datedAll.filter(x => !x.done && x.due! < t)
+  const allDated: Entry[] = [...datedAll.map(task => ({ day: task.due!, task })), ...pays.map(pay => ({ day: pay.date, pay }))]
+  const entries = dayView
+    ? allDated.filter(e => e.day === calSel)
+    : allDated.filter(e => e.day.startsWith(calMonth))
+  const showTodo = active !== 'money' && undated.length > 0
+  const hasCalData = datedAll.length > 0 || pays.length > 0
+  const showAgenda = dayView || entries.length > 0
 
   return (
-    <main className="mx-auto max-w-page px-4 pt-safe-5 pb-safe-40">
-      <LifeBar />
-      <div className="mt-3"><BurmeseCard /></div>
-      <header className="px-1 pt-4">
-        <h1 className="text-2xl font-bold tracking-tight">{greeting()}, Lian</h1>
-        <p className="mt-1 text-xs font-semibold tracking-widest text-muted-foreground uppercase">{longDate(today())}</p>
-      </header>
-
-      <nav className="scrollbar-none -mx-4 mt-4 flex gap-5 overflow-x-auto px-5">
+    <main className="mx-auto max-w-page px-4 pb-safe-40">
+      <nav className="bg-page scrollbar-none sticky top-0 z-30 -mx-4 flex gap-2 overflow-x-auto px-4 pt-safe-3 pb-2">
         <FilterLabel on={active === 'all'} color="var(--foreground)" onClick={() => pick('all')}>All</FilterLabel>
         {state.projects.map(p => (
-          <FilterLabel key={p.id} on={active === p.id} color={p.color} onClick={() => pick(p.id)}>{p.name}</FilterLabel>
+          <FilterLabel key={p.id} on={active === p.id} color={dim(p.color)} onClick={() => pick(p.id)}>{p.name}</FilterLabel>
         ))}
-        {expected.length > 0 && <FilterLabel on={active === 'money'} color="var(--money)" onClick={() => pick('money')}>Money</FilterLabel>}
+        {expected.length > 0 && <FilterLabel on={active === 'money'} color={dim('var(--money)')} onClick={() => pick('money')}>Money</FilterLabel>}
         <FilterLabel on={completed} color="var(--muted-foreground)" onClick={() => pick('completed')}>Completed</FilterLabel>
       </nav>
 
@@ -200,30 +135,47 @@ export function Home() {
         <Completed tasks={state.tasks.filter(x => x.done)} />
       ) : (
         <>
-          <CalendarPanel filter={active} />
+          {showTodo && (
+            <section>
+              <SectionHead title="To-do" sticky collapsed={todoShut} onToggle={toggleTodo} />
+              {!todoShut && undated.map(x => <TaskRow key={x.id} task={x} compact tag={tag} />)}
+            </section>
+          )}
 
+          {(hasCalData || dayView) && <CalendarPanel filter={active} />}
+
+          {showAgenda && (
           <section>
-            <SectionHead title="Upcoming" />
-            {byDay(entries).map(([day, list]) => (
-              <div key={day}>
-                <DayHead day={day} onMove={rescheduleOverdue} />
-                {day === t && main && <MainEvent task={main} />}
-                {list.map(e => e.task
-                  ? e.task !== main && <TaskRow key={e.task.id} task={e.task} compact tag={tag} hideDue={day !== 'overdue'} />
-                  : <PaymentRow key={e.pay!.id} p={e.pay!} tag={tag} />)}
+            {dayView ? (
+              <div className="bg-page sticky top-below-filters z-20 flex items-center justify-between pt-6 pb-1 text-lg font-semibold tracking-wider text-muted-foreground uppercase">
+                <span>{relDay(calSel) || parseYmd(calSel).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'short' })}</span>
+                <button type="button" onClick={closeDay} className="text-sm font-semibold tracking-normal text-primary normal-case">Show all</button>
               </div>
-            ))}
-            {!entries.length && <div className="py-4 text-sm text-muted-foreground">Nothing in the next {UPCOMING_DAYS} days.</div>}
-            {later > 0 && (
-              <p className="py-3 text-sm text-muted-foreground">{later} more after {dayHeading(until)} · see the calendar above.</p>
+            ) : (
+              <div className="bg-page sticky top-below-filters z-20 flex items-center justify-between pt-6 pb-1 text-lg font-semibold tracking-wider text-muted-foreground uppercase">
+                <button type="button" onClick={toggleUp} className="-my-1 py-1 uppercase">Upcoming</button>
+                {overdueOpen.length > 0 && <button type="button" onClick={rescheduleOverdue} className="text-sm font-semibold tracking-normal text-primary normal-case">Move {overdueOpen.length} overdue</button>}
+              </div>
             )}
+            {(dayView || !upShut) && groupByDay(entries).map(([day, list]) => {
+              const over = day < t && list.some(e => e.task && !e.task.done)
+              return (
+                <div key={day}>
+                  <DayHead day={day} overdue={over} />
+                  {day === t && main && <MainEvent task={main} />}
+                  {list.map(e => e.task
+                    ? e.task !== main && <TaskRow key={e.task.id} task={e.task} compact tag={tag} hideDue />
+                    : <PaymentRow key={e.pay!.id} p={e.pay!} tag={tag} />)}
+                </div>
+              )
+            })}
+            {dayView && !entries.length && <div className="py-4 text-sm text-muted-foreground">Nothing on this day.</div>}
           </section>
+          )}
 
-          {active !== 'money' && <section>
-            <SectionHead title="To-do · no date" count={undated.length} />
-            {undated.map(x => <TaskRow key={x.id} task={x} compact tag={tag} />)}
-            {!undated.length && <div className="py-4 text-sm text-muted-foreground">All clear.</div>}
-          </section>}
+          {!showTodo && !hasCalData && !showAgenda && (
+            <p className="py-12 text-center text-sm text-muted-foreground">Nothing here yet.</p>
+          )}
         </>
       )}
     </main>

@@ -1,12 +1,14 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "@fontsource-variable/geist";
+@import "@fontsource-variable/inter";
 
 
 @theme {
     --text-micro: 10px;
     --text-micro--line-height: 13px;
+    --text-xxs: 11px;
+    --text-xxs--line-height: 15px;
     --text-xs: 12px;
     --text-xs--line-height: 16px;
     --text-sm: 13px;
@@ -43,7 +45,7 @@
     --color-p3: var(--p3);
     --color-p4: var(--p4);
     --font-heading: var(--font-sans);
-    --font-sans: 'Geist Variable', sans-serif;
+    --font-sans: 'Inter Variable', sans-serif;
     --color-sidebar-ring: var(--sidebar-ring);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -92,7 +94,7 @@
     --card-foreground: #f2f3f5;
     --popover: #16181c;
     --popover-foreground: #f2f3f5;
-    --primary: #2fa4ff;
+    --primary: #4593d6;
     --primary-foreground: #ffffff;
     --secondary: #1d2025;
     --secondary-foreground: #f2f3f5;
@@ -103,10 +105,11 @@
     --destructive: #ff6a5f;
     --border: rgb(255 255 255 / 9%);
     --input: rgb(255 255 255 / 14%);
-    --ring: #2fa4ff;
+    --ring: #4593d6;
     --radius: 0.75rem;
     --sheet: #0f1013;
     --chrome: #15263a;
+    --page-gradient: linear-gradient(180deg, var(--chrome) 0, #0e1826 240px, var(--background) 520px) no-repeat;
     --hairline: rgb(255 255 255 / 14%);
     --overdue: #ff6a5f;
     --today: #3ddc84;
@@ -125,7 +128,7 @@
     @apply border-border outline-ring/50;
     }
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
     }
   button:not(:disabled), [role="button"]:not(:disabled) {
     cursor: pointer;
@@ -141,8 +144,16 @@
   * { scrollbar-width: none; }
   ::-webkit-scrollbar { display: none; }
   body {
-    background: linear-gradient(180deg, var(--chrome) 0, #0e1826 --spacing(60), var(--background) --spacing(130)) no-repeat, var(--background);
+    background: transparent;
     min-height: 100dvh;
+  }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background: var(--page-gradient);
+    pointer-events: none;
   }
   html { font-size: 16px; }
   body { font-size: var(--text-base); line-height: var(--text-base--line-height); }
@@ -202,6 +213,26 @@
 
 @utility top-below-header {
   top: calc(--spacing(14) + env(safe-area-inset-top));
+}
+
+@utility top-safe-* {
+  top: calc(--spacing(--value(integer)) + env(safe-area-inset-top));
+}
+
+@utility top-below-filters {
+  top: calc(--spacing(14) + env(safe-area-inset-top));
+}
+
+.bg-page {
+  clip-path: inset(0);
+}
+.bg-page::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: var(--page-gradient);
+  pointer-events: none;
 }
 
 @utility scroll-mb-dock {

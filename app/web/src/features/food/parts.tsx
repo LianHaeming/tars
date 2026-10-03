@@ -21,7 +21,7 @@ export function ShopSwitch({ shops }: { shops: Shop[] }) {
 export function ShopName({ shop, buy, fallback, price = true }: { shop: Shop | null; buy: string | null; fallback: string; price?: boolean }) {
   const e = shopEntry(shop, buy)
   if (!e) return <>{fallback}</>
-  const note = e.swap && <span className="block text-xs text-muted-foreground">⇄ {e.note}</span>
+  const note = e.swap && <span className="block text-xs text-muted-foreground">Swap: {e.note}</span>
   if (!e.n) return <span><s className="text-muted-foreground">{fallback}</s>{note}</span>
   return (
     <span>

@@ -1,16 +1,15 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, XIcon } from 'lucide-react'
+import { type TouchEvent, useMemo, useRef, useState } from 'react'
 import type { Task } from '@/lib/api'
 import { localGet, localSet } from '@/lib/api'
-import { parseYmd, relDay, longDate, today, ymd } from '@/lib/dates'
+import { parseYmd, today, ymd } from '@/lib/dates'
 import { byTime, useTars } from '@/features/tasks/store'
-import { Button } from '@/components/ui/button'
-import { TaskRow } from '@/features/tasks/TaskRow'
-import { PaymentRow, useExpected, type Expected } from '@/features/money/expected'
-import { cn } from '@/lib/utils'
+import { useExpected, type Expected } from '@/features/money/expected'
+import { SectionHead } from '@/components/common'
+import { cn, dim } from '@/lib/utils'
 
 const DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 const firstOf = (d: Date) => new Date(d.getFullYear(), d.getMonth(), 1)
+const monthKey = (d: Date) => ymd(d).slice(0, 7)
 
 function buildCells(month: Date) {
   const first = firstOf(month)
@@ -20,24 +19,11 @@ function buildCells(month: Date) {
 }
 
 export function CalendarPanel({ filter = 'all' }: { filter?: string }) {
-  const { state, calSel, pickDay, project, dayView, enterDay, closeDay } = useTars()
+  const { state, calSel, pickDay, project, dayView, enterDay, closeDay, calMonth, setCalMonth } = useTars()
   const expected = useExpected()
-  const [month, setMonth] = useState(() => firstOf(parseYmd(calSel)))
+  const month = useMemo(() => parseYmd(calMonth + '-01'), [calMonth])
   const [shut, setShut] = useState(() => localGet('home-cal') === '0')
-  const panelRef = useRef<HTMLElement>(null)
-
-  // click outside the panel closes the open day
-  useEffect(() => {
-    if (!dayView) return
-    const onDoc = (e: MouseEvent) => {
-      const el = e.target as Element
-      if (!el.isConnected || panelRef.current?.contains(el)) return
-      if (el.closest('[data-dock], [data-radix-popper-content-wrapper], [data-sonner-toaster], [role=dialog], [role=alertdialog]')) return
-      closeDay()
-    }
-    const t = setTimeout(() => document.addEventListener('click', onDoc), 0)
-    return () => { clearTimeout(t); document.removeEventListener('click', onDoc) }
-  }, [dayView, closeDay])
+  const touch = useRef<{ x: number; y: number } | null>(null)
 
   const cells = useMemo(() => buildCells(month), [month])
   const tasksByDay = useMemo(() => {
@@ -56,31 +42,31 @@ export function CalendarPanel({ filter = 'all' }: { filter?: string }) {
   const showTasks = filter !== 'money'
   const gridTasks = (d: string) => (showTasks ? (tasksByDay[d] || []).filter(x => !activeTag || x.projectId === activeTag) : [])
 
-  const goMonth = (delta: number) => { const m = new Date(month.getFullYear(), month.getMonth() + delta, 1); setMonth(m); pickDay(ymd(m)) }
-  const goToday = () => { const t = today(); setMonth(firstOf(t)); if (dayView) enterDay(ymd(t)); else pickDay(ymd(t)) }
+  const goMonth = (delta: number) => { const m = new Date(month.getFullYear(), month.getMonth() + delta, 1); setCalMonth(monthKey(m)); pickDay(ymd(m)) }
+  const calLabel = monthKey(month) === monthKey(today())
+    ? today().toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' })
+    : month.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })
   const toggleShut = () => { setShut(v => { localSet('home-cal', v ? '1' : '0'); if (!v) closeDay(); return !v }) }
   const clickDay = (d: string) => { if (dayView && d === calSel) closeDay(); else enterDay(d) }
 
-  const dayTasks = (tasksByDay[calSel] || []).slice().sort(byTime)
-  const dayPays = paysByDay[calSel] || []
-  const nav = 'grid size-8 place-items-center rounded-full text-muted-foreground active:bg-muted [&_svg]:size-5'
+  const onTouchStart = (e: TouchEvent) => { const t = e.touches[0]; touch.current = { x: t.clientX, y: t.clientY } }
+  const onTouchEnd = (e: TouchEvent) => {
+    const s = touch.current; touch.current = null
+    if (!s) return
+    const t = e.changedTouches[0]
+    const dx = t.clientX - s.x, dy = t.clientY - s.y
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) goMonth(dx < 0 ? 1 : -1)
+  }
 
   return (
-    <section ref={panelRef} data-cal-panel>
-      <div className="flex items-center justify-between pt-6 pb-1">
-        <div className="flex items-center gap-1">
-          {!shut && <button type="button" aria-label="Previous month" onClick={() => goMonth(-1)} className={nav}><ChevronLeftIcon /></button>}
-          <button type="button" onClick={toggleShut} className="inline-flex items-center gap-1 text-xl font-bold tracking-tight tabular-nums">
-            {month.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
-            <ChevronDownIcon className={cn('size-5 text-muted-foreground transition-transform', shut && '-rotate-90')} />
-          </button>
-          {!shut && <button type="button" aria-label="Next month" onClick={() => goMonth(1)} className={nav}><ChevronRightIcon /></button>}
-        </div>
-        {!shut && <Button variant="secondary" size="sm" onClick={goToday}>Today</Button>}
-      </div>
+    <section data-cal-panel>
+      <SectionHead title="Calendar" sticky collapsed={shut} onToggle={toggleShut} />
 
       {!shut && (
-        <>
+        <div onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+          <div className="pt-1 pb-1">
+            <span className="text-sm font-semibold tracking-wider text-muted-foreground uppercase tabular-nums">{calLabel}</span>
+          </div>
           <div className="mt-2 grid grid-cols-7 px-1">
             {DOW.map(d => <span key={d} className="pb-1 text-center text-micro font-semibold tracking-wide text-muted-foreground">{d}</span>)}
           </div>
@@ -108,19 +94,6 @@ export function CalendarPanel({ filter = 'all' }: { filter?: string }) {
               )
             })}
           </div>
-        </>
-      )}
-
-      {dayView && (
-        <div className="animate-in fade-in slide-in-from-top-1 duration-200">
-          <div className="flex items-baseline gap-2 pt-4 pb-1">
-            <h3 className="text-lg font-bold tracking-tight">{relDay(calSel) || longDate(parseYmd(calSel))}</h3>
-            {relDay(calSel) && <span className="text-xs text-muted-foreground">{longDate(parseYmd(calSel))}</span>}
-            <button type="button" aria-label="Close day" onClick={closeDay} className="ml-auto grid size-7 place-items-center rounded-full text-muted-foreground active:bg-muted"><XIcon className="size-4" /></button>
-          </div>
-          {dayTasks.map(x => <TaskRow key={x.id} task={x} compact tag hideDue />)}
-          {dayPays.map(p => <PaymentRow key={p.id} p={p} tag />)}
-          {!dayTasks.length && !dayPays.length && <p className="py-4 text-sm text-muted-foreground">Nothing on this day. Tap Add task to add one.</p>}
         </div>
       )}
     </section>
@@ -128,10 +101,11 @@ export function CalendarPanel({ filter = 'all' }: { filter?: string }) {
 }
 
 function Chip({ color, label, done }: { color: string; label: string; done?: boolean }) {
+  const c = dim(color)
   return (
     <span
       className={cn('truncate rounded-mark border-l-2 px-1 text-micro font-medium', done && 'line-through opacity-50')}
-      style={{ borderColor: color, color, background: `color-mix(in srgb, ${color} 16%, transparent)` }}
+      style={{ borderColor: c, color: c, background: `color-mix(in srgb, ${color} 14%, transparent)` }}
     >
       {label || 'Untitled'}
     </span>

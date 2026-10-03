@@ -30,13 +30,13 @@ export function Dock() {
   }
   const tab = hidden ? -1 : 0
   const onSchedule = pathname === '/'
-  const seg = (on: boolean) => cn('relative z-10 grid h-12 w-16 place-items-center rounded-full transition-colors duration-200 [&_svg]:size-5', on ? 'text-background' : 'text-muted-foreground')
+  const seg = (on: boolean) => cn('relative z-10 grid h-10 w-14 place-items-center rounded-full transition-colors duration-200 [&_svg]:size-5', on ? 'text-background' : 'text-muted-foreground')
 
   const editing = !hidden && !!openId
   const showUndo = !editing && !!flash
   const doneEditing = () => { (document.activeElement as HTMLElement | null)?.blur(); setOpenId(null) }
-  const barPrimary = 'grid h-12 place-items-center rounded-full bg-foreground px-5 text-sm font-semibold text-background active:scale-98 animate-in fade-in duration-200'
-  const barGhost = 'grid h-12 place-items-center rounded-full px-4 text-sm font-semibold text-destructive active:scale-98 animate-in fade-in duration-200'
+  const barPrimary = 'grid h-10 place-items-center rounded-full bg-foreground px-5 text-sm font-semibold text-background active:scale-98 animate-in fade-in duration-200'
+  const barGhost = 'grid h-10 place-items-center rounded-full px-4 text-sm font-semibold text-destructive active:scale-98 animate-in fade-in duration-200'
 
   const actions = [
     { key: 'tars', label: 'Tars', Icon: BotIcon, run: () => navigate('/tars') },
@@ -47,11 +47,11 @@ export function Dock() {
     <nav
       data-dock
       className={cn(
-        'pointer-events-none fixed inset-x-4 bottom-safe-4 z-30 mx-auto flex max-w-page items-center justify-between transition-[translate,opacity] duration-200',
+        'pointer-events-none fixed inset-x-4 bottom-safe-2 z-30 mx-auto flex max-w-page items-center justify-between transition-[translate,opacity] duration-200',
         hidden && 'translate-y-full opacity-0',
       )}
     >
-      <div aria-hidden className="size-14 shrink-0" />
+      <div aria-hidden className="size-12 shrink-0" />
       <div className={cn('dock relative flex items-center gap-1 rounded-full p-1', !hidden && 'pointer-events-auto')}>
         {editing ? (
           <>
@@ -60,14 +60,14 @@ export function Dock() {
           </>
         ) : showUndo ? (
           <>
-            <span className="grid h-12 place-items-center px-3 text-sm font-semibold text-muted-foreground animate-in fade-in duration-200">{flash!.label}</span>
+            <span className="grid h-10 place-items-center px-3 text-sm font-semibold text-muted-foreground animate-in fade-in duration-200">{flash!.label}</span>
             <button type="button" onClick={flash!.run} className={barPrimary}>Undo</button>
           </>
         ) : (
           <>
             <span
               aria-hidden
-              className="absolute left-1 top-1 h-12 w-16 rounded-full bg-foreground shadow-sm transition-transform duration-300 ease-spring"
+              className="absolute left-1 top-1 h-10 w-14 rounded-full bg-foreground shadow-sm transition-transform duration-300 ease-spring"
               style={{ transform: onSchedule ? 'translateX(0)' : 'translateX(calc(100% + 0.25rem))' }}
             />
             <Link to="/" onClick={exitDay} aria-label="Schedule" aria-current={onSchedule ? 'page' : undefined} tabIndex={tab} className={seg(onSchedule)}><CircleCheckIcon /></Link>
@@ -90,7 +90,7 @@ export function Dock() {
               aria-label={a.label}
               onClick={() => { setOpen(false); a.run() }}
               className={cn(
-                'dock grid size-14 place-items-center rounded-full text-foreground transition-[transform,opacity] duration-200 ease-sheet active:scale-98 [&_svg]:size-5',
+                'dock grid size-12 place-items-center rounded-full text-foreground transition-[transform,opacity] duration-200 ease-sheet active:scale-98 [&_svg]:size-5',
                 open ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-2 opacity-0',
               )}
               style={{ transitionDelay: open ? `${i * 40}ms` : '0ms' }}
@@ -105,7 +105,7 @@ export function Dock() {
           aria-expanded={open}
           tabIndex={tab}
           onClick={() => setOpen(v => !v)}
-          className="dock grid size-14 place-items-center rounded-full text-foreground transition-colors active:scale-98 [&_svg]:size-5"
+          className="dock grid size-12 place-items-center rounded-full text-foreground transition-colors active:scale-98 [&_svg]:size-5"
         >
           {open ? <XIcon /> : <MenuIcon />}
         </button>

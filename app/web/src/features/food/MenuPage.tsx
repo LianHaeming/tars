@@ -92,7 +92,7 @@ export function MenuPage() {
         {filtered && <Button variant="ghost" size="sm" className="shrink-0 text-muted-foreground" onClick={() => setF(DEFAULTS)}>Reset</Button>}
       </div>
 
-      {!food ? <Loading error={error} /> : !list.length ? <Empty icon="🍽">No dishes match these filters.</Empty> : CARBS.map(c => {
+      {!food ? <Loading error={error} /> : !list.length ? <Empty>No dishes match these filters.</Empty> : CARBS.map(c => {
         const rs = list.filter(r => r.cf === c)
         if (!rs.length) return null
         return (

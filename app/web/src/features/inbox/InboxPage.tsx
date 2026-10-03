@@ -58,7 +58,7 @@ export function InboxPage() {
   return (
     <Page title="From email" back="/apps">
       {loaded && !candidates.length ? (
-        <Empty icon="📬">Nothing to review. New emails that look like tasks will show up here.</Empty>
+        <Empty>Nothing to review. New emails that look like tasks will show up here.</Empty>
       ) : (
         <ul className="space-y-3 pt-4">
           {candidates.map(c => (
