@@ -17,9 +17,19 @@ function useStoreValue() {
   const [view, setView] = useState<string | null>(null)
   const [openId, setOpenId] = useState<string | null>(null)
   const [calSel, setCalSel] = useState(() => ymd(today()))
+  const [dayView, setDayView] = useState(false)
   const [adding, setAdding] = useState(false)
   const [pendingAdd, setPendingAdd] = useState(false)
+  const [flash, setFlash] = useState<{ label: string; run: () => void } | null>(null)
+  const flashTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
   const [, setTick] = useState(0)
+
+  const flashUndo = useCallback((label: string, run: () => void | Promise<void>) => {
+    clearTimeout(flashTimer.current)
+    setFlash({ label, run: () => { clearTimeout(flashTimer.current); setFlash(null); run() } })
+    flashTimer.current = setTimeout(() => setFlash(null), 6000)
+  }, [])
+  const clearFlash = useCallback(() => { clearTimeout(flashTimer.current); setFlash(null) }, [])
   const stateRef = useRef(state)
   stateRef.current = state
   const draftIds = useRef(new Set<string>())
@@ -80,6 +90,7 @@ function useStoreValue() {
       const f = localGet('home-filter')
       if (f && state.projects.some(p => p.id === f)) defaults.projectId = f
     }
+    if (dayView && defaults.due == null) defaults.due = calSel
     const task: Task = { id, title: '', description: '', due: null, dueTime: null, priority: 4, projectId: null, done: false, createdAt: Date.now(), completedAt: null, ...defaults }
     draftIds.current.add(id)
     setState(s => ({ ...s, tasks: [...s.tasks, task] }))
@@ -106,7 +117,7 @@ function useStoreValue() {
     if (openId === id) setOpenId(null)
     await api('PATCH', 'tasks/' + id, { done: !t.done })
     await load()
-    if (!t.done) toast('Completed', { action: { label: 'Undo', onClick: async () => { await api('PATCH', 'tasks/' + id, { done: false }); await load() } } })
+    if (!t.done) flashUndo('Completed', async () => { await api('PATCH', 'tasks/' + id, { done: false }); await load() })
   }
 
   async function deleteTask(id: string) {
@@ -114,7 +125,7 @@ function useStoreValue() {
     setOpenId(null)
     await api('DELETE', 'tasks/' + id)
     await load()
-    toast('Deleted', { action: { label: 'Undo', onClick: async () => { await api('POST', 'tasks', copy); await load() } } })
+    flashUndo('Deleted', async () => { await api('POST', 'tasks', copy); await load() })
   }
 
   async function rescheduleOverdue() {
@@ -157,8 +168,9 @@ function useStoreValue() {
   return {
     loaded, state, open, project, shoppingList, load,
     view, setView, viewInfo, addDefaults, inView,
-    openId, setOpenId, calSel, setCalSel: (ds: string) => { setCalSel(ds); setOpenId(null) },
-    adding, setAdding, pendingAdd, setPendingAdd,
+    openId, setOpenId, calSel, setCalSel: (ds: string) => { setCalSel(ds); setOpenId(null) }, pickDay: (ds: string) => setCalSel(ds),
+    dayView, enterDay: (ds: string) => { setCalSel(ds); setDayView(true) }, exitDay: () => { setDayView(false); setOpenId(null) }, closeDay: () => setDayView(false),
+    adding, setAdding, pendingAdd, setPendingAdd, flash, clearFlash,
     patch, addTask, addDraft, discardIfEmpty, toggleDone, deleteTask, rescheduleOverdue, whereAdded,
     addProject, renameProject, deleteProject,
   }

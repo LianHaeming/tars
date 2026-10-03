@@ -14,7 +14,7 @@ export function ListPage() {
   const { food, error } = useFood()
   const basket = useBasket()
   const { shop } = useShop(food?.shops ?? [])
-  const { load } = useTars()
+  const { load, shoppingList } = useTars()
   const navigate = useNavigate()
   const [lines, setLines] = useState<Line[] | null>(null)
   const [sending, setSending] = useState(false)
@@ -36,7 +36,7 @@ export function ListPage() {
     try {
       await api('POST', 'shopping', { items })
       await load()
-      toast(`Sent ${items.length} items to Shopping`, { action: { label: 'Open', onClick: () => navigate('/shopping') } })
+      toast(`Sent ${items.length} items to Shopping`, { action: { label: 'Open', onClick: () => navigate(shoppingList ? `/?filter=${shoppingList.id}` : '/') } })
     } catch {
       toast("Couldn't send, try again")
     }

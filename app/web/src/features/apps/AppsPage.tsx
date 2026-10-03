@@ -1,26 +1,15 @@
 import { Link } from 'react-router'
-import { CalendarDaysIcon, LanguagesIcon, ListChecksIcon, MailIcon, ShoppingCartIcon, UtensilsIcon, WalletIcon } from 'lucide-react'
-import { today, ymd } from '@/lib/dates'
+import { MailIcon, UtensilsIcon, WalletIcon } from 'lucide-react'
 import { useBasket } from '@/features/food/data'
 import { useInbox } from '@/features/inbox/data'
-import { useTars } from '@/features/tasks/store'
 
 function useApps() {
-  const { open, shoppingList } = useTars()
   const picked = useBasket().ids.length
   const review = useInbox().candidates.length
-  const t = ymd(today())
-  const toBuy = open.filter(x => x.projectId === shoppingList?.id).length
-  const coming = open.filter(x => x.due && x.due >= t).length
-  const tasks = open.filter(x => x.projectId !== shoppingList?.id).length
   return [
     { to: '/food', label: 'Food', sub: picked ? `${picked} picked` : 'Pick dishes', icon: <UtensilsIcon /> },
-    { to: '/shopping', label: 'Shopping', sub: `${toBuy} to buy`, icon: <ShoppingCartIcon /> },
-    { to: '/month', label: 'Calendar', sub: `${coming} coming up`, icon: <CalendarDaysIcon /> },
-    { to: '/lists', label: 'Lists', sub: `${tasks} tasks`, icon: <ListChecksIcon /> },
     { to: '/money', label: 'Money', sub: 'Monzo', icon: <WalletIcon /> },
     { to: '/inbox', label: 'Email', sub: review ? `${review} to review` : 'From Gmail', icon: <MailIcon />, dot: review > 0 },
-    { to: '/burmese', label: 'Burmese', sub: 'Daily phrase', icon: <LanguagesIcon /> },
   ]
 }
 

@@ -1,12 +1,13 @@
 import { useEffect, useState, type ReactNode } from 'react'
-import { Link } from 'react-router'
+import { useSearchParams } from 'react-router'
 import { focusDraft } from '@/app/Dock'
 import { cn } from '@/lib/utils'
 import { localGet, localSet, type Task } from '@/lib/api'
-import { addDays, dayDiff, hhmm, longDate, parseYmd, today, ymd } from '@/lib/dates'
+import { addDays, dayDiff, hhmm, longDate, parseYmd, shortDate, today, ymd } from '@/lib/dates'
 import { byPriority, byWhen, useTars } from '@/features/tasks/store'
 import { TaskRow } from '@/features/tasks/TaskRow'
-import { SectionHead } from '@/components/common'
+import { CalendarPanel } from '@/features/tasks/calendar'
+import { Section, SectionHead } from '@/components/common'
 import { PaymentRow, useExpected, type Expected } from '@/features/money/expected'
 import { MainEvent } from './MainEvent'
 import { BurmeseCard } from '@/features/burmese/BurmeseCard'
@@ -117,9 +118,34 @@ function DayHead({ day, onMove }: { day: string; onMove: () => void }) {
   )
 }
 
+function Completed({ tasks }: { tasks: Task[] }) {
+  const done = [...tasks].sort((a, b) => (b.completedAt || 0) - (a.completedAt || 0))
+  let last: string | null | undefined
+  return (
+    <section>
+      <SectionHead title="Completed" count={done.length} />
+      {done.map(x => {
+        const day = x.completedAt ? ymd(new Date(x.completedAt)) : null
+        const head = day !== last
+        last = day
+        const name = !day ? 'Earlier' : dayDiff(day) === 0 ? 'Today' : dayDiff(day) === -1 ? 'Yesterday' : parseYmd(day).toLocaleDateString(undefined, { weekday: 'long' })
+        return (
+          <div key={x.id}>
+            {head && <Section><span>{name}{day && <span className="font-semibold text-muted-foreground"> · {shortDate(parseYmd(day))}</span>}</span></Section>}
+            <TaskRow task={x} hideDue />
+          </div>
+        )
+      })}
+      {!done.length && <div className="py-4 text-sm text-muted-foreground">Nothing completed yet.</div>}
+    </section>
+  )
+}
+
 export function Home() {
-  const { open, state, rescheduleOverdue, pendingAdd, setPendingAdd, addDraft } = useTars()
+  const { open, state, rescheduleOverdue, pendingAdd, setPendingAdd, addDraft, dayView, calSel } = useTars()
   const expected = useExpected()
+  const [params, setParams] = useSearchParams()
+  const urlFilter = params.get('filter')
 
   useEffect(() => {
     if (!pendingAdd) return
@@ -129,10 +155,17 @@ export function Home() {
     return () => clearTimeout(t)
   }, [pendingAdd, setPendingAdd, addDraft])
   const [filter, setFilter] = useState(() => localGet('home-filter') || 'all')
-  const active = filter === 'money' || state.projects.some(p => p.id === filter) ? filter : 'all'
+  const known = (k: string) => k === 'all' || k === 'money' || k === 'completed' || state.projects.some(p => p.id === k)
+  const active = known(filter) ? filter : 'all'
   const pick = (k: string) => { setFilter(k); localSet('home-filter', k) }
+  useEffect(() => {
+    if (!urlFilter) return
+    if (known(urlFilter)) { pick(urlFilter); setParams({}, { replace: true }) }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [urlFilter, state.projects])
 
-  const shown = active === 'all' ? open : open.filter(x => x.projectId === active)
+  const completed = active === 'completed'
+  const shown = active === 'all' || completed ? open : open.filter(x => x.projectId === active)
   const dated = shown.filter(x => x.due).sort(byWhen)
   const undated = shown.filter(x => !x.due).sort(byPriority)
   const main = todaysEvent(dated)
@@ -141,11 +174,12 @@ export function Home() {
   const until = ymd(addDays(today(), UPCOMING_DAYS - 1))
   const pays = active === 'all' || active === 'money' ? expected : []
   const all: Entry[] = [...dated.map(task => ({ day: task.due!, task })), ...pays.map(pay => ({ day: pay.date, pay }))]
-  const entries = all.filter(e => e.day <= until)
-  const later = all.length - entries.length
+  const windowed = all.filter(e => e.day <= until)
+  const entries = dayView ? windowed.filter(e => e.day !== calSel) : windowed
+  const later = all.length - windowed.length
 
   return (
-    <main className="mx-auto max-w-page px-4 pt-safe-5 pb-safe-30">
+    <main className="mx-auto max-w-page px-4 pt-safe-5 pb-safe-40">
       <LifeBar />
       <div className="mt-3"><BurmeseCard /></div>
       <header className="px-1 pt-4">
@@ -159,32 +193,39 @@ export function Home() {
           <FilterLabel key={p.id} on={active === p.id} color={p.color} onClick={() => pick(p.id)}>{p.name}</FilterLabel>
         ))}
         {expected.length > 0 && <FilterLabel on={active === 'money'} color="var(--money)" onClick={() => pick('money')}>Money</FilterLabel>}
+        <FilterLabel on={completed} color="var(--muted-foreground)" onClick={() => pick('completed')}>Completed</FilterLabel>
       </nav>
 
-      <section>
-        <SectionHead title="Upcoming" link="Month" to="/month" />
-        {byDay(entries).map(([day, list]) => (
-          <div key={day}>
-            <DayHead day={day} onMove={rescheduleOverdue} />
-            {day === t && main && <MainEvent task={main} />}
-            {list.map(e => e.task
-              ? e.task !== main && <TaskRow key={e.task.id} task={e.task} compact tag={tag} hideDue={day !== 'overdue'} />
-              : <PaymentRow key={e.pay!.id} p={e.pay!} tag={tag} />)}
-          </div>
-        ))}
-        {!entries.length && <div className="py-4 text-sm text-muted-foreground">Nothing in the next {UPCOMING_DAYS} days.</div>}
-        {later > 0 && (
-          <Link to="/month" className="block py-3 text-sm text-muted-foreground">
-            {later} more after {dayHeading(until)} · <span className="font-semibold text-primary">See Month</span>
-          </Link>
-        )}
-      </section>
+      {completed ? (
+        <Completed tasks={state.tasks.filter(x => x.done)} />
+      ) : (
+        <>
+          <CalendarPanel filter={active} />
 
-      {active !== 'money' && <section>
-        <SectionHead title="To-do · no date" count={undated.length} link="All lists" to="/lists" />
-        {undated.map(x => <TaskRow key={x.id} task={x} compact tag={tag} />)}
-        {!undated.length && <div className="py-4 text-sm text-muted-foreground">All clear.</div>}
-      </section>}
+          <section>
+            <SectionHead title="Upcoming" />
+            {byDay(entries).map(([day, list]) => (
+              <div key={day}>
+                <DayHead day={day} onMove={rescheduleOverdue} />
+                {day === t && main && <MainEvent task={main} />}
+                {list.map(e => e.task
+                  ? e.task !== main && <TaskRow key={e.task.id} task={e.task} compact tag={tag} hideDue={day !== 'overdue'} />
+                  : <PaymentRow key={e.pay!.id} p={e.pay!} tag={tag} />)}
+              </div>
+            ))}
+            {!entries.length && <div className="py-4 text-sm text-muted-foreground">Nothing in the next {UPCOMING_DAYS} days.</div>}
+            {later > 0 && (
+              <p className="py-3 text-sm text-muted-foreground">{later} more after {dayHeading(until)} · see the calendar above.</p>
+            )}
+          </section>
+
+          {active !== 'money' && <section>
+            <SectionHead title="To-do · no date" count={undated.length} />
+            {undated.map(x => <TaskRow key={x.id} task={x} compact tag={tag} />)}
+            {!undated.length && <div className="py-4 text-sm text-muted-foreground">All clear.</div>}
+          </section>}
+        </>
+      )}
     </main>
   )
 }

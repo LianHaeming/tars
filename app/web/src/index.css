@@ -5,6 +5,8 @@
 
 
 @theme {
+    --text-micro: 10px;
+    --text-micro--line-height: 13px;
     --text-xs: 12px;
     --text-xs--line-height: 16px;
     --text-sm: 13px;
@@ -135,7 +137,7 @@
 
 @layer base {
   html, body { overscroll-behavior-y: none; -webkit-tap-highlight-color: transparent; }
-  html { background: var(--background); }
+  html { background: var(--background); scroll-padding-bottom: calc(--spacing(26) + env(safe-area-inset-bottom)); }
   * { scrollbar-width: none; }
   ::-webkit-scrollbar { display: none; }
   body {
@@ -202,6 +204,10 @@
   top: calc(--spacing(14) + env(safe-area-inset-top));
 }
 
+@utility scroll-mb-dock {
+  scroll-margin-bottom: calc(--spacing(26) + env(safe-area-inset-bottom));
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 1ms !important;
@@ -210,3 +216,15 @@
     scroll-behavior: auto !important;
   }
 }
+
+.cn-toast-close {
+  opacity: 1 !important;
+  width: 22px !important;
+  height: 22px !important;
+  background: var(--popover) !important;
+  border-color: var(--border) !important;
+  color: var(--muted-foreground) !important;
+  transition: color .15s, background .15s;
+}
+.cn-toast-close:hover { color: var(--foreground) !important; }
+.cn-toast-close > svg { width: 14px; height: 14px; }

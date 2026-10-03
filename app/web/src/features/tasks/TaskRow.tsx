@@ -1,27 +1,20 @@
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
-import { CalendarIcon, CheckIcon, ClockIcon, FlagIcon, InboxIcon, Trash2Icon } from 'lucide-react'
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { CalendarIcon, CheckIcon, ClockIcon, TagIcon, XIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Task } from '@/lib/api'
-import { addDays, dueColor, dueLabel, nextMonday, parseYmd, today, whenLabel, ymd } from '@/lib/dates'
+import { dueColor, dueLabel, today, whenLabel, ymd } from '@/lib/dates'
 import { useTars } from '@/features/tasks/store'
-import { Button } from '@/components/ui/button'
-import { Calendar } from '@/components/ui/calendar'
-import { Input } from '@/components/ui/input'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Textarea } from '@/components/ui/textarea'
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import { Dot, pill } from '@/components/common'
+import { TagManager } from '@/features/tasks/TagManager'
 
-type Opts = { hideProject?: boolean; hideDue?: boolean; compact?: boolean; tag?: boolean }
+type Opts = { hideProject?: boolean; hideDue?: boolean; compact?: boolean; tag?: boolean; forceEditor?: boolean }
 
-const pc = (p: number) => ({ '--pc': `var(--p${p})` }) as CSSProperties
-
-function Check({ task, onDone }: { task: Task; onDone: () => void }) {
+function Check({ task, color, onDone }: { task: Task; color: string; onDone: () => void }) {
   return (
     <button
       type="button"
       aria-label={task.done ? 'Mark not done' : 'Complete'}
-      style={pc(task.priority)}
+      style={{ '--pc': color } as CSSProperties}
       onClick={e => { e.stopPropagation(); onDone() }}
       className={cn(
         'group/check mt-px grid size-5 shrink-0 place-items-center rounded-full border-2 border-(--pc) bg-(--pc)/12 transition-colors',
@@ -33,8 +26,10 @@ function Check({ task, onDone }: { task: Task; onDone: () => void }) {
   )
 }
 
-export function TaskRow({ task, hideProject, hideDue, compact, tag }: { task: Task } & Opts) {
-  const { openId, setOpenId, toggleDone, project } = useTars()
+const checkColor = (_color?: string) => 'var(--p4)'
+
+export function TaskRow({ task, hideProject, hideDue, compact, tag, forceEditor }: { task: Task } & Opts) {
+  const { openId, setOpenId, toggleDone, project, dayView } = useTars()
   const [completing, setCompleting] = useState(false)
   const p = project(task.projectId)
 
@@ -48,7 +43,7 @@ export function TaskRow({ task, hideProject, hideDue, compact, tag }: { task: Ta
     setCompleting(false)
   }
 
-  if (openId === task.id) return <TaskEditor task={task} onDone={done} />
+  if (openId === task.id && (forceEditor || !dayView)) return <TaskEditor task={task} onDone={done} />
 
   return (
     <div
@@ -57,7 +52,7 @@ export function TaskRow({ task, hideProject, hideDue, compact, tag }: { task: Ta
       className={cn('group/task hairline-b transition-opacity duration-200', completing && 'opacity-40')}
     >
       <div className="flex cursor-pointer items-start gap-3 py-3" onClick={() => setOpenId(task.id)}>
-        <Check task={task} onDone={done} />
+        <Check task={task} color={checkColor(p?.color)} onDone={done} />
         <div className="min-w-0 flex-1">
           <div className="break-words group-data-[done=true]/task:text-muted-foreground group-data-[done=true]/task:line-through">{task.title}</div>
           {task.description && !compact && (
@@ -96,16 +91,26 @@ function Meta({ task, hideDue, project, tag }: { task: Task; hideDue?: boolean; 
   return <div className="mt-1 flex gap-3 text-xs text-muted-foreground [&>span]:inline-flex [&>span]:items-center [&>span]:gap-1 [&_svg]:size-3">{items}</div>
 }
 
-const pill = 'h-8 rounded-lg border-transparent bg-background px-3 text-sm font-normal data-[on=true]:border-(--pc,var(--foreground)) dark:bg-background dark:hover:bg-accent'
+const chip = cn(pill, 'px-3 py-2 [&_svg]:size-4')
+
+const grow = (el: HTMLTextAreaElement | null) => { if (el) { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px' } }
 
 function TaskEditor({ task, onDone }: { task: Task; onDone: () => void }) {
-  const { patch, deleteTask, state, setOpenId, discardIfEmpty } = useTars()
+  const { patch, state, setOpenId, discardIfEmpty } = useTars()
   const [title, setTitle] = useState(task.title)
   const ref = useRef<HTMLDivElement>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
+  const titleRef = useRef<HTMLTextAreaElement>(null)
+  const p = state.projects.find(x => x.id === task.projectId)
 
   useEffect(() => {
-    if (!task.title) inputRef.current?.focus()
+    // new draft: focus the title and let the browser scroll it above the keyboard.
+    // existing task: no keyboard, so bring the whole card into view ourselves.
+    if (!task.title) {
+      titleRef.current?.focus()
+    } else {
+      const id = requestAnimationFrame(() => ref.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }))
+      return () => { cancelAnimationFrame(id); discardIfEmpty(task.id) }
+    }
     return () => discardIfEmpty(task.id)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -113,117 +118,77 @@ function TaskEditor({ task, onDone }: { task: Task; onDone: () => void }) {
   useEffect(() => {
     const away = (e: MouseEvent) => {
       const el = e.target as Element
-      if (!el.isConnected || ref.current?.contains(el) || el.closest('[data-radix-popper-content-wrapper], [data-sonner-toaster], [data-task-row]')) return
+      if (!el.isConnected || ref.current?.contains(el) || el.closest('[data-radix-popper-content-wrapper], [data-sonner-toaster], [data-task-row], [data-dock]')) return
       const dialog = el.closest('[role=dialog], [role=alertdialog]')
       if (dialog && !dialog.contains(ref.current)) return
-      setOpenId(null)
+      finish()
     }
     const t = setTimeout(() => document.addEventListener('click', away), 0)
     return () => { clearTimeout(t); document.removeEventListener('click', away) }
-  }, [setOpenId])
-  const [calOpen, setCalOpen] = useState(false)
-  const td = ymd(today()), tm = ymd(addDays(today(), 1)), nw = ymd(nextMonday())
-  const custom = !!task.due && ![td, tm, nw].includes(task.due)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [title])
 
   const saveTitle = () => {
     const t = title.trim()
     if (t && t !== task.title) patch(task.id, { title: t })
-    else setTitle(task.title)
+    else if (!t) setTitle(task.title)
   }
-  const dateBtn = (d: string, label: ReactNode) => (
-    <Button variant="outline" size="sm" data-on={task.due === d} className={pill} onClick={() => patch(task.id, { due: d })}>{label}</Button>
-  )
+  const finish = () => { saveTitle(); setOpenId(null) }
 
   return (
-    <div ref={ref} data-done={task.done} className="group/task -mx-3 my-2 rounded-xl bg-muted px-3 pb-3">
-      <div className="flex items-start gap-3 py-3">
-        <Check task={task} onDone={onDone} />
+    <div ref={ref} data-editor data-done={task.done} className="group/task -mx-3 my-2 scroll-mb-dock rounded-xl bg-muted px-3 pb-3">
+      <div className="flex items-start gap-3 pt-3">
+        <Check task={task} color={checkColor(p?.color)} onDone={onDone} />
         <div className="min-w-0 flex-1">
-          <Input
-            ref={inputRef}
+          <textarea
+            ref={el => { titleRef.current = el; grow(el) }}
             id="qa"
             value={title}
-            onChange={e => setTitle(e.target.value)}
+            rows={1}
+            onChange={e => { setTitle(e.target.value); grow(e.currentTarget) }}
             onBlur={saveTitle}
-            onKeyDown={e => { if (e.key === 'Enter') e.currentTarget.blur() }}
+            onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); e.currentTarget.blur() } }}
             placeholder="Task"
             autoComplete="off"
-            className="h-auto rounded-none border-0 bg-transparent p-0 font-semibold shadow-none focus-visible:ring-0 dark:bg-transparent"
+            className="block w-full resize-none overflow-hidden bg-transparent py-0 text-field leading-6 font-semibold break-words outline-none placeholder:text-muted-foreground"
           />
-          <Textarea
+          <textarea
+            ref={el => grow(el)}
             defaultValue={task.description}
-            placeholder="Add a note"
+            placeholder="Notes"
             rows={1}
+            onInput={e => grow(e.currentTarget)}
             onBlur={e => { const v = e.target.value.trim(); if (v !== task.description) patch(task.id, { description: v }) }}
-            className="mt-1 min-h-0 resize-none rounded-none border-0 bg-transparent p-0 text-field text-muted-foreground shadow-none focus-visible:ring-0 dark:bg-transparent"
+            className="mt-2 block w-full resize-none overflow-hidden rounded-lg bg-background/60 px-3 py-2 text-field text-muted-foreground outline-none placeholder:text-muted-foreground"
           />
         </div>
       </div>
 
-      <div className="ml-8 flex flex-wrap gap-2">
-        {dateBtn(td, <><CalendarIcon className="text-today" />Today</>)}
-        {dateBtn(tm, 'Tomorrow')}
-        {dateBtn(nw, 'Next week')}
-        <Popover open={calOpen} onOpenChange={setCalOpen}>
-          <PopoverTrigger asChild>
-            <Button variant="outline" size="sm" data-on={custom} className={pill}>{custom ? dueLabel(task.due!) : 'Pick date…'}</Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
-            <Calendar
-              mode="single"
-              weekStartsOn={1}
-              selected={task.due ? parseYmd(task.due) : undefined}
-              defaultMonth={task.due ? parseYmd(task.due) : undefined}
-              onSelect={d => { if (d) { patch(task.id, { due: ymd(d) }); setCalOpen(false) } }}
-            />
-          </PopoverContent>
-        </Popover>
-        {task.due && (
-          <label className={cn(pill, 'relative inline-flex cursor-pointer items-center gap-1 border [&_svg]:size-4')} data-on={!!task.dueTime}>
-            <ClockIcon />{task.dueTime || 'Time'}
-            <input
-              type="time"
-              value={task.dueTime || ''}
-              onChange={e => patch(task.id, { dueTime: e.target.value || null })}
-              className="absolute inset-0 opacity-0"
-            />
-          </label>
-        )}
-        {task.due && (
-          <Button variant="outline" size="sm" className={pill} onClick={() => patch(task.id, { due: null, dueTime: null })}>No date</Button>
-        )}
+      <div className="scrollbar-none mt-3 ml-8 flex gap-2 overflow-x-auto">
+        <button type="button" data-on={!task.projectId} className={chip} onClick={() => patch(task.id, { projectId: null })}>Inbox</button>
+        {state.projects.map(pr => (
+          <button key={pr.id} type="button" data-on={task.projectId === pr.id} className={chip} onClick={() => patch(task.id, { projectId: pr.id })}>
+            <Dot color={pr.color} />{pr.name}
+          </button>
+        ))}
+        <TagManager
+          onCreate={id => patch(task.id, { projectId: id })}
+          trigger={<button type="button" className={cn(chip, 'text-muted-foreground')}><TagIcon />Tags</button>}
+        />
       </div>
 
       <div className="mt-2 ml-8 flex flex-wrap items-center gap-2">
-        <ToggleGroup
-          type="single"
-          spacing={1}
-          value={String(task.priority)}
-          onValueChange={v => v && patch(task.id, { priority: +v as Task['priority'] })}
-        >
-          {[1, 2, 3, 4].map(n => (
-            <ToggleGroupItem key={n} value={String(n)} size="sm" style={pc(n)}
-              className={cn(pill, 'border data-[state=on]:border-(--pc) data-[state=on]:bg-background [&_svg]:text-(--pc)')}>
-              <FlagIcon className="fill-current" />P{n}
-            </ToggleGroupItem>
-          ))}
-        </ToggleGroup>
-        <Select value={task.projectId ?? 'inbox'} onValueChange={v => patch(task.id, { projectId: v === 'inbox' ? null : v })}>
-          <SelectTrigger size="sm" className="h-8 border-transparent bg-background text-sm dark:bg-background">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="inbox"><InboxIcon />Inbox</SelectItem>
-            {state.projects.map(pr => (
-              <SelectItem key={pr.id} value={pr.id}>
-                <span className="size-2 rounded-full" style={{ background: pr.color }} />{pr.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Button variant="destructive" size="sm" className="ml-auto h-8" onClick={() => deleteTask(task.id)}>
-          <Trash2Icon />Delete
-        </Button>
+        <label className={cn(chip, 'relative cursor-pointer')} data-on={!!task.due}>
+          <CalendarIcon />{task.due ? dueLabel(task.due) : 'Add date'}
+          <input type="date" value={task.due || ''} onChange={e => patch(task.id, { due: e.target.value || null, ...(e.target.value ? {} : { dueTime: null }) })} className="absolute inset-0 opacity-0" />
+        </label>
+        <label className={cn(chip, 'relative cursor-pointer')} data-on={!!task.dueTime}>
+          <ClockIcon />{task.dueTime || 'Add time'}
+          <input type="time" value={task.dueTime || ''} onChange={e => patch(task.id, { dueTime: e.target.value || null })} className="absolute inset-0 opacity-0" />
+        </label>
+        {(task.due || task.dueTime) && (
+          <button type="button" className={cn(chip, 'text-muted-foreground')} onClick={() => patch(task.id, { due: null, dueTime: null })}><XIcon />Clear</button>
+        )}
       </div>
     </div>
   )
