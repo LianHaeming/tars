@@ -1,5 +1,6 @@
-import { useState, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { Link } from 'react-router'
+import { focusDraft } from '@/app/Dock'
 import { cn } from '@/lib/utils'
 import { localGet, localSet, type Task } from '@/lib/api'
 import { addDays, dayDiff, hhmm, longDate, parseYmd, today, ymd } from '@/lib/dates'
@@ -117,8 +118,16 @@ function DayHead({ day, onMove }: { day: string; onMove: () => void }) {
 }
 
 export function Home() {
-  const { open, state, rescheduleOverdue } = useTars()
+  const { open, state, rescheduleOverdue, pendingAdd, setPendingAdd, addDraft } = useTars()
   const expected = useExpected()
+
+  useEffect(() => {
+    if (!pendingAdd) return
+    setPendingAdd(false)
+    addDraft()
+    const t = setTimeout(focusDraft, 60)
+    return () => clearTimeout(t)
+  }, [pendingAdd, setPendingAdd, addDraft])
   const [filter, setFilter] = useState(() => localGet('home-filter') || 'all')
   const active = filter === 'money' || state.projects.some(p => p.id === filter) ? filter : 'all'
   const pick = (k: string) => { setFilter(k); localSet('home-filter', k) }

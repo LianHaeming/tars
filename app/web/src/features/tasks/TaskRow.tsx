@@ -99,9 +99,16 @@ function Meta({ task, hideDue, project, tag }: { task: Task; hideDue?: boolean; 
 const pill = 'h-8 rounded-lg border-transparent bg-background px-3 text-sm font-normal data-[on=true]:border-(--pc,var(--foreground)) dark:bg-background dark:hover:bg-accent'
 
 function TaskEditor({ task, onDone }: { task: Task; onDone: () => void }) {
-  const { patch, deleteTask, state, setOpenId } = useTars()
+  const { patch, deleteTask, state, setOpenId, discardIfEmpty } = useTars()
   const [title, setTitle] = useState(task.title)
   const ref = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    if (!task.title) inputRef.current?.focus()
+    return () => discardIfEmpty(task.id)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   useEffect(() => {
     const away = (e: MouseEvent) => {
@@ -111,8 +118,8 @@ function TaskEditor({ task, onDone }: { task: Task; onDone: () => void }) {
       if (dialog && !dialog.contains(ref.current)) return
       setOpenId(null)
     }
-    document.addEventListener('click', away)
-    return () => document.removeEventListener('click', away)
+    const t = setTimeout(() => document.addEventListener('click', away), 0)
+    return () => { clearTimeout(t); document.removeEventListener('click', away) }
   }, [setOpenId])
   const [calOpen, setCalOpen] = useState(false)
   const td = ymd(today()), tm = ymd(addDays(today(), 1)), nw = ymd(nextMonday())
@@ -133,10 +140,14 @@ function TaskEditor({ task, onDone }: { task: Task; onDone: () => void }) {
         <Check task={task} onDone={onDone} />
         <div className="min-w-0 flex-1">
           <Input
+            ref={inputRef}
+            id="qa"
             value={title}
             onChange={e => setTitle(e.target.value)}
             onBlur={saveTitle}
             onKeyDown={e => { if (e.key === 'Enter') e.currentTarget.blur() }}
+            placeholder="Task"
+            autoComplete="off"
             className="h-auto rounded-none border-0 bg-transparent p-0 font-semibold shadow-none focus-visible:ring-0 dark:bg-transparent"
           />
           <Textarea

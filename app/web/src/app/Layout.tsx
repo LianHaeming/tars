@@ -1,34 +1,35 @@
 import { useEffect } from 'react'
-import { Outlet, ScrollRestoration, useLocation } from 'react-router'
+import { flushSync } from 'react-dom'
+import { Outlet, ScrollRestoration, useLocation, useNavigate } from 'react-router'
 import { Toaster } from '@/components/ui/sonner'
-import { QuickAdd, openQuickAdd } from '@/features/tasks/QuickAdd'
 import { useTars } from '@/features/tasks/store'
-import { Dock, showsDock } from './Dock'
+import { Dock, focusDraft, hasTaskList, showsDock } from './Dock'
 
 export function Layout() {
-  const { adding, setAdding, openId, setOpenId } = useTars()
+  const { openId, setOpenId, addDraft, setPendingAdd } = useTars()
   const { pathname } = useLocation()
+  const navigate = useNavigate()
 
   useEffect(() => {
     const editing = () => document.activeElement?.closest('input, textarea, select, [contenteditable]')
     const onKey = (e: KeyboardEvent) => {
-      if ((e.key === 'q' || e.key === '/') && !editing() && showsDock(pathname)) { e.preventDefault(); openQuickAdd(setAdding) }
+      if ((e.key === 'q' || e.key === '/') && !editing() && showsDock(pathname)) {
+        e.preventDefault()
+        if (hasTaskList(pathname)) { flushSync(() => { addDraft() }); focusDraft() }
+        else { setPendingAdd(true); navigate('/') }
+      }
       if (e.key === 'Escape' && !document.querySelector('[data-radix-popper-content-wrapper], [role=alertdialog], [role=dialog][data-state=open]')) {
-        if (adding) setAdding(false)
-        else if (openId) setOpenId(null)
+        if (openId) setOpenId(null)
       }
     }
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
-  }, [adding, openId, pathname, setAdding, setOpenId])
-
-  useEffect(() => { setAdding(false) }, [pathname, setAdding])
+  }, [openId, pathname, setOpenId, addDraft, setPendingAdd, navigate])
 
   return (
     <>
       <Outlet />
       <Dock />
-      <QuickAdd />
       <Toaster position="bottom-center" offset={{ bottom: 'calc(96px + env(safe-area-inset-bottom))' }} mobileOffset={{ bottom: 'calc(96px + env(safe-area-inset-bottom))' }} />
       <ScrollRestoration />
     </>

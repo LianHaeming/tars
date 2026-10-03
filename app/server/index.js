@@ -17,8 +17,9 @@ const db = store.tasks.get();
 const id = () => crypto.randomBytes(6).toString('hex');
 const TASK_FIELDS = ['title', 'description', 'due', 'dueTime', 'priority', 'projectId', 'done'];
 const pick = (obj, keys) => Object.fromEntries(keys.filter(k => k in obj).map(k => [k, obj[k]]));
-const newTask = fields => ({ id: id(), title: '', description: '', due: null, dueTime: null, priority: 4, projectId: null, done: false,
-  ...pick(fields, TASK_FIELDS), createdAt: Date.now(), completedAt: null });
+const newTask = fields => ({ id: typeof fields.id === 'string' && /^[\w-]{6,64}$/.test(fields.id) ? fields.id : id(),
+  title: '', description: '', due: null, dueTime: null, priority: 4, projectId: null, done: false,
+  ...pick(fields, TASK_FIELDS), createdAt: Number(fields.createdAt) || Date.now(), completedAt: null });
 const save = () => store.tasks.save();
 
 function send(res, status, body) {
@@ -42,7 +43,8 @@ async function api(req, res, parts) {
 
   if (resource === 'tasks') {
     if (req.method === 'POST' && !rid) {
-      if (!body.title?.trim()) return send(res, 400, { error: 'title required' });
+      const existing = body.id && db.tasks.find(t => t.id === body.id);
+      if (existing) { Object.assign(existing, pick(body, TASK_FIELDS)); save(); return send(res, 200, existing); }
       const task = newTask(body);
       db.tasks.push(task); save();
       return send(res, 201, task);

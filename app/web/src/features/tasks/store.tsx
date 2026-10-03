@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { toast } from 'sonner'
-import { api, type Project, type State, type Task } from '@/lib/api'
+import { api, localGet, type Project, type State, type Task } from '@/lib/api'
 import { dueLabel, longDate, today, ymd } from '@/lib/dates'
 
 const PROJECT_COLORS = ['#dc4c3e', '#eb8909', '#fad000', '#7ecc49', '#299438', '#14aaf5', '#4073ff', '#884dff', '#e05194', '#808080']
@@ -18,9 +18,12 @@ function useStoreValue() {
   const [openId, setOpenId] = useState<string | null>(null)
   const [calSel, setCalSel] = useState(() => ymd(today()))
   const [adding, setAdding] = useState(false)
+  const [pendingAdd, setPendingAdd] = useState(false)
   const [, setTick] = useState(0)
   const stateRef = useRef(state)
   stateRef.current = state
+  const draftIds = useRef(new Set<string>())
+  const persisted = useRef(new Set<string>())
 
   const load = useCallback(async () => { setState(await api<State>('GET', 'state')); setLoaded(true) }, [])
 
@@ -61,7 +64,36 @@ function useStoreValue() {
 
   async function patch(id: string, fields: Partial<Task>) {
     setState(s => ({ ...s, tasks: s.tasks.map(t => (t.id === id ? { ...t, ...fields } : t)) }))
-    await api('PATCH', 'tasks/' + id, fields)
+    if (draftIds.current.has(id) && !persisted.current.has(id)) {
+      persisted.current.add(id)
+      const task = { ...stateRef.current.tasks.find(t => t.id === id), ...fields }
+      await api('POST', 'tasks', task)
+    } else {
+      await api('PATCH', 'tasks/' + id, fields)
+    }
+  }
+
+  function addDraft() {
+    const id = crypto.randomUUID()
+    const defaults = addDefaults()
+    if (!view) {
+      const f = localGet('home-filter')
+      if (f && state.projects.some(p => p.id === f)) defaults.projectId = f
+    }
+    const task: Task = { id, title: '', description: '', due: null, dueTime: null, priority: 4, projectId: null, done: false, createdAt: Date.now(), completedAt: null, ...defaults }
+    draftIds.current.add(id)
+    setState(s => ({ ...s, tasks: [...s.tasks, task] }))
+    setOpenId(id)
+    return id
+  }
+
+  function discardIfEmpty(id: string) {
+    if (!draftIds.current.has(id)) return
+    const t = stateRef.current.tasks.find(x => x.id === id)
+    if (t && (t.title.trim() || (t.description || '').trim())) return
+    draftIds.current.delete(id)
+    setState(s => ({ ...s, tasks: s.tasks.filter(x => x.id !== id) }))
+    if (persisted.current.has(id)) { persisted.current.delete(id); api('DELETE', 'tasks/' + id) }
   }
 
   async function addTask(task: Partial<Task>) {
@@ -126,8 +158,8 @@ function useStoreValue() {
     loaded, state, open, project, shoppingList, load,
     view, setView, viewInfo, addDefaults, inView,
     openId, setOpenId, calSel, setCalSel: (ds: string) => { setCalSel(ds); setOpenId(null) },
-    adding, setAdding,
-    patch, addTask, toggleDone, deleteTask, rescheduleOverdue, whereAdded,
+    adding, setAdding, pendingAdd, setPendingAdd,
+    patch, addTask, addDraft, discardIfEmpty, toggleDone, deleteTask, rescheduleOverdue, whereAdded,
     addProject, renameProject, deleteProject,
   }
 }
