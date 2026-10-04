@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { focusDraft } from '@/app/Dock'
 import { cn, dim } from '@/lib/utils'
@@ -7,7 +7,7 @@ import { dayDiff, hhmm, parseYmd, relDay, shortDate, today, ymd } from '@/lib/da
 import { byPriority, byWhen, useTars } from '@/features/tasks/store'
 import { TaskRow } from '@/features/tasks/TaskRow'
 import { CalendarPanel } from '@/features/tasks/calendar'
-import { Section, SectionHead } from '@/components/common'
+import { FilterBar, FilterLabel, Section, SectionHead } from '@/components/common'
 import { PaymentRow, useExpected, type Expected } from '@/features/money/expected'
 import { MainEvent } from './MainEvent'
 
@@ -27,17 +27,51 @@ function groupByDay(entries: Entry[]) {
   return [...groups]
 }
 
-function FilterLabel({ on, color, onClick, children }: { on: boolean; color: string; onClick: () => void; children: ReactNode }) {
+const BIRTH = new Date(1998, 1, 10)
+const SPAN = 100
+const MARKS = [
+  { at: 81, label: 'today’s rates' },
+  { at: 87, label: 'likely', main: true },
+  { at: 90, label: '≈1 in 4' },
+]
+const QUIPS = ['make today count', 'go make a memory', 'carpe that diem', 'you can’t bank the unused days', 'spend it well', 'the days don’t come back']
+
+function LifeStrip() {
+  const age = (Date.now() - +BIRTH) / (365.25 * 864e5)
+  const pct = (age / SPAN) * 100
+  const toAvg = Math.round((age / 87) * 100)
+  const quip = QUIPS[Math.floor(+today() / 864e5) % QUIPS.length]
   return (
-    <button
-      type="button"
-      aria-pressed={on}
-      onClick={onClick}
-      style={on ? undefined : { color }}
-      className={cn('shrink-0 rounded-full px-3 py-2 text-base font-semibold whitespace-nowrap transition-colors', on && 'bg-secondary text-foreground')}
-    >
-      {children}
-    </button>
+    <div className="px-1 pt-1 pb-3">
+      <div className="flex items-baseline justify-between">
+        <span className="text-sm font-semibold">Life, so far — you’re {Math.floor(age)}</span>
+        <span className="text-xs text-muted-foreground">{toAvg}% to the average</span>
+      </div>
+      <div className="mt-3 flex items-center gap-3">
+        <div className="relative h-2 flex-1 overflow-hidden rounded-full bg-secondary">
+          <div className="absolute inset-y-0 left-0 overflow-hidden rounded-full" style={{ width: `${pct}%` }}>
+            <div className="h-full" style={{ width: `${10000 / pct}%`, background: 'linear-gradient(90deg, var(--today), var(--tomorrow), var(--overdue))' }} />
+          </div>
+          {MARKS.map(m => (
+            <div key={m.at} className={cn('absolute inset-y-0 w-px', m.main ? 'bg-primary' : 'bg-foreground/50')} style={{ left: `${(m.at / SPAN) * 100}%` }} title={`${m.at} — ${m.label}`} />
+          ))}
+        </div>
+        <span className="text-xs font-semibold tabular-nums text-muted-foreground" title="100 — about 1 in 9 men">100</span>
+      </div>
+      <p className="mt-2 text-xs text-muted-foreground">
+        81 today’s rates · <span className="text-primary">87 likely</span> · 90 ≈ 1 in 4 · 100 ≈ 1 in 9 · {quip}
+      </p>
+    </div>
+  )
+}
+
+function SubHead({ name, color, count }: { name: string; color: string; count: number }) {
+  return (
+    <div className="flex items-center gap-2 pt-5 pb-1 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
+      <span className="size-2 shrink-0 rounded-full" style={{ background: color }} />
+      <span>{name}</span>
+      <span className="opacity-60">{count}</span>
+    </div>
   )
 }
 
@@ -90,13 +124,9 @@ export function Home() {
     return () => clearTimeout(t)
   }, [pendingAdd, setPendingAdd, addDraft])
   const [filter, setFilter] = useState(() => localGet('home-filter') || 'all')
-  const known = (k: string) => k === 'all' || k === 'money' || k === 'completed' || state.projects.some(p => p.id === k)
+  const known = (k: string) => k === 'all' || k === 'completed' || state.projects.some(p => p.id === k)
   const active = known(filter) ? filter : 'all'
   const pick = (k: string) => { setFilter(k); localSet('home-filter', k) }
-  const [todoShut, setTodoShut] = useState(() => localGet('home-todo') === '1')
-  const toggleTodo = () => setTodoShut(v => { localSet('home-todo', v ? '0' : '1'); return !v })
-  const [upShut, setUpShut] = useState(() => localGet('home-up') === '1')
-  const toggleUp = () => setUpShut(v => { localSet('home-up', v ? '0' : '1'); return !v })
   useEffect(() => {
     if (!urlFilter) return
     if (known(urlFilter)) { pick(urlFilter); setParams({}, { replace: true }) }
@@ -107,29 +137,33 @@ export function Home() {
   const t = ymd(today())
   const tag = active === 'all'
   const matchTag = (x: Task) => active === 'all' || x.projectId === active
-  const datedAll = (active === 'money' ? [] : state.tasks.filter(x => x.due && matchTag(x))).sort(byWhen)
-  const undated = (active === 'money' ? [] : open.filter(x => !x.due && matchTag(x))).sort(byPriority)
-  const pays = active === 'all' || active === 'money' ? expected : []
+  const datedAll = state.tasks.filter(x => x.due && matchTag(x)).sort(byWhen)
+  const undated = open.filter(x => !x.due && matchTag(x)).sort(byPriority)
+  const pays = active === 'all' ? expected : []
   const main = todaysEvent(datedAll.filter(x => !x.done))
   const overdueOpen = datedAll.filter(x => !x.done && x.due! < t)
   const allDated: Entry[] = [...datedAll.map(task => ({ day: task.due!, task })), ...pays.map(pay => ({ day: pay.date, pay }))]
   const entries = dayView
     ? allDated.filter(e => e.day === calSel)
     : allDated.filter(e => e.day.startsWith(calMonth))
-  const showTodo = active !== 'money' && undated.length > 0
+  const activeProject = state.projects.find(p => p.id === active)
+  const subs = activeProject?.subs ?? []
+  const grouped = subs.length > 0 && undated.some(x => x.subId)
+  const noSub = undated.filter(x => !x.subId || !subs.some(s => s.id === x.subId))
+  const showTodo = undated.length > 0
   const hasCalData = datedAll.length > 0 || pays.length > 0
   const showAgenda = dayView || entries.length > 0
 
   return (
-    <main className="mx-auto max-w-page px-4 pb-safe-40">
-      <nav className="bg-page scrollbar-none sticky top-0 z-30 -mx-4 flex gap-2 overflow-x-auto px-4 pt-safe-3 pb-2">
+    <main className="mx-auto max-w-page px-4 pt-safe-3 pb-safe-40">
+      <LifeStrip />
+      <FilterBar>
         <FilterLabel on={active === 'all'} color="var(--foreground)" onClick={() => pick('all')}>All</FilterLabel>
         {state.projects.map(p => (
           <FilterLabel key={p.id} on={active === p.id} color={dim(p.color)} onClick={() => pick(p.id)}>{p.name}</FilterLabel>
         ))}
-        {expected.length > 0 && <FilterLabel on={active === 'money'} color={dim('var(--money)')} onClick={() => pick('money')}>Money</FilterLabel>}
         <FilterLabel on={completed} color="var(--muted-foreground)" onClick={() => pick('completed')}>Completed</FilterLabel>
-      </nav>
+      </FilterBar>
 
       {completed ? (
         <Completed tasks={state.tasks.filter(x => x.done)} />
@@ -137,8 +171,29 @@ export function Home() {
         <>
           {showTodo && (
             <section>
-              <SectionHead title="To-do" sticky collapsed={todoShut} onToggle={toggleTodo} />
-              {!todoShut && undated.map(x => <TaskRow key={x.id} task={x} compact tag={tag} />)}
+              <SectionHead title="To-do" lg />
+              {grouped ? (
+                <>
+                  {subs.map(s => {
+                    const items = undated.filter(x => x.subId === s.id)
+                    if (!items.length) return null
+                    return (
+                      <div key={s.id}>
+                        <SubHead name={s.name} color={activeProject!.color} count={items.length} />
+                        {items.map(x => <TaskRow key={x.id} task={x} compact tag={tag} />)}
+                      </div>
+                    )
+                  })}
+                  {noSub.length > 0 && (
+                    <div>
+                      <SubHead name="Other" color="var(--muted-foreground)" count={noSub.length} />
+                      {noSub.map(x => <TaskRow key={x.id} task={x} compact tag={tag} />)}
+                    </div>
+                  )}
+                </>
+              ) : (
+                undated.map(x => <TaskRow key={x.id} task={x} compact tag={tag} />)
+              )}
             </section>
           )}
 
@@ -147,17 +202,17 @@ export function Home() {
           {showAgenda && (
           <section>
             {dayView ? (
-              <div className="bg-page sticky top-below-filters z-20 flex items-center justify-between pt-6 pb-1 text-lg font-semibold tracking-wider text-muted-foreground uppercase">
+              <div className="flex items-center justify-between pt-6 pb-1 text-lg font-semibold tracking-wider text-muted-foreground uppercase">
                 <span>{relDay(calSel) || parseYmd(calSel).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'short' })}</span>
                 <button type="button" onClick={closeDay} className="text-sm font-semibold tracking-normal text-primary normal-case">Show all</button>
               </div>
             ) : (
-              <div className="bg-page sticky top-below-filters z-20 flex items-center justify-between pt-6 pb-1 text-lg font-semibold tracking-wider text-muted-foreground uppercase">
-                <button type="button" onClick={toggleUp} className="-my-1 py-1 uppercase">Upcoming</button>
+              <div className="flex items-center justify-between pt-6 pb-1 text-lg font-semibold tracking-wider text-muted-foreground uppercase">
+                <span>Upcoming</span>
                 {overdueOpen.length > 0 && <button type="button" onClick={rescheduleOverdue} className="text-sm font-semibold tracking-normal text-primary normal-case">Move {overdueOpen.length} overdue</button>}
               </div>
             )}
-            {(dayView || !upShut) && groupByDay(entries).map(([day, list]) => {
+            {groupByDay(entries).map(([day, list]) => {
               const over = day < t && list.some(e => e.task && !e.task.done)
               return (
                 <div key={day}>

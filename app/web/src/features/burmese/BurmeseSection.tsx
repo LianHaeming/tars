@@ -2,11 +2,10 @@ import { useEffect, useState } from 'react'
 import { ChevronLeftIcon, ChevronRightIcon, SparklesIcon } from 'lucide-react'
 import { api } from '@/lib/api'
 import { cn } from '@/lib/utils'
-import { Page } from '@/components/Page'
 import { SectionHead } from '@/components/common'
 import type { Bank, Today } from './data'
 
-export function BurmesePage() {
+export function BurmeseSection() {
   const [bank, setBank] = useState<Bank | null>(null)
   const [sel, setSel] = useState(0)
   const [busy, setBusy] = useState(false)
@@ -21,8 +20,8 @@ export function BurmesePage() {
     api<Today>('POST', 'burmese').then(() => load(true)).finally(() => setBusy(false))
   }
 
-  if (!bank) return <Page title="Burmese"><p className="pt-8 text-sm text-muted-foreground">Loading…</p></Page>
-  if (!bank.total) return <Page title="Burmese"><p className="pt-8 text-sm text-muted-foreground">No phrases yet — the bank is still being set up.</p></Page>
+  if (!bank) return <p className="pt-8 text-sm text-muted-foreground">Loading…</p>
+  if (!bank.total) return <p className="pt-8 text-sm text-muted-foreground">No phrases yet — the bank is still being set up.</p>
 
   const p = bank.phrases[sel]
   const isToday = sel === bank.index
@@ -30,8 +29,8 @@ export function BurmesePage() {
   const seen = bank.index + 1
 
   return (
-    <Page title="Burmese">
-      <div className="glass rounded-2xl p-5 pt-safe-2">
+    <>
+      <div className="glass mt-3 rounded-2xl p-5">
         <div className="flex items-center justify-between text-xs font-semibold tracking-wider text-muted-foreground uppercase">
           <span>{isToday ? "Today's phrase" : `Phrase ${sel + 1}`}</span>
           <span>{sel + 1} / {seen}</span>
@@ -96,6 +95,6 @@ export function BurmesePage() {
           )
         })}
       </ul>
-    </Page>
+    </>
   )
 }

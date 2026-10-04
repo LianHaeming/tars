@@ -219,10 +219,6 @@
   top: calc(--spacing(--value(integer)) + env(safe-area-inset-top));
 }
 
-@utility top-below-filters {
-  top: calc(--spacing(14) + env(safe-area-inset-top));
-}
-
 .bg-page {
   clip-path: inset(0);
 }

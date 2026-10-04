@@ -52,11 +52,11 @@ export function ListPage() {
   })
 
   return (
-    <Page title="Shopping list" back="/food">
+    <Page title="Shopping list" back="/apps">
       {!food ? <Loading error={error} /> : !basket.ids.length ? (
         <Empty>
           No dishes added yet.
-          <div className="mt-4"><Button asChild><Link to="/food">Pick dishes</Link></Button></div>
+          <div className="mt-4"><Button asChild><Link to="/apps">Pick dishes</Link></Button></div>
         </Empty>
       ) : (
         <>

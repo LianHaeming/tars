@@ -60,9 +60,9 @@ export function BasketButton({ id, size = 'default' }: { id: string; size?: 'def
   )
 }
 
-export function RecipeCard({ r }: { r: Recipe }) {
+export function RecipeTile({ r }: { r: Recipe }) {
   return (
-    <Link to={`/food/${r.id}`} className="group block">
+    <Link to={`/food/${r.id}`} className="group block w-60 shrink-0 snap-start">
       <Card className="h-full gap-0 overflow-hidden py-0 transition-transform group-active:scale-98">
         <div className="relative aspect-4/3 bg-secondary">
           <img loading="lazy" src={r.img} alt="" className="size-full object-cover" />
@@ -70,8 +70,7 @@ export function RecipeCard({ r }: { r: Recipe }) {
         </div>
         <div className="flex flex-1 flex-col gap-1 p-3">
           <div className="text-xs font-semibold text-primary">{tagline(r)}</div>
-          <div className="text-base leading-snug font-semibold">{r.n}</div>
-          <div className="text-sm leading-snug text-muted-foreground">{r.h}</div>
+          <div className="line-clamp-2 text-base leading-snug font-semibold">{r.n}</div>
           <div className="mt-auto pt-2 text-sm text-muted-foreground">{meta(r)}</div>
         </div>
       </Card>

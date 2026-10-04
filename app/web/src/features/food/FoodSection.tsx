@@ -1,15 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router'
-import { SearchIcon, ShoppingBasketIcon } from 'lucide-react'
+import { SearchIcon } from 'lucide-react'
 import { localGet, localSet } from '@/lib/api'
-import { Page } from '@/components/Page'
 import { Empty, SectionHead } from '@/components/common'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { useBasket, useFood, type Recipe } from './data'
-import { Loading, RecipeCard } from './parts'
+import { useFood, type Recipe } from './data'
+import { Loading, RecipeTile } from './parts'
 
 const CARBS = ['Pasta', 'Rice', 'Noodles', 'Potato', 'Grains', 'Bread', 'Other']
 const DEFAULTS = { q: '', protein: '', cuisine: '', time: '', kcal: '', sort: 'name' }
@@ -44,9 +41,8 @@ function Filter({ value, onChange, any, options }: { value: string; onChange: (v
   )
 }
 
-export function MenuPage() {
+export function FoodSection() {
   const { food, error } = useFood()
-  const basket = useBasket()
   const [f, setF] = useState(loadFilters)
   const set = (k: keyof Filters) => (v: string) => setF(s => ({ ...s, [k]: v }))
   useEffect(() => { localSet('menuFilters', JSON.stringify(f)) }, [f])
@@ -66,19 +62,7 @@ export function MenuPage() {
   const filtered = JSON.stringify({ ...f, sort: '' }) !== JSON.stringify({ ...DEFAULTS, sort: '' })
 
   return (
-    <Page
-      title="Food"
-      back="/apps"
-      wide
-      actions={
-        <Button asChild size="sm" className="rounded-full">
-          <Link to="/food/list">
-            <ShoppingBasketIcon />List
-            {basket.ids.length > 0 && <Badge variant="secondary" className="h-4 min-w-4 rounded-full px-1 text-xs">{basket.ids.length}</Badge>}
-          </Link>
-        </Button>
-      }
-    >
+    <>
       <div className="relative mt-3">
         <SearchIcon className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
         <Input type="search" value={f.q} onChange={e => set('q')(e.target.value)} placeholder="Search dish or ingredient" className="h-10 rounded-full pl-9" />
@@ -98,13 +82,13 @@ export function MenuPage() {
         return (
           <section key={c}>
             <SectionHead title={c} count={rs.length} />
-            <div className="grid grid-cols-2 gap-3 pt-3 sm:grid-cols-3 lg:grid-cols-4">
-              {rs.map(r => <RecipeCard key={r.id} r={r} />)}
+            <div className="scrollbar-none -mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pt-3 pb-1">
+              {rs.map(r => <RecipeTile key={r.id} r={r} />)}
             </div>
           </section>
         )
       })}
       {food && <p className="pt-6 text-center text-xs text-muted-foreground">{list.length} of {menu.length} dishes</p>}
-    </Page>
+    </>
   )
 }

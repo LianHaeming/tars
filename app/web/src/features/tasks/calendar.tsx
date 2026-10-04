@@ -1,6 +1,5 @@
-import { type TouchEvent, useMemo, useRef, useState } from 'react'
+import { type TouchEvent, useMemo, useRef } from 'react'
 import type { Task } from '@/lib/api'
-import { localGet, localSet } from '@/lib/api'
 import { parseYmd, today, ymd } from '@/lib/dates'
 import { byTime, useTars } from '@/features/tasks/store'
 import { useExpected, type Expected } from '@/features/money/expected'
@@ -22,7 +21,6 @@ export function CalendarPanel({ filter = 'all' }: { filter?: string }) {
   const { state, calSel, pickDay, project, dayView, enterDay, closeDay, calMonth, setCalMonth } = useTars()
   const expected = useExpected()
   const month = useMemo(() => parseYmd(calMonth + '-01'), [calMonth])
-  const [shut, setShut] = useState(() => localGet('home-cal') === '0')
   const touch = useRef<{ x: number; y: number } | null>(null)
 
   const cells = useMemo(() => buildCells(month), [month])
@@ -46,7 +44,6 @@ export function CalendarPanel({ filter = 'all' }: { filter?: string }) {
   const calLabel = monthKey(month) === monthKey(today())
     ? today().toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' })
     : month.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })
-  const toggleShut = () => { setShut(v => { localSet('home-cal', v ? '1' : '0'); if (!v) closeDay(); return !v }) }
   const clickDay = (d: string) => { if (dayView && d === calSel) closeDay(); else enterDay(d) }
 
   const onTouchStart = (e: TouchEvent) => { const t = e.touches[0]; touch.current = { x: t.clientX, y: t.clientY } }
@@ -60,10 +57,9 @@ export function CalendarPanel({ filter = 'all' }: { filter?: string }) {
 
   return (
     <section data-cal-panel>
-      <SectionHead title="Calendar" sticky collapsed={shut} onToggle={toggleShut} />
+      <SectionHead title="Calendar" lg />
 
-      {!shut && (
-        <div onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+      <div onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
           <div className="pt-1 pb-1">
             <span className="text-sm font-semibold tracking-wider text-muted-foreground uppercase tabular-nums">{calLabel}</span>
           </div>
@@ -94,8 +90,7 @@ export function CalendarPanel({ filter = 'all' }: { filter?: string }) {
               )
             })}
           </div>
-        </div>
-      )}
+      </div>
     </section>
   )
 }

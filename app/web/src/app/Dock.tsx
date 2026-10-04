@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils'
 import { useTars } from '@/features/tasks/store'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 
-export const showsDock = (path: string) => path === '/' || /^\/(apps|money|food)(\/|$)/.test(path)
+export const showsDock = (path: string) => path === '/' || /^\/(apps|food)(\/|$)/.test(path)
 export const hasTaskList = (path: string) => path === '/'
 
 export function focusDraft() {

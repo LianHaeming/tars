@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
-import { CalendarIcon, CheckIcon, ClockIcon, TagIcon, XIcon } from 'lucide-react'
+import { CalendarIcon, CheckIcon, ClockIcon, LayersIcon, TagIcon, XIcon } from 'lucide-react'
 import { cn, dim } from '@/lib/utils'
 import type { Task } from '@/lib/api'
 import { dueColor, dueLabel, today, whenLabel, ymd } from '@/lib/dates'
 import { useTars } from '@/features/tasks/store'
 import { Dot } from '@/components/common'
-import { TagManager } from '@/features/tasks/TagManager'
+import { SubManager, TagManager } from '@/features/tasks/TagManager'
 
 type Opts = { hideProject?: boolean; hideDue?: boolean; compact?: boolean; tag?: boolean }
 
@@ -96,11 +96,12 @@ const tbtn = 'inline-flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-
 const grow = (el: HTMLTextAreaElement | null) => { if (el) { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px' } }
 
 function TaskEditor({ task, onDone }: { task: Task; onDone: () => void }) {
-  const { patch, state, setOpenId, discardIfEmpty } = useTars()
+  const { patch, state, setOpenId, discardIfEmpty, subsOf } = useTars()
   const [title, setTitle] = useState(task.title)
   const ref = useRef<HTMLDivElement>(null)
   const titleRef = useRef<HTMLTextAreaElement>(null)
   const p = state.projects.find(x => x.id === task.projectId)
+  const subs = subsOf(task.projectId)
 
   useEffect(() => {
     // new draft: focus the title and let the browser scroll it above the keyboard.
@@ -166,17 +167,32 @@ function TaskEditor({ task, onDone }: { task: Task; onDone: () => void }) {
 
       <div className="mt-3 -mx-3 flex flex-col gap-1 hairline-t px-2 pt-2">
         <div className="scrollbar-none flex gap-1 overflow-x-auto">
-          <button type="button" data-on={!task.projectId} className={tbtn} onClick={() => patch(task.id, { projectId: null })}>Inbox</button>
+          <button type="button" data-on={!task.projectId} className={tbtn} onClick={() => patch(task.id, { projectId: null, subId: null })}>Inbox</button>
           {state.projects.map(pr => (
-            <button key={pr.id} type="button" data-on={task.projectId === pr.id} className={tbtn} onClick={() => patch(task.id, { projectId: pr.id })}>
+            <button key={pr.id} type="button" data-on={task.projectId === pr.id} className={tbtn} onClick={() => patch(task.id, { projectId: pr.id, subId: null })}>
               <Dot color={pr.color} />{pr.name}
             </button>
           ))}
           <TagManager
-            onCreate={id => patch(task.id, { projectId: id })}
+            onCreate={id => patch(task.id, { projectId: id, subId: null })}
             trigger={<button type="button" className={tbtn}><TagIcon />Tags</button>}
           />
         </div>
+
+        {task.projectId && (
+          <div className="scrollbar-none flex gap-1 overflow-x-auto">
+            {subs.map(s => (
+              <button key={s.id} type="button" data-on={task.subId === s.id} className={tbtn} onClick={() => patch(task.id, { subId: task.subId === s.id ? null : s.id })}>
+                {s.name}
+              </button>
+            ))}
+            <SubManager
+              projectId={task.projectId}
+              onCreate={id => patch(task.id, { subId: id })}
+              trigger={<button type="button" className={tbtn}><LayersIcon />{subs.length ? 'Edit' : 'Sub-categories'}</button>}
+            />
+          </div>
+        )}
 
         <div className="flex flex-wrap items-center gap-1">
           <label className={cn(tbtn, 'relative cursor-pointer')} data-on={!!task.due}>

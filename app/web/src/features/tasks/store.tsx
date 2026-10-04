@@ -92,7 +92,7 @@ function useStoreValue() {
       if (f && state.projects.some(p => p.id === f)) defaults.projectId = f
     }
     if (dayView && defaults.due == null) defaults.due = calSel
-    const task: Task = { id, title: '', description: '', due: null, dueTime: null, priority: 4, projectId: null, done: false, createdAt: Date.now(), completedAt: null, ...defaults }
+    const task: Task = { id, title: '', description: '', due: null, dueTime: null, priority: 4, projectId: null, subId: null, done: false, createdAt: Date.now(), completedAt: null, ...defaults }
     draftIds.current.add(id)
     setState(s => ({ ...s, tasks: [...s.tasks, task] }))
     setOpenId(id)
@@ -153,6 +153,25 @@ function useStoreValue() {
     await load()
   }
 
+  const subsOf = (projectId: string | null) => (projectId ? project(projectId)?.subs ?? [] : [])
+
+  async function saveSubs(projectId: string, subs: { id: string; name: string }[]) {
+    await api('PATCH', 'projects/' + projectId, { subs })
+    await load()
+  }
+
+  async function addSub(projectId: string, name: string) {
+    const sub = { id: crypto.randomUUID(), name }
+    await saveSubs(projectId, [...subsOf(projectId), sub])
+    return sub
+  }
+
+  const renameSub = (projectId: string, subId: string, name: string) =>
+    saveSubs(projectId, subsOf(projectId).map(s => (s.id === subId ? { ...s, name } : s)))
+
+  const deleteSub = (projectId: string, subId: string) =>
+    saveSubs(projectId, subsOf(projectId).filter(s => s.id !== subId))
+
   const whereAdded = (task: Partial<Task>) =>
     task.projectId ? project(task.projectId)?.name ?? 'list' : task.due ? dueLabel(task.due) : 'Inbox'
 
@@ -175,6 +194,7 @@ function useStoreValue() {
     adding, setAdding, pendingAdd, setPendingAdd, flash, clearFlash,
     patch, addTask, addDraft, discardIfEmpty, toggleDone, deleteTask, rescheduleOverdue, whereAdded,
     addProject, renameProject, deleteProject,
+    subsOf, addSub, renameSub, deleteSub,
   }
 }
 

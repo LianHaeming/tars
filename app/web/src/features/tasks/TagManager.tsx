@@ -33,6 +33,59 @@ function TagRow({ id, name, color }: { id: string; name: string; color: string }
   )
 }
 
+function SubRow({ projectId, id, name }: { projectId: string; id: string; name: string }) {
+  const { renameSub, deleteSub } = useTars()
+  const [value, setValue] = useState(name)
+  const [confirm, setConfirm] = useState(false)
+  const save = () => { const v = value.trim(); if (v && v !== name) renameSub(projectId, id, v); else setValue(name) }
+  return (
+    <div className="flex items-center gap-2 hairline-b py-2">
+      <Input
+        value={value}
+        onChange={e => setValue(e.target.value)}
+        onBlur={save}
+        onKeyDown={e => { if (e.key === 'Enter') e.currentTarget.blur() }}
+        className="h-9 flex-1 text-field"
+      />
+      {confirm ? (
+        <>
+          <Button size="sm" variant="destructive" onClick={() => deleteSub(projectId, id)}>Delete</Button>
+          <Button size="sm" variant="ghost" onClick={() => setConfirm(false)}>Cancel</Button>
+        </>
+      ) : (
+        <Button size="icon-sm" variant="ghost" className="text-muted-foreground" aria-label={`Delete ${name}`} onClick={() => setConfirm(true)}><Trash2Icon /></Button>
+      )}
+    </div>
+  )
+}
+
+export function SubManager({ projectId, trigger, onCreate }: { projectId: string; trigger: ReactNode; onCreate?: (id: string) => void }) {
+  const { project, subsOf, addSub } = useTars()
+  const [open, setOpen] = useState(false)
+  const [name, setName] = useState('')
+  const subs = subsOf(projectId)
+  const add = async () => { const v = name.trim(); if (!v) return; setName(''); const s = await addSub(projectId, v); onCreate?.(s.id) }
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      <DialogContent className="sm:max-w-sm">
+        <DialogHeader>
+          <DialogTitle>{project(projectId)?.name} sub-categories</DialogTitle>
+          <DialogDescription>Add a sub-category, rename one, or delete it — its tasks keep the list but lose the sub-category.</DialogDescription>
+        </DialogHeader>
+        <div className="max-h-80 overflow-y-auto scrollbar-none">
+          {subs.map(s => <SubRow key={s.id} projectId={projectId} id={s.id} name={s.name} />)}
+          {!subs.length && <p className="py-2 text-sm text-muted-foreground">No sub-categories yet.</p>}
+        </div>
+        <form onSubmit={e => { e.preventDefault(); add() }} className="flex items-center gap-2 hairline-t pt-3">
+          <Input value={name} onChange={e => setName(e.target.value)} placeholder="New sub-category" className="h-9 flex-1 text-field" />
+          <Button type="submit" disabled={!name.trim()}>Add</Button>
+        </form>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
 export function TagManager({ trigger, onCreate }: { trigger: ReactNode; onCreate?: (id: string) => void }) {
   const { state, addProject } = useTars()
   const [open, setOpen] = useState(false)

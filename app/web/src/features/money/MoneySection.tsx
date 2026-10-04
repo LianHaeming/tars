@@ -4,7 +4,6 @@ import { cn } from '@/lib/utils'
 import { localGet, localSet } from '@/lib/api'
 import { addDays, dueLabel, hhmm, parseYmd, ymd } from '@/lib/dates'
 import { Empty, PillBar, SectionHead, pill } from '@/components/common'
-import { Page } from '@/components/Page'
 import { BarList, BucketTable, ColumnChart, type Bucket } from './charts'
 import { categoryName, day, fmt, fmt0, inWindow, spent, useMoney, windowOf, type Tx } from './data'
 
@@ -43,7 +42,7 @@ function Stat({ label, value, children }: { label: string; value: string; childr
   )
 }
 
-export function MoneyPage() {
+export function MoneySection() {
   const { data, error, loading, refresh } = useMoney()
   const [days, setDays] = useState(() => Number(localGet('money-days')) || 30)
   const [table, setTable] = useState(false)
@@ -84,18 +83,19 @@ export function MoneyPage() {
   }, [data, days])
 
   const refreshBtn = (
-    <button type="button" onClick={refresh} disabled={loading} aria-label="Refresh" className="grid size-10 place-items-center text-primary disabled:opacity-60">
+    <button type="button" onClick={refresh} disabled={loading} aria-label="Refresh Monzo" className="grid size-10 shrink-0 place-items-center text-primary disabled:opacity-60">
       <RefreshCwIcon className={cn('size-5', loading && 'animate-spin')} />
     </button>
   )
 
   if (!data) {
     return (
-      <Page title="Money" back="/apps" actions={refreshBtn}>
+      <div className="flex items-start justify-between gap-2">
         <Empty>
           {error ? <>Couldn't reach Monzo.<br /><span className="text-sm">{error}</span></> : 'Loading your Monzo account…'}
         </Empty>
-      </Page>
+        {refreshBtn}
+      </div>
     )
   }
 
@@ -104,15 +104,19 @@ export function MoneyPage() {
   const delta = view!.prev ? (view!.total - view!.prev) / view!.prev : null
 
   return (
-    <Page title="Money" back="/apps" actions={refreshBtn}>
-      <div className={cn('transition-opacity duration-200', loading && 'opacity-60')}>
+    <div className={cn('transition-opacity duration-200', loading && 'opacity-60')}>
         {error && <div className="mt-3 rounded-xl bg-secondary px-3 py-2 text-sm text-muted-foreground">Showing data from {hhmm(new Date(data.fetchedAt))}: {error}</div>}
 
         <section className="px-1 pt-5 pb-2">
-          <div className="text-sm text-muted-foreground">Current account</div>
-          <div className="text-hero font-semibold tracking-tight">{fmt(balance.balance)}</div>
-          <div className="mt-1 text-sm text-muted-foreground">
-            {fmt(-balance.spendToday)} spent today · updated {hhmm(new Date(data.fetchedAt))}
+          <div className="flex items-start justify-between gap-2">
+            <div>
+              <div className="text-sm text-muted-foreground">Current account</div>
+              <div className="text-hero font-semibold tracking-tight">{fmt(balance.balance)}</div>
+              <div className="mt-1 text-sm text-muted-foreground">
+                {fmt(-balance.spendToday)} spent today · updated {hhmm(new Date(data.fetchedAt))}
+              </div>
+            </div>
+            {refreshBtn}
           </div>
         </section>
 
@@ -187,7 +191,6 @@ export function MoneyPage() {
         )}
         {!view!.recent.length && <div className="py-4 text-sm text-muted-foreground">No transactions in this period.</div>}
         <div className="pt-6 text-center text-xs text-muted-foreground">Read-only from Monzo · up to 3 months of history</div>
-      </div>
-    </Page>
+    </div>
   )
 }

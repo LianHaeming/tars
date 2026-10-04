@@ -15,12 +15,20 @@ const FOOD = path.join(store.DATA, 'food');
 const db = store.tasks.get();
 
 const id = () => crypto.randomBytes(6).toString('hex');
-const TASK_FIELDS = ['title', 'description', 'due', 'dueTime', 'priority', 'projectId', 'done'];
+const okId = v => typeof v === 'string' && /^[\w-]{6,64}$/.test(v);
+const TASK_FIELDS = ['title', 'description', 'due', 'dueTime', 'priority', 'projectId', 'subId', 'done'];
 const pick = (obj, keys) => Object.fromEntries(keys.filter(k => k in obj).map(k => [k, obj[k]]));
-const newTask = fields => ({ id: typeof fields.id === 'string' && /^[\w-]{6,64}$/.test(fields.id) ? fields.id : id(),
-  title: '', description: '', due: null, dueTime: null, priority: 4, projectId: null, done: false,
+const newTask = fields => ({ id: okId(fields.id) ? fields.id : id(),
+  title: '', description: '', due: null, dueTime: null, priority: 4, projectId: null, subId: null, done: false,
   ...pick(fields, TASK_FIELDS), createdAt: Number(fields.createdAt) || Date.now(), completedAt: null });
 const save = () => store.tasks.save();
+
+// A task's subId only makes sense inside its own list; drop it otherwise.
+function fixSub(task) {
+  if (!task.subId) return;
+  const p = db.projects.find(p => p.id === task.projectId);
+  if (!p || !(p.subs || []).some(s => s.id === task.subId)) task.subId = null;
+}
 
 function send(res, status, body) {
   res.writeHead(status, { 'content-type': 'application/json', 'cache-control': 'no-store' });
@@ -44,8 +52,8 @@ async function api(req, res, parts) {
   if (resource === 'tasks') {
     if (req.method === 'POST' && !rid) {
       const existing = body.id && db.tasks.find(t => t.id === body.id);
-      if (existing) { Object.assign(existing, pick(body, TASK_FIELDS)); save(); return send(res, 200, existing); }
-      const task = newTask(body);
+      if (existing) { Object.assign(existing, pick(body, TASK_FIELDS)); fixSub(existing); save(); return send(res, 200, existing); }
+      const task = newTask(body); fixSub(task);
       db.tasks.push(task); save();
       return send(res, 201, task);
     }
@@ -54,6 +62,7 @@ async function api(req, res, parts) {
     if (req.method === 'PATCH') {
       Object.assign(task, pick(body, TASK_FIELDS));
       if ('done' in body) task.completedAt = body.done ? Date.now() : null;
+      fixSub(task);
       save(); return send(res, 200, task);
     }
     if (req.method === 'DELETE') {
@@ -72,6 +81,14 @@ async function api(req, res, parts) {
     const project = db.projects.find(p => p.id === rid);
     if (!project) return send(res, 404, { error: 'not found' });
     if (req.method === 'PATCH') {
+      if (Array.isArray(body.subs)) {
+        const subs = body.subs
+          .filter(s => s && typeof s.name === 'string' && s.name.trim())
+          .map(s => ({ id: okId(s.id) ? s.id : id(), name: s.name.trim() }));
+        const keep = new Set(subs.map(s => s.id));
+        db.tasks.forEach(t => { if (t.projectId === project.id && t.subId && !keep.has(t.subId)) t.subId = null; });
+        project.subs = subs;
+      }
       Object.assign(project, pick(body, ['name', 'color'])); save();
       return send(res, 200, project);
     }

@@ -6,12 +6,14 @@ export type Task = {
   dueTime: string | null
   priority: 1 | 2 | 3 | 4
   projectId: string | null
+  subId: string | null
   done: boolean
   createdAt: number
   completedAt: number | null
 }
 
-export type Project = { id: string; name: string; color: string }
+export type Sub = { id: string; name: string }
+export type Project = { id: string; name: string; color: string; subs?: Sub[] }
 
 export type State = { projects: Project[]; tasks: Task[] }
 
