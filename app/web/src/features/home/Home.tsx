@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router'
 import { focusDraft } from '@/app/Dock'
 import { cn, dim } from '@/lib/utils'
 import { localGet, localSet, type Task } from '@/lib/api'
-import { dayDiff, hhmm, parseYmd, relDay, shortDate, today, ymd } from '@/lib/dates'
+import { addDays, dayDiff, hhmm, parseYmd, shortDate, today, ymd } from '@/lib/dates'
 import { byCreated, byWhen, useTars } from '@/features/tasks/store'
 import { TaskRow } from '@/features/tasks/TaskRow'
 import { CalendarPanel } from '@/features/tasks/calendar'
@@ -120,7 +120,7 @@ function Completed({ tasks }: { tasks: Task[] }) {
 }
 
 export function Home() {
-  const { open, state, rescheduleOverdue, pendingAdd, setPendingAdd, addDraft, dayView, calSel, closeDay, calMonth } = useTars()
+  const { open, state, rescheduleOverdue, pendingAdd, setPendingAdd, addDraft, dayView } = useTars()
   const expected = useExpected()
   const [params, setParams] = useSearchParams()
   const urlFilter = params.get('filter')
@@ -152,16 +152,15 @@ export function Home() {
   const main = todaysEvent(datedAll.filter(x => !x.done))
   const overdueOpen = datedAll.filter(x => !x.done && x.due! < t)
   const allDated: Entry[] = [...datedAll.map(task => ({ day: task.due!, task })), ...pays.map(pay => ({ day: pay.date, pay }))]
-  const entries = dayView
-    ? allDated.filter(e => e.day === calSel)
-    : allDated.filter(e => e.day.startsWith(calMonth) && !(e.task && e.task.done))
+  const horizon = ymd(addDays(today(), 14))
+  const entries = allDated.filter(e => e.day < horizon && (e.task ? !e.task.done : e.day >= t))
   const activeProject = state.projects.find(p => p.id === active)
   const subs = activeProject?.subs ?? []
   const grouped = subs.length > 0 && undated.some(x => x.subId)
   const noSub = undated.filter(x => !x.subId || !subs.some(s => s.id === x.subId))
   const showTodo = undated.length > 0
   const hasCalData = datedAll.length > 0 || pays.length > 0
-  const showAgenda = dayView || entries.length > 0
+  const showAgenda = entries.length > 0
 
   return (
     <main className="mx-auto max-w-page px-4 pt-safe-3 pb-safe-40">
@@ -178,6 +177,29 @@ export function Home() {
         <Completed tasks={state.tasks.filter(x => x.done)} />
       ) : (
         <>
+          {showAgenda && (
+          <section>
+            <AgendaHead
+              label="Upcoming"
+              action={overdueOpen.length > 0 ? <button type="button" onClick={rescheduleOverdue} className="text-sm font-semibold tracking-normal text-primary normal-case">Move {overdueOpen.length} overdue</button> : undefined}
+            />
+            {groupByDay(entries).map(([day, list]) => {
+              const over = day < t && list.some(e => e.task && !e.task.done)
+              return (
+                <div key={day}>
+                  <DayHead day={day} overdue={over} />
+                  {day === t && main && <MainEvent task={main} />}
+                  {list.map(e => e.task
+                    ? e.task !== main && <TaskRow key={e.task.id} task={e.task} compact tag={tag} hideDue />
+                    : <PaymentRow key={e.pay!.id} p={e.pay!} tag={tag} />)}
+                </div>
+              )
+            })}
+          </section>
+          )}
+
+          {(hasCalData || dayView) && <CalendarPanel filter={active} />}
+
           {showTodo && (
             <section>
               <SectionHead title="To-do" lg />
@@ -204,37 +226,6 @@ export function Home() {
                 undated.map(x => <TaskRow key={x.id} task={x} compact tag={tag} />)
               )}
             </section>
-          )}
-
-          {(hasCalData || dayView) && <CalendarPanel filter={active} />}
-
-          {showAgenda && (
-          <section>
-            {dayView ? (
-              <AgendaHead
-                label={relDay(calSel) || parseYmd(calSel).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'short' })}
-                action={<button type="button" onClick={closeDay} className="text-sm font-semibold tracking-normal text-primary normal-case">Show all</button>}
-              />
-            ) : (
-              <AgendaHead
-                label="Upcoming"
-                action={overdueOpen.length > 0 ? <button type="button" onClick={rescheduleOverdue} className="text-sm font-semibold tracking-normal text-primary normal-case">Move {overdueOpen.length} overdue</button> : undefined}
-              />
-            )}
-            {groupByDay(entries).map(([day, list]) => {
-              const over = day < t && list.some(e => e.task && !e.task.done)
-              return (
-                <div key={day}>
-                  <DayHead day={day} overdue={over} />
-                  {day === t && main && <MainEvent task={main} />}
-                  {list.map(e => e.task
-                    ? e.task !== main && <TaskRow key={e.task.id} task={e.task} compact tag={tag} hideDue />
-                    : <PaymentRow key={e.pay!.id} p={e.pay!} tag={tag} />)}
-                </div>
-              )
-            })}
-            {dayView && !entries.length && <div className="py-4 text-sm text-muted-foreground">Nothing on this day.</div>}
-          </section>
           )}
 
           {!showTodo && !hasCalData && !showAgenda && (

@@ -1,8 +1,9 @@
 import { type TouchEvent, useMemo, useRef } from 'react'
 import type { Task } from '@/lib/api'
-import { parseYmd, today, ymd } from '@/lib/dates'
+import { addDays, parseYmd, relDay, today, ymd } from '@/lib/dates'
 import { byTime, useTars } from '@/features/tasks/store'
-import { useExpected, type Expected } from '@/features/money/expected'
+import { TaskRow } from '@/features/tasks/TaskRow'
+import { PaymentRow, useExpected, type Expected } from '@/features/money/expected'
 import { SectionHead } from '@/components/common'
 import { cn, dim } from '@/lib/utils'
 
@@ -17,13 +18,19 @@ function buildCells(month: Date) {
   return Array.from({ length: 42 }, (_, i) => new Date(start.getFullYear(), start.getMonth(), start.getDate() + i))
 }
 
+function weekOf(day: string) {
+  const d = parseYmd(day)
+  const start = addDays(d, -((d.getDay() + 6) % 7))
+  return Array.from({ length: 7 }, (_, i) => addDays(start, i))
+}
+
 export function CalendarPanel({ filter = 'all' }: { filter?: string }) {
   const { state, calSel, pickDay, project, dayView, enterDay, closeDay, calMonth, setCalMonth } = useTars()
   const expected = useExpected()
   const month = useMemo(() => parseYmd(calMonth + '-01'), [calMonth])
   const touch = useRef<{ x: number; y: number } | null>(null)
 
-  const cells = useMemo(() => buildCells(month), [month])
+  const cells = useMemo(() => (dayView ? weekOf(calSel) : buildCells(month)), [dayView, calSel, month])
   const tasksByDay = useMemo(() => {
     const m: Record<string, Task[]> = {}
     state.tasks.forEach(x => { if (x.due) (m[x.due] ||= []).push(x) })
@@ -41,10 +48,20 @@ export function CalendarPanel({ filter = 'all' }: { filter?: string }) {
   const gridTasks = (d: string) => (showTasks ? (tasksByDay[d] || []).filter(x => !activeTag || x.projectId === activeTag) : [])
 
   const goMonth = (delta: number) => { const m = new Date(month.getFullYear(), month.getMonth() + delta, 1); setCalMonth(monthKey(m)); pickDay(ymd(m)) }
-  const calLabel = monthKey(month) === monthKey(today())
-    ? today().toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' })
-    : month.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })
-  const clickDay = (d: string) => { if (dayView && d === calSel) closeDay(); else enterDay(d) }
+  const goWeek = (delta: number) => { const d = addDays(parseYmd(calSel), delta * 7); setCalMonth(monthKey(d)); enterDay(ymd(d)) }
+  const calLabel = dayView
+    ? parseYmd(calSel).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })
+    : monthKey(month) === monthKey(today())
+      ? today().toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' })
+      : month.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })
+  const clickDay = (d: string) => {
+    if (dayView && d === calSel) { closeDay(); return }
+    setCalMonth(d.slice(0, 7))
+    enterDay(d)
+  }
+  const dayTasks = gridTasks(calSel).slice().sort(byTime)
+  const dayPays = showMoney ? (paysByDay[calSel] || []) : []
+  const dayLabel = relDay(calSel) || parseYmd(calSel).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'short' })
 
   const onTouchStart = (e: TouchEvent) => { const t = e.touches[0]; touch.current = { x: t.clientX, y: t.clientY } }
   const onTouchEnd = (e: TouchEvent) => {
@@ -52,7 +69,7 @@ export function CalendarPanel({ filter = 'all' }: { filter?: string }) {
     if (!s) return
     const t = e.changedTouches[0]
     const dx = t.clientX - s.x, dy = t.clientY - s.y
-    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) goMonth(dx < 0 ? 1 : -1)
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) (dayView ? goWeek : goMonth)(dx < 0 ? 1 : -1)
   }
 
   return (
@@ -60,8 +77,9 @@ export function CalendarPanel({ filter = 'all' }: { filter?: string }) {
       <SectionHead title="Calendar" lg />
 
       <div onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
-          <div className="pt-1 pb-1">
+          <div className="flex items-center justify-between pt-1 pb-1">
             <span className="text-sm font-semibold tracking-wider text-muted-foreground uppercase tabular-nums">{calLabel}</span>
+            {dayView && <button type="button" onClick={closeDay} className="text-sm font-semibold text-primary">Month</button>}
           </div>
           <div className="mt-2 grid grid-cols-7 px-1">
             {DOW.map(d => <span key={d} className="pb-1 text-center text-micro font-semibold tracking-wide text-muted-foreground">{d}</span>)}
@@ -69,12 +87,26 @@ export function CalendarPanel({ filter = 'all' }: { filter?: string }) {
           <div className="grid grid-cols-7 gap-1">
             {cells.map(dt => {
               const d = ymd(dt)
-              const other = dt.getMonth() !== month.getMonth()
+              const other = !dayView && dt.getMonth() !== month.getMonth()
               const ts = gridTasks(d).slice().sort(byTime)
               const pays = showMoney ? (paysByDay[d] || []) : []
               const shown = ts.slice(0, 2)
               const extra = ts.length - shown.length
               const sel = dayView && d === calSel
+              if (dayView) return (
+                <button
+                  key={d}
+                  type="button"
+                  onClick={() => clickDay(d)}
+                  className={cn('flex flex-col items-center gap-1 rounded-lg border py-2 active:bg-muted', sel ? 'border-primary/50 bg-primary/10' : 'border-transparent')}
+                >
+                  <span className={cn('text-sm font-semibold tabular-nums', d === ymd(today()) && 'text-primary')}>{dt.getDate()}</span>
+                  <span className="flex h-1 gap-1">
+                    {ts.slice(0, 3).map(x => <span key={x.id} className="size-1 rounded-full" style={{ background: dim(project(x.projectId)?.color || 'var(--primary)') }} />)}
+                    {pays.length > 0 && <span className="size-1 rounded-full bg-money" />}
+                  </span>
+                </button>
+              )
               return (
                 <button
                   key={d}
@@ -91,6 +123,15 @@ export function CalendarPanel({ filter = 'all' }: { filter?: string }) {
             })}
           </div>
       </div>
+
+      {dayView && (
+        <div className="pt-2">
+          <div className="hairline-b pt-2 pb-1 text-xs font-semibold tracking-wider text-primary uppercase">{dayLabel}</div>
+          {dayTasks.map(x => <TaskRow key={x.id} task={x} compact tag={!activeTag} hideDue />)}
+          {dayPays.map(p => <PaymentRow key={p.id} p={p} tag={!activeTag} />)}
+          {!dayTasks.length && !dayPays.length && <div className="py-4 text-sm text-muted-foreground">Nothing on this day.</div>}
+        </div>
+      )}
     </section>
   )
 }
