@@ -55,14 +55,15 @@ export function useDetail(id: string | undefined) {
   return { detail, error }
 }
 
-type Prefs = { basket: string[]; shop: string }
+type Prefs = { basket: string[]; shop: string; servings: Record<string, number> }
 
 const prefs = (() => {
-  let value: Prefs = { basket: [], shop: '' }
+  let value: Prefs = { basket: [], shop: '', servings: {} }
   const subs = new Set<() => void>()
   const emit = () => subs.forEach(f => f())
   async function load() {
-    value = await api<Prefs>('GET', 'food')
+    const got = await api<Prefs>('GET', 'food')
+    value = { ...got, servings: got.servings ?? {} }
     const oldBasket = localGet('basket'), oldShop = localGet('shop')
     if (oldBasket !== null || oldShop !== null) {
       let ids: string[] = []
@@ -79,7 +80,7 @@ const prefs = (() => {
     get: () => value,
     subscribe: (f: () => void) => { subs.add(f); return () => { subs.delete(f) } },
     set(patch: Partial<Prefs>) {
-      value = { ...value, ...patch }
+      value = { ...value, ...patch, servings: { ...value.servings, ...patch.servings } }
       emit()
       api<Prefs>('PATCH', 'food', patch).catch(() => load().catch(() => {}))
     },
@@ -99,6 +100,17 @@ export function useBasket() {
 export function useShop(shops: Shop[]) {
   const id = useSyncExternalStore(prefs.subscribe, prefs.get).shop
   return { shop: shops.find(s => s.id === id) || null, setShop: (v: string) => prefs.set({ shop: v }) }
+}
+
+export const BASE_SERVINGS = 2
+
+export function useServings() {
+  const all = useSyncExternalStore(prefs.subscribe, prefs.get).servings
+  return {
+    all,
+    of: (id: string) => all[id] ?? BASE_SERVINGS,
+    set: (id: string, n: number) => prefs.set({ servings: { [id]: Math.round(n * 100) / 100 } }),
+  }
 }
 
 export const shopEntry = (shop: Shop | null, buy: string | null) => (buy && shop?.data[buy.toLowerCase()]) || null
@@ -122,17 +134,66 @@ export function shopPacks(e: ShopEntry, units: [string, number][], dishes: numbe
   return Math.max(p, 1)
 }
 
-function fmtQ(q: number, u: string) {
-  const n = Math.round(q * 100) / 100
-  if (!u) return `${n}`
+const FRACTIONS: [number, string][] = [[0.25, '¼'], [0.5, '½'], [0.75, '¾']]
+
+function nice(n: number, u: string) {
+  if (['g', 'ml'].includes(u)) return String(n >= 100 ? Math.round(n / 5) * 5 : n >= 10 ? Math.round(n) : Math.round(n * 10) / 10)
+  if (['kg', 'l'].includes(u)) return String(Math.round(n * 100) / 100)
+  const q = Math.round(n * 4) / 4
+  if (q === 0) return '¼'
+  const whole = Math.floor(q), frac = FRACTIONS.find(([f]) => Math.abs(q - whole - f) < 0.01)?.[1] ?? ''
+  return `${whole || ''}${frac}` || '0'
+}
+
+export function fmtQ(q: number, u: string) {
+  const n = nice(q, u)
+  if (!u) return n
   if (['g', 'ml', 'kg', 'l'].includes(u)) return `${n}${u}`
   if (['tsp', 'tbsp'].includes(u)) return `${n} ${u}`
-  return `${n} ${u}${n > 1 ? (/(ch|sh|s)$/.test(u) ? 'es' : 's') : ''}`
+  return `${n} ${u}${Math.round(q * 4) / 4 > 1 ? (/(ch|sh|s)$/.test(u) ? 'es' : 's') : ''}`
+}
+
+export const scaledAmount = (i: Ingredient, f: number) => (i.q == null || f === 1 ? i.amount : fmtQ(i.q * f, i.u || ''))
+
+export function spare(e: ShopEntry, units: [string, number][], packs: number) {
+  let g = 0, n = 0
+  for (const [u, q] of units) {
+    if (u === 'g' || u === 'ml') g += q
+    else if (u === '') n += q
+    else return null
+  }
+  const left = g && e.g ? packs * e.g - g : n && e.ea && !e.perDish ? packs * e.ea - n : 0
+  if (!(left > 0) || left < (g ? e.g! : e.ea!) * 0.03) return null
+  return g ? `${nice(left, 'g')}g spare` : `${nice(left, '')} spare`
+}
+
+export type Fit = { name: string; packs: number; servings: number }
+
+export function packFits(d: Detail, shop: Shop | null, current: number): Fit[] {
+  if (!shop) return []
+  const out: Fit[] = []
+  const keys = d.ingredients
+    .map(i => ({ i, e: shopEntry(shop, i.buy) }))
+    .filter(({ i, e }) => e && !e.perDish && i.q && ((['g', 'ml'].includes(i.u || '') && e.g) || (!i.u && e.ea)))
+    .sort((a, b) => b.e!.pr - a.e!.pr)
+    .slice(0, 3)
+  for (const { i, e } of keys) {
+    const size = (i.u ? e!.g : e!.ea)!
+    const perServing = i.q! / BASE_SERVINGS
+    const options: Fit[] = []
+    for (let k = 1; k <= 6; k++) {
+      const s = Math.floor(((k * size) / perServing) * 100) / 100
+      if (s >= 1 && s <= 8) options.push({ name: i.name, packs: k, servings: s })
+    }
+    options.sort((a, b) => Math.abs(a.servings - current) - Math.abs(b.servings - current))
+    out.push(...options.filter(o => Math.abs(o.servings - current) > 0.05).slice(0, 2).sort((a, b) => a.packs - b.packs))
+  }
+  return out
 }
 
 export type Line = { name: string; img: string | null; amount: string; units: [string, number][]; dishes: number; dishIds: string[] }
 
-export async function totals(ids: string[]): Promise<Line[]> {
+export async function totals(ids: string[], servings: Record<string, number> = {}): Promise<Line[]> {
   const ds = await Promise.all(ids.map(id => loadDetail(id).catch(() => null)))
   const lines = new Map<string, { name: string; img: string | null; byUnit: Map<string, number>; other: string[]; dishes: Set<string> }>()
   for (const d of ds) {
@@ -143,7 +204,8 @@ export async function totals(ids: string[]): Promise<Line[]> {
       const L = lines.get(key)!
       L.dishes.add(d!.id)
       if (i.q == null) { if (i.amount) L.other.push(i.amount); continue }
-      L.byUnit.set(i.u || '', (L.byUnit.get(i.u || '') || 0) + i.q)
+      const f = (servings[d!.id] ?? BASE_SERVINGS) / BASE_SERVINGS
+      L.byUnit.set(i.u || '', (L.byUnit.get(i.u || '') || 0) + i.q * f)
     }
   }
   return [...lines.values()].map(L => ({

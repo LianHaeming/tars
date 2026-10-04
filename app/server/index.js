@@ -120,6 +120,10 @@ async function api(req, res, parts) {
     if (req.method === 'PATCH') {
       if (Array.isArray(body.basket)) food.basket = [...new Set(body.basket.filter(x => typeof x === 'string'))];
       if (typeof body.shop === 'string') food.shop = body.shop;
+      if (body.servings && typeof body.servings === 'object') {
+        food.servings = Object.fromEntries(Object.entries({ ...food.servings, ...body.servings })
+          .filter(([, v]) => typeof v === 'number' && v > 0 && v <= 20 && v !== 2));
+      }
       store.food.save();
       return send(res, 200, food);
     }

@@ -12,7 +12,7 @@ One data folder, one server, one React frontend.
 ```
 data/            all data — only the server reads or writes it
   food/          Food content: menu.json, r/<id>.json, sainsburys/ocado.json, photos/ (in git; published from the Mac)
-  state/         live data (PC only, gitignored): tasks.json (lists + tasks), food.json (basket, shop), chat.json (Tars), money.json (AI labels + insights)
+  state/         live data (PC only, gitignored): tasks.json (lists + tasks), food.json (basket, shop, servings), chat.json (Tars), money.json (AI labels + insights)
 app/
   server/        Node, no dependencies: index.js (routes + static), store.js (data/state docs), ask.js (Tars chat), money.js (Monzo), claude.js (shared `claude` CLI runner for ask/burmese/money), burmese.js (deck, progress, translator)
   web/           React + TypeScript + Vite + Tailwind v4 + shadcn/ui — display only, everything via /api
@@ -28,7 +28,7 @@ bin/             sync, up, backup, gmail, monzo, burmese (rebuilds the deck — 
   in place for notes / Mark done / Edit), then **To-do · no date**. Rows show the list as a coloured tag under All.
   **Apps** (`/apps`) — one flat multi-app page: a sticky filter (All / Food / Burmese / Money — All shows every section,
   each tab shows just one; choice kept in browser storage) over titled sections for **Food** (menu search + recipe
-  carousels + shopping-list link), **Burmese** (tabs: Practice — a 100-sentence deck in both directions with spaced repetition — 3 new a day, phonetic first;
+  carousels + shopping-list link; recipes have a continuous servings slider with "use whole packs" shortcuts and per-ingredient spare), **Burmese** (tabs: Practice — a 100-sentence deck in both directions with spaced repetition — 3 new a day, phonetic first;
   learned list with unlearn, extra practice rounds; Phrase of the day — the original phrase bank (server/phrases.js);
   Translate — quick English → Burmese that can add a sentence to the deck) and **Money** (a small dashboard, not a
   Monzo copy: balance line, "goes out automatically every month" total split by group, Claude's "Tars noticed" insights,
@@ -41,7 +41,7 @@ bin/             sync, up, backup, gmail, monzo, burmese (rebuilds the deck — 
   `/food/list`. Legacy `/money`, `/food`, `/burmese`, `/month` now just redirect to their home (`/apps` or `/`).
   "Todo"/"calendar" = this app.
 - **API** (`app/server/index.js`): `GET /api/state` · `POST|PATCH|DELETE /api/tasks[/id]` · `/api/projects[/id]` (a project PATCH with `subs` sets its sub-categories; tasks carry an optional `subId`) ·
-  `POST /api/shopping {items}` (replaces the Shopping list's unticked items) · `GET|PATCH /api/food {basket, shop}` ·
+  `POST /api/shopping {items}` (replaces the Shopping list's unticked items) · `GET|PATCH /api/food {basket, shop, servings}` (servings per recipe id, base 2) ·
   `GET|DELETE /api/chat` · `POST /api/ask {message}` (runs `claude -p` in `~/tars`, streams NDJSON text/status/error/done,
   saves the conversation in chat.json; read-only tools + `bin/gmail` + curl to the API, never edits code) ·
   `GET /api/money[/fresh]` (runs `bin/monzo json` via `server/money.js`, cached 2 min; 503 with the message if sign-in is needed) ·

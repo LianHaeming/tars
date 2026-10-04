@@ -2,9 +2,10 @@ import { useParams } from 'react-router'
 import { Page } from '@/components/Page'
 import { Card } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
+import { Slider } from '@/components/ui/slider'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { cn } from '@/lib/utils'
-import { NUTRIENT_TILES, RI, meta, tagline, useDetail, useFood, useShop, type Detail, type Shop } from './data'
+import { BASE_SERVINGS, NUTRIENT_TILES, RI, meta, packFits, scaledAmount, shopEntry, shopPacks, spare, tagline, useDetail, useFood, useServings, useShop, type Detail, type Shop } from './data'
 import { BasketButton, Loading, ShopName, ShopSwitch } from './parts'
 
 const TIMING = /\b\d+(?:[.,]\d+)?(?:\s?[-–]\s?\d+)?\s?(?:mins?|minutes|secs?|seconds|hrs?|hours)\b|\b\d+\s?°[CF]/gi
@@ -42,24 +43,64 @@ function richText(html: string) {
   return { __html: doc.body.innerHTML }
 }
 
+function Servings({ d, shop }: { d: Detail; shop: Shop | null }) {
+  const servings = useServings()
+  const n = servings.of(d.id)
+  const fits = packFits(d, shop, n)
+  return (
+    <div className="glass mb-4 rounded-2xl p-4">
+      <div className="flex items-baseline justify-between">
+        <span className="text-sm text-muted-foreground">Servings</span>
+        <span className="flex items-baseline gap-3">
+          {n !== BASE_SERVINGS && <button type="button" onClick={() => servings.set(d.id, BASE_SERVINGS)} className="text-xs font-semibold text-primary">Reset</button>}
+          <span className="text-2xl font-semibold tabular-nums">{n.toFixed(1)}</span>
+        </span>
+      </div>
+      <Slider className="mt-4" min={1} max={8} step={0.1} value={[n]} onValueChange={([v]) => servings.set(d.id, v)} aria-label="Servings" />
+      {fits.length > 0 && (
+        <>
+          <p className="mt-4 text-xs text-muted-foreground">Use whole packs, nothing left over:</p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {fits.map(f => (
+              <button key={f.name + f.packs} type="button" onClick={() => servings.set(d.id, f.servings)} className="rounded-full bg-secondary px-3 py-1 text-xs font-semibold">
+                {f.name} · {f.packs} pack{f.packs > 1 ? 's' : ''} <span className="text-primary">→ {f.servings.toFixed(1)}</span>
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
 function Ingredients({ d, shops }: { d: Detail; shops: Shop[] }) {
   const { shop } = useShop(shops)
+  const n = useServings().of(d.id)
+  const f = n / BASE_SERVINGS
+  const packShop = shop ?? shops[0] ?? null
   return (
     <>
+      <Servings d={d} shop={packShop} />
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-        <span className="text-sm text-muted-foreground">For 2 servings</span>
+        <span className="text-sm text-muted-foreground">For {n.toFixed(1).replace(/\.0$/, '')} servings</span>
         <ShopSwitch shops={shops} />
       </div>
       <ul className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5">
-        {d.ingredients.map((i, n) => (
-          <li key={n} className="flex flex-col items-center gap-1 rounded-xl bg-card px-2 py-3 text-center text-sm leading-tight ring-1 ring-foreground/10">
-            {i.img
-              ? <img loading="lazy" src={i.img} alt="" className="size-14 rounded-full bg-white object-contain p-2" />
-              : <span className="size-14 rounded-full bg-secondary" />}
-            <span className="font-semibold">{i.amount}</span>
-            <span>{shop ? <ShopName shop={shop} buy={i.buy} fallback={i.name} /> : i.name}</span>
-          </li>
-        ))}
+        {d.ingredients.map((i, k) => {
+          const e = shopEntry(packShop, i.buy)
+          const units: [string, number][] = i.q == null ? [] : [[i.u || '', i.q * f]]
+          const left = e && units.length ? spare(e, units, shopPacks(e, units, 1)) : null
+          return (
+            <li key={k} className="flex flex-col items-center gap-1 rounded-xl bg-card px-2 py-3 text-center text-sm leading-tight ring-1 ring-foreground/10">
+              {i.img
+                ? <img loading="lazy" src={i.img} alt="" className="size-14 rounded-full bg-white object-contain p-2" />
+                : <span className="size-14 rounded-full bg-secondary" />}
+              <span className="font-semibold tabular-nums">{scaledAmount(i, f)}</span>
+              <span>{shop ? <ShopName shop={shop} buy={i.buy} fallback={i.name} /> : i.name}</span>
+              {left && <span className="text-xs text-muted-foreground">{left}</span>}
+            </li>
+          )
+        })}
       </ul>
     </>
   )

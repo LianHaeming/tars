@@ -7,7 +7,7 @@ import { useTars } from '@/features/tasks/store'
 import { Page } from '@/components/Page'
 import { Empty, SectionHead } from '@/components/common'
 import { Button } from '@/components/ui/button'
-import { shopEntry, shopPacks, totals, useBasket, useFood, useShop, type Line } from './data'
+import { shopEntry, shopPacks, spare, totals, useBasket, useFood, useServings, useShop, type Line } from './data'
 import { Loading, ShopName, ShopSwitch, Thumb } from './parts'
 
 export function ListPage() {
@@ -18,11 +18,12 @@ export function ListPage() {
   const navigate = useNavigate()
   const [lines, setLines] = useState<Line[] | null>(null)
   const [sending, setSending] = useState(false)
-  const key = basket.ids.join()
+  const servings = useServings()
+  const key = basket.ids.join() + JSON.stringify(servings.all)
 
   useEffect(() => {
     let live = true
-    totals(basket.ids).then(l => { if (live) setLines(l) })
+    totals(basket.ids, servings.all).then(l => { if (live) setLines(l) })
     return () => { live = false }
   }, [key])
 
@@ -65,7 +66,10 @@ export function ListPage() {
             {basket.ids.map(id => food.byId.get(id)).filter(r => !!r).map(r => (
               <li key={r.id} className="flex items-center gap-3 hairline-b py-3">
                 <img src={r.img} alt="" className="h-10 w-13 shrink-0 rounded-md object-cover" />
-                <Link to={`/food/${r.id}`} className="min-w-0 flex-1 truncate">{r.n}</Link>
+                <Link to={`/food/${r.id}`} className="min-w-0 flex-1">
+                  <span className="block truncate">{r.n}</span>
+                  <span className="text-xs text-muted-foreground">{servings.of(r.id).toFixed(1).replace(/\.0$/, '')} servings</span>
+                </Link>
                 <Button variant="ghost" size="icon-sm" aria-label="Remove" className="text-muted-foreground" onClick={() => basket.toggle(r.id)}><XIcon /></Button>
               </li>
             ))}
@@ -77,7 +81,7 @@ export function ListPage() {
 
           <div className="mt-6 flex flex-wrap items-end justify-between gap-2 hairline-b pb-2">
             <div className="text-sm font-bold tracking-wider text-muted-foreground uppercase">
-              Ingredients <span className="font-semibold tracking-normal normal-case opacity-70">· 2 servings each</span>
+              Ingredients
             </div>
             <ShopSwitch shops={food.shops} />
           </div>
@@ -95,6 +99,7 @@ export function ListPage() {
                     <span className="min-w-0 flex-1">{shop ? <ShopName shop={shop} buy={l.name} fallback={l.name} price={false} /> : l.name}</span>
                     <span className="text-right whitespace-nowrap text-muted-foreground">
                       {l.amount}{packs > 0 && e && <> → {packs} × £{e.pr.toFixed(2)}</>}
+                      {packs > 0 && e && spare(e, l.units, packs) && <span className="block text-xs">{spare(e, l.units, packs)}</span>}
                     </span>
                   </li>
                 ))}
