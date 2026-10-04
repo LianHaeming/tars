@@ -45,12 +45,14 @@ export function useFood() {
 }
 
 export function useDetail(id: string | undefined) {
-  const [d, setD] = useState<Detail | null>(null)
+  const [detail, setDetail] = useState<Detail | null>(null)
+  const [error, setError] = useState(false)
   useEffect(() => {
-    setD(null)
-    if (id) loadDetail(id).then(setD, () => {})
+    setDetail(null)
+    setError(false)
+    if (id) loadDetail(id).then(setDetail, () => setError(true))
   }, [id])
-  return d
+  return { detail, error }
 }
 
 type Prefs = { basket: string[]; shop: string }

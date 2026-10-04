@@ -42,7 +42,7 @@ function Card({ c, onAccept, onDismiss }: { c: Candidate; onAccept: () => void; 
 }
 
 export function InboxPage() {
-  const { candidates, loaded, accept, dismiss } = useInbox()
+  const { candidates, loaded, error, accept, dismiss } = useInbox()
   const { load } = useTars()
 
   const onAccept = async (c: Candidate) => {
@@ -57,7 +57,9 @@ export function InboxPage() {
 
   return (
     <Page title="From email" back="/apps">
-      {loaded && !candidates.length ? (
+      {error && !candidates.length ? (
+        <Empty>Couldn't load the review queue — {error}.</Empty>
+      ) : loaded && !candidates.length ? (
         <Empty>Nothing to review. New emails that look like tasks will show up here.</Empty>
       ) : (
         <ul className="space-y-3 pt-4">

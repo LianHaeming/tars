@@ -124,12 +124,12 @@ function Nutrition({ d }: { d: Detail }) {
 export function RecipePage() {
   const { id } = useParams()
   const { food, error } = useFood()
-  const d = useDetail(id)
+  const { detail: d, error: detailError } = useDetail(id)
   const r = food?.byId.get(id!)
 
   return (
     <Page title={r?.n ?? 'Recipe'} back="/apps">
-      {!r || !d ? <Loading error={error || (!!food && !r)} /> : (
+      {!r || !d ? <Loading error={error || detailError || (!!food && !r)} /> : (
         <>
           <img src={d.photo} onError={e => { e.currentTarget.src = r.img }} alt="" className="mt-3 aspect-video w-full rounded-2xl bg-secondary object-cover" />
           <div className="mt-4 flex flex-wrap items-start gap-4">

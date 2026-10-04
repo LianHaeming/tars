@@ -18,7 +18,7 @@ professional web apps look crisp on iOS Safari, plus an audit of tars' current f
 is used correctly in Home padding, Dock, and Toaster · `overscroll-behavior-y: none` ·
 `-webkit-tap-highlight-color: transparent` · `input,textarea,select{font-size:16px}` (prevents
 iOS zoom-on-focus) · `min-height:100dvh` · `useKeyboardOffset` via visualViewport · design tokens
-as CSS vars · Geist variable font · shadcn/Radix primitives · dark `color-scheme`.
+as CSS vars · Inter variable font · shadcn/Radix primitives · dark `color-scheme`.
 
 Leave all of the above alone. The gaps are below.
 

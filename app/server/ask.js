@@ -1,7 +1,7 @@
 // POST /api/ask: runs `claude -p` in the tars folder and streams the reply as NDJSON (text/status/error/done).
 // The conversation (messages + Claude session id) is kept in data/state/chat.json so every device sees it.
-const { spawn } = require('child_process');
-const { TARS, chat } = require('./store');
+const { chat } = require('./store');
+const { spawnClaude } = require('./claude');
 
 const TIMEOUT = 180e3;
 const KEEP = 60;
@@ -39,9 +39,8 @@ function ask(res, message, port) {
   res.writeHead(200, { 'content-type': 'application/x-ndjson', 'cache-control': 'no-store' });
   const emit = obj => res.writableEnded || res.write(JSON.stringify(obj) + '\n');
   const note = text => { reply.text += (reply.text ? '\n\n' : '') + '⚠️ ' + text; emit({ type: 'error', text }); };
-  const child = spawn('claude', args, { cwd: TARS, stdio: ['ignore', 'pipe', 'pipe'] });
-  const timer = setTimeout(() => { note('Took too long, stopped after 3 minutes.'); child.kill(); }, TIMEOUT);
-  let buf = '', wrote = false, errText = '';
+  const { child, clear, error } = spawnClaude(args, { timeout: TIMEOUT, onTimeout: () => note('Took too long, stopped after 3 minutes.') });
+  let buf = '', wrote = false;
 
   child.stdout.on('data', chunk => {
     buf += chunk;
@@ -58,11 +57,10 @@ function ask(res, message, port) {
       if (m.type === 'result' && m.is_error) note(String(m.result || 'Claude hit an error.'));
     }
   });
-  child.stderr.on('data', x => { errText += x; });
   child.on('error', e => note(e.message));
   child.on('close', code => {
-    clearTimeout(timer);
-    if (code && !wrote) note((errText.trim().split('\n').pop() || `claude exited with ${code}`).slice(0, 300));
+    clear();
+    if (code && !wrote) note(error(code));
     if (!reply.text) reply.text = '(no reply)';
     chat.save();
     busy = false;

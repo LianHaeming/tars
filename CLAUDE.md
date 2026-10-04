@@ -14,7 +14,7 @@ data/            all data — only the server reads or writes it
   food/          Food content: menu.json, r/<id>.json, sainsburys/ocado.json, photos/ (in git; published from the Mac)
   state/         live data (PC only, gitignored): tasks.json (lists + tasks), food.json (basket, shop), chat.json (Tars)
 app/
-  server/        Node, no dependencies: index.js (routes + static), store.js (data/state docs), ask.js (Tars chat), money.js (Monzo)
+  server/        Node, no dependencies: index.js (routes + static), store.js (data/state docs), ask.js (Tars chat), money.js (Monzo), claude.js (shared `claude` CLI runner for ask/burmese), burmese.js
   web/           React + TypeScript + Vite + Tailwind v4 + shadcn/ui — display only, everything via /api
   app.json       service config for bin/up (build → app/dist/, start → node server)
 bin/             sync, up, backup, gmail, monzo, burmese, email-tasks
@@ -47,7 +47,7 @@ bin/             sync, up, backup, gmail, monzo, burmese, email-tasks
   Static: `/data/food/*` from data/food; anything else is the built app (page URLs fall back to index.html).
 - **Frontend** (`app/web/src/`), grouped by feature:
   - `app/` — App.tsx (routes), Layout.tsx (dock, quick-add, toasts), Dock.tsx.
-  - `features/tasks/` — store.tsx (`useTars()`: all task state + actions), parse-quick-add.ts, TaskRow.tsx,
+  - `features/tasks/` — store.tsx (`useTars()`: all task state + actions; `useQuickAdd()` shared by Dock/Layout; quick-add is draft-based — an empty optimistic row that persists on first edit, no NL parsing), TaskRow.tsx,
     TagManager.tsx (lists + their sub-categories), calendar.tsx (CalendarPanel, folded into Home). `features/home/` —
     Home.tsx (the Schedule tab, incl. the "Life, so far" strip), MainEvent.tsx. `features/apps/` — AppsPage.tsx (the
     filter + the three sections). `features/food/` — data.ts (content + server-backed basket/shop), parts.tsx
@@ -57,7 +57,7 @@ bin/             sync, up, backup, gmail, monzo, burmese, email-tasks
     PaymentRow, used by Home and calendar). Each app's `*Section.tsx` is bare content (no page header) composed by
     AppsPage; shared bits in `components/common.tsx` — `FilterBar`/`FilterLabel` (the sticky pill), SectionHead, etc.
   - `components/` — Page.tsx (every page's header/back/width), common.tsx (FilterBar, FilterLabel, SectionHead, Section, Empty, PillBar, pill),
-    `ui/` (shadcn: `cd app/web && npx shadcn@latest add <name>`). `lib/` — api.ts, dates.ts, utils.ts.
+    `ui/` (shadcn: `cd app/web && npx shadcn@latest add <name>`). `lib/` — api.ts, dates.ts, utils.ts, use-resource.ts (shared `{data,error,loading,reload}` fetch hook for read-mostly features).
   - **One look everywhere**: shadcn components + the shared pieces above; never hard-code colours — use the tokens in
     `src/index.css` (dark only, blue `primary`, due/priority colours). No second theme or CSS file.
   - **Crispness rules** (see UI-CRISPNESS-BRIEF.md): type ramp only — `text-xs/sm/base/lg/xl/2xl` = 12/13/15/17/20/24,

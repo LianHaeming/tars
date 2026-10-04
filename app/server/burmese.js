@@ -1,8 +1,8 @@
 // A bank of short Burmese phrases to learn — common, useful and funny ones. Built once (bin/burmese) by `claude -p`
 // in batches and stored in data/state/burmese.json, so day-to-day there is no Claude call: an index steps one phrase
 // forward each London day (or on demand), and everything up to it is the "seen" history.
-const { spawn } = require('child_process');
-const { TARS, burmese } = require('./store');
+const { burmese } = require('./store');
+const { runClaude } = require('./claude');
 
 const BATCH_TIMEOUT = 180e3;
 const THEMES = [
@@ -60,21 +60,9 @@ function parseArray(out) {
     .map(o => ({ burmese: o.burmese.trim(), phonetic: o.phonetic.trim(), english: o.english.trim(), note: String(o.note || '').trim() }));
 }
 
-function batch(n, theme, avoid) {
-  return new Promise((resolve, reject) => {
-    const args = ['-p', prompt(n, theme, avoid), '--disallowedTools', 'Edit', 'Write', 'NotebookEdit', 'Bash'];
-    const child = spawn('claude', args, { cwd: TARS, stdio: ['ignore', 'pipe', 'pipe'] });
-    const timer = setTimeout(() => { child.kill(); reject(new Error('batch timed out')); }, BATCH_TIMEOUT);
-    let out = '', err = '';
-    child.stdout.on('data', c => { out += c; });
-    child.stderr.on('data', c => { err += c; });
-    child.on('error', e => { clearTimeout(timer); reject(e); });
-    child.on('close', code => {
-      clearTimeout(timer);
-      if (code) return reject(new Error((err.trim().split('\n').pop() || `claude exited ${code}`).slice(0, 200)));
-      try { resolve(parseArray(out)); } catch (e) { reject(e); }
-    });
-  });
+async function batch(n, theme, avoid) {
+  const args = ['-p', prompt(n, theme, avoid), '--disallowedTools', 'Edit', 'Write', 'NotebookEdit', 'Bash'];
+  return parseArray(await runClaude(args, { timeout: BATCH_TIMEOUT }));
 }
 
 // Tops up the bank toward `target` phrases, saving after every batch so it is safe to stop and resume.

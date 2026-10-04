@@ -1,7 +1,9 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { flushSync } from 'react-dom'
+import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
 import { api, localGet, type Project, type State, type Task } from '@/lib/api'
-import { longDate, today, ymd } from '@/lib/dates'
+import { today, ymd } from '@/lib/dates'
 
 const PROJECT_COLORS = ['#dc4c3e', '#eb8909', '#fad000', '#7ecc49', '#299438', '#14aaf5', '#4073ff', '#884dff', '#e05194', '#808080']
 
@@ -9,17 +11,13 @@ export const byCreated = (a: Task, b: Task) => (a.due || '9').localeCompare(b.du
 export const byTime = (a: Task, b: Task) => (a.dueTime || '99:99').localeCompare(b.dueTime || '99:99') || a.createdAt - b.createdAt
 export const byWhen = (a: Task, b: Task) => a.due!.localeCompare(b.due!) || (a.dueTime || '').localeCompare(b.dueTime || '') || a.createdAt - b.createdAt
 
-export type ViewInfo = { title: string; sub?: string; project?: Project; tasks: Task[]; defaults: Partial<Task> }
-
 function useStoreValue() {
   const [state, setState] = useState<State>({ projects: [], tasks: [] })
   const [loaded, setLoaded] = useState(false)
-  const [view, setView] = useState<string | null>(null)
   const [openId, setOpenId] = useState<string | null>(null)
   const [calSel, setCalSel] = useState(() => ymd(today()))
   const [calMonth, setCalMonth] = useState(() => ymd(today()).slice(0, 7))
   const [dayView, setDayView] = useState(false)
-  const [adding, setAdding] = useState(false)
   const [pendingAdd, setPendingAdd] = useState(false)
   const [flash, setFlash] = useState<{ label: string; run: () => void } | null>(null)
   const flashTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
@@ -42,30 +40,6 @@ function useStoreValue() {
   const open = useMemo(() => state.tasks.filter(t => !t.done), [state])
   const project = useCallback((id: string | null) => state.projects.find(p => p.id === id), [state])
   const shoppingList = state.projects.find(p => p.name === 'Shopping')
-
-  function viewInfo(): ViewInfo {
-    const t = ymd(today())
-    if (view === 'inbox') return { title: 'Inbox', tasks: open.filter(x => !x.projectId), defaults: {} }
-    if (view === 'today') return { title: 'Today', sub: longDate(today()), tasks: open.filter(x => x.due && x.due <= t), defaults: { due: t } }
-    if (view === 'calendar') return { title: 'Month', tasks: open.filter(x => x.due === calSel), defaults: { due: calSel } }
-    if (view === 'completed') return { title: 'Completed', tasks: state.tasks.filter(x => x.done), defaults: {} }
-    if (view?.startsWith('project:')) {
-      const p = project(view.slice(8))
-      if (p) return { title: p.name, project: p, tasks: open.filter(x => x.projectId === p.id), defaults: { projectId: p.id } }
-    }
-    return { title: 'Today', sub: longDate(today()), tasks: open.filter(x => x.due && x.due <= t), defaults: { due: t } }
-  }
-  const addDefaults = () => (view ? viewInfo().defaults : {})
-
-  function inView(task: Partial<Task>) {
-    if (!view) return false
-    const t = ymd(today())
-    if (view === 'inbox') return !task.projectId
-    if (view === 'today') return !!task.due && task.due <= t
-    if (view === 'calendar') return task.due === calSel
-    if (view.startsWith('project:')) return task.projectId === view.slice(8)
-    return false
-  }
 
   const creatingShopping = useRef(false)
   useEffect(() => {
@@ -91,11 +65,9 @@ function useStoreValue() {
 
   function addDraft() {
     const id = crypto.randomUUID()
-    const defaults = addDefaults()
-    if (!view) {
-      const f = localGet('home-filter')
-      if (f && state.projects.some(p => p.id === f)) defaults.projectId = f
-    }
+    const defaults: Partial<Task> = {}
+    const f = localGet('home-filter')
+    if (f && state.projects.some(p => p.id === f)) defaults.projectId = f
     if (dayView && defaults.due == null) defaults.due = calSel
     const task: Task = { id, title: '', description: '', due: null, dueTime: null, projectId: null, subId: null, done: false, createdAt: Date.now(), completedAt: null, ...defaults }
     draftIds.current.add(id)
@@ -184,11 +156,10 @@ function useStoreValue() {
 
   return {
     loaded, state, open, project, shoppingList, load,
-    view, setView, viewInfo, addDefaults, inView,
     openId, setOpenId, calSel, setCalSel: (ds: string) => { setCalSel(ds); setOpenId(null) }, pickDay: (ds: string) => setCalSel(ds),
     dayView, enterDay: (ds: string) => { setCalSel(ds); setDayView(true) }, exitDay: () => { setDayView(false); setOpenId(null) }, closeDay: () => setDayView(false),
     calMonth, setCalMonth,
-    adding, setAdding, pendingAdd, setPendingAdd, flash, clearFlash,
+    pendingAdd, setPendingAdd, flash, clearFlash,
     patch, addDraft, discardIfEmpty, toggleDone, deleteTask, rescheduleOverdue,
     addProject, renameProject, deleteProject,
     subsOf, addSub, renameSub, deleteSub,
@@ -208,11 +179,11 @@ export function useTars() {
   return s
 }
 
-export function useListView(v: string | null) {
-  const { setView, setOpenId } = useTars()
-  useEffect(() => {
-    setView(v)
-    setOpenId(null)
-    return () => setView(null)
-  }, [v, setView, setOpenId])
+export function useQuickAdd() {
+  const { addDraft, setPendingAdd } = useTars()
+  const navigate = useNavigate()
+  return useCallback((onTaskList: boolean) => {
+    if (onTaskList) { flushSync(() => { addDraft() }); document.getElementById('qa')?.focus() }
+    else { setPendingAdd(true); navigate('/') }
+  }, [addDraft, setPendingAdd, navigate])
 }

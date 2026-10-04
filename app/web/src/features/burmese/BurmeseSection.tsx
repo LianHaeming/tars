@@ -1,25 +1,22 @@
 import { useEffect, useState } from 'react'
 import { ChevronLeftIcon, ChevronRightIcon, SparklesIcon } from 'lucide-react'
-import { api } from '@/lib/api'
 import { cn } from '@/lib/utils'
 import { SectionHead } from '@/components/common'
-import type { Bank, Today } from './data'
+import { revealNext, useBank } from './data'
 
 export function BurmeseSection() {
-  const [bank, setBank] = useState<Bank | null>(null)
+  const { data: bank, error, reload } = useBank()
   const [sel, setSel] = useState(0)
   const [busy, setBusy] = useState(false)
 
-  const load = (focusLatest = true) =>
-    api<Bank>('GET', 'burmese/all').then(b => { setBank(b); if (focusLatest) setSel(b.index) }, () => {})
-
-  useEffect(() => { load() }, [])
+  useEffect(() => { if (bank) setSel(bank.index) }, [bank])
 
   const reveal = () => {
     setBusy(true)
-    api<Today>('POST', 'burmese').then(() => load(true)).finally(() => setBusy(false))
+    revealNext().then(() => reload()).finally(() => setBusy(false))
   }
 
+  if (error) return <p className="pt-8 text-sm text-muted-foreground">Couldn't load phrases — {error}.</p>
   if (!bank) return <p className="pt-8 text-sm text-muted-foreground">Loading…</p>
   if (!bank.total) return <p className="pt-8 text-sm text-muted-foreground">No phrases yet — the bank is still being set up.</p>
 

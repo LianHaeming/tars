@@ -35,11 +35,14 @@ function send(res, status, body) {
   res.end(body === undefined ? '' : JSON.stringify(body));
 }
 
+class BadRequest extends Error {}
+
 function readBody(req) {
   return new Promise((resolve, reject) => {
     let s = '';
-    req.on('data', c => { s += c; if (s.length > 1e6) req.destroy(); });
-    req.on('end', () => { try { resolve(s ? JSON.parse(s) : {}); } catch (e) { reject(e); } });
+    req.on('data', c => { s += c; if (s.length > 1e6) { req.destroy(); reject(new BadRequest('body too large')); } });
+    req.on('end', () => { try { resolve(s ? JSON.parse(s) : {}); } catch { reject(new BadRequest('invalid JSON body')); } });
+    req.on('error', reject);
   });
 }
 
@@ -210,7 +213,12 @@ http.createServer(async (req, res) => {
   const rel = decodeURIComponent(url.pathname);
   if (rel.startsWith('/api/')) {
     try { return await api(req, res, rel.slice(5).split('/')); }
-    catch (e) { return send(res, 400, { error: e.message }); }
+    catch (e) {
+      if (res.headersSent || res.writableEnded) return res.end();
+      if (e instanceof BadRequest) return send(res, 400, { error: e.message });
+      console.error('API error', req.method, rel, e);
+      return send(res, 500, { error: 'server error' });
+    }
   }
   if (rel.startsWith('/data/food/')) {
     const file = inside(FOOD, rel.slice('/data/food'.length));

@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react'
-import { flushSync } from 'react-dom'
 import { Link, useLocation, useNavigate } from 'react-router'
 import { BotIcon, CircleCheckIcon, LayoutGridIcon, MenuIcon, PlusIcon, XIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { useTars } from '@/features/tasks/store'
+import { useQuickAdd, useTars } from '@/features/tasks/store'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 
 export const showsDock = (path: string) => path === '/' || /^\/(apps|food)(\/|$)/.test(path)
@@ -14,7 +13,8 @@ export function focusDraft() {
 }
 
 export function Dock() {
-  const { addDraft, setPendingAdd, openId, setOpenId, deleteTask, flash, state, exitDay } = useTars()
+  const { openId, setOpenId, deleteTask, flash, state, exitDay } = useTars()
+  const quickAdd = useQuickAdd()
   const { pathname } = useLocation()
   const navigate = useNavigate()
   const hidden = !showsDock(pathname)
@@ -24,10 +24,7 @@ export function Dock() {
   useEffect(() => { setOpen(false) }, [pathname])
   useEffect(() => { if (hidden) setOpen(false) }, [hidden])
 
-  const add = () => {
-    if (hasTaskList(pathname)) { flushSync(() => { addDraft() }); focusDraft() }
-    else { setPendingAdd(true); navigate('/') }
-  }
+  const add = () => quickAdd(hasTaskList(pathname))
   const tab = hidden ? -1 : 0
   const onSchedule = pathname === '/'
   const seg = (on: boolean) => cn('relative z-10 grid h-10 w-14 place-items-center rounded-full transition-colors duration-200 [&_svg]:size-5', on ? 'text-background' : 'text-muted-foreground')
