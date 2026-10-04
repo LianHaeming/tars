@@ -5,7 +5,7 @@ import { toast } from 'sonner'
 import { api, localGet, type Project, type State, type Task } from '@/lib/api'
 import { today, ymd } from '@/lib/dates'
 
-const PROJECT_COLORS = ['#dc4c3e', '#eb8909', '#fad000', '#7ecc49', '#299438', '#14aaf5', '#4073ff', '#884dff', '#e05194', '#808080']
+const PROJECT_COLORS = ['#3fa9f5', '#ff7a59', '#c77dff', '#fad000', '#ff5fa2', '#4cc38a', '#7f8cff', '#eb8909', '#808080']
 
 export const byCreated = (a: Task, b: Task) => (a.due || '9').localeCompare(b.due || '9') || a.createdAt - b.createdAt
 export const byTime = (a: Task, b: Task) => (a.dueTime || '99:99').localeCompare(b.dueTime || '99:99') || a.createdAt - b.createdAt
@@ -45,7 +45,7 @@ function useStoreValue() {
   useEffect(() => {
     if (!loaded || shoppingList || creatingShopping.current) return
     creatingShopping.current = true
-    api('POST', 'projects', { name: 'Shopping', color: '#25b84c' }).then(load).finally(() => { creatingShopping.current = false })
+    api('POST', 'projects', { name: 'Shopping', color: '#ff7a59' }).then(load).finally(() => { creatingShopping.current = false })
   }, [loaded, shoppingList, load])
 
   async function patch(id: string, fields: Partial<Task>) {
