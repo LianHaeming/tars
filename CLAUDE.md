@@ -26,7 +26,7 @@ bin/             sync, up, backup, gmail, monzo, burmese (rebuilds the deck — 
   grouped by day (next 14 days only, then an "N more · See Month" link; Overdue first; expected Monzo payments mixed in
   as teal Money rows with a Money filter label; today's next timed task is a highlighted "main event" pill that expands
   in place for notes / Mark done / Edit), then **To-do · no date**. Rows show the list as a coloured tag under All.
-  **Apps** (`/apps`) — one flat multi-app page: a sticky filter (All / Food / Burmese / Money — All shows every section,
+  **Apps** (`/apps`) — one flat multi-app page: a sticky filter (All / Burmese / Money / Food — All shows every section,
   each tab shows just one; choice kept in browser storage) over titled sections for **Food** (menu search + recipe
   carousels + shopping-list link; recipes have a continuous servings slider with "use whole packs" shortcuts and per-ingredient spare), **Burmese** (tabs: Practice — a 100-sentence deck in both directions with spaced repetition — 3 new a day, phonetic first;
   learned list with unlearn, extra practice rounds; Phrase of the day — the original phrase bank (server/phrases.js);

@@ -50,9 +50,9 @@ function EmailCard() {
 
 const TABS = [
   { key: 'all', label: 'All', color: 'var(--foreground)' },
-  { key: 'food', label: 'Food', color: 'var(--today)' },
   { key: 'burmese', label: 'Burmese', color: 'var(--week)' },
   { key: 'money', label: 'Money', color: 'var(--money)' },
+  { key: 'food', label: 'Food', color: 'var(--today)' },
 ]
 
 export function AppsPage() {
@@ -71,13 +71,6 @@ export function AppsPage() {
 
       {active === 'all' && <EmailCard />}
 
-      {show('food') && (
-        <section>
-          <SectionHead title="Food" lg link="Shopping list" to="/food/list" />
-          <FoodSection />
-        </section>
-      )}
-
       {show('burmese') && (
         <section>
           <SectionHead title="Burmese" lg />
@@ -91,6 +84,13 @@ export function AppsPage() {
           <MoneySection />
         </section>
       )}
+      {show('food') && (
+        <section>
+          <SectionHead title="Food" lg link="Shopping list" to="/food/list" />
+          <FoodSection />
+        </section>
+      )}
+
     </main>
   )
 }
