@@ -16,10 +16,10 @@ const db = store.tasks.get();
 
 const id = () => crypto.randomBytes(6).toString('hex');
 const okId = v => typeof v === 'string' && /^[\w-]{6,64}$/.test(v);
-const TASK_FIELDS = ['title', 'description', 'due', 'dueTime', 'priority', 'projectId', 'subId', 'done'];
+const TASK_FIELDS = ['title', 'description', 'due', 'dueTime', 'projectId', 'subId', 'done'];
 const pick = (obj, keys) => Object.fromEntries(keys.filter(k => k in obj).map(k => [k, obj[k]]));
 const newTask = fields => ({ id: okId(fields.id) ? fields.id : id(),
-  title: '', description: '', due: null, dueTime: null, priority: 4, projectId: null, subId: null, done: false,
+  title: '', description: '', due: null, dueTime: null, projectId: null, subId: null, done: false,
   ...pick(fields, TASK_FIELDS), createdAt: Number(fields.createdAt) || Date.now(), completedAt: null });
 const save = () => store.tasks.save();
 

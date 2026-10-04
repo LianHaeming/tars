@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { useSearchParams } from 'react-router'
 import { focusDraft } from '@/app/Dock'
 import { cn, dim } from '@/lib/utils'
 import { localGet, localSet, type Task } from '@/lib/api'
 import { dayDiff, hhmm, parseYmd, relDay, shortDate, today, ymd } from '@/lib/dates'
-import { byPriority, byWhen, useTars } from '@/features/tasks/store'
+import { byCreated, byWhen, useTars } from '@/features/tasks/store'
 import { TaskRow } from '@/features/tasks/TaskRow'
 import { CalendarPanel } from '@/features/tasks/calendar'
 import { FilterBar, FilterLabel, Section, SectionHead } from '@/components/common'
@@ -61,6 +61,15 @@ function LifeStrip() {
       <p className="mt-2 text-xs text-muted-foreground">
         81 today’s rates · <span className="text-primary">87 likely</span> · 90 ≈ 1 in 4 · 100 ≈ 1 in 9 · {quip}
       </p>
+    </div>
+  )
+}
+
+function AgendaHead({ label, action }: { label: string; action?: ReactNode }) {
+  return (
+    <div className="flex items-center justify-between pt-6 pb-1 text-lg font-semibold tracking-wider text-muted-foreground uppercase">
+      <span>{label}</span>
+      {action}
     </div>
   )
 }
@@ -138,14 +147,14 @@ export function Home() {
   const tag = active === 'all'
   const matchTag = (x: Task) => active === 'all' || x.projectId === active
   const datedAll = state.tasks.filter(x => x.due && matchTag(x)).sort(byWhen)
-  const undated = open.filter(x => !x.due && matchTag(x)).sort(byPriority)
+  const undated = open.filter(x => !x.due && matchTag(x)).sort(byCreated)
   const pays = active === 'all' ? expected : []
   const main = todaysEvent(datedAll.filter(x => !x.done))
   const overdueOpen = datedAll.filter(x => !x.done && x.due! < t)
   const allDated: Entry[] = [...datedAll.map(task => ({ day: task.due!, task })), ...pays.map(pay => ({ day: pay.date, pay }))]
   const entries = dayView
     ? allDated.filter(e => e.day === calSel)
-    : allDated.filter(e => e.day.startsWith(calMonth))
+    : allDated.filter(e => e.day.startsWith(calMonth) && !(e.task && e.task.done))
   const activeProject = state.projects.find(p => p.id === active)
   const subs = activeProject?.subs ?? []
   const grouped = subs.length > 0 && undated.some(x => x.subId)
@@ -202,15 +211,15 @@ export function Home() {
           {showAgenda && (
           <section>
             {dayView ? (
-              <div className="flex items-center justify-between pt-6 pb-1 text-lg font-semibold tracking-wider text-muted-foreground uppercase">
-                <span>{relDay(calSel) || parseYmd(calSel).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'short' })}</span>
-                <button type="button" onClick={closeDay} className="text-sm font-semibold tracking-normal text-primary normal-case">Show all</button>
-              </div>
+              <AgendaHead
+                label={relDay(calSel) || parseYmd(calSel).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'short' })}
+                action={<button type="button" onClick={closeDay} className="text-sm font-semibold tracking-normal text-primary normal-case">Show all</button>}
+              />
             ) : (
-              <div className="flex items-center justify-between pt-6 pb-1 text-lg font-semibold tracking-wider text-muted-foreground uppercase">
-                <span>Upcoming</span>
-                {overdueOpen.length > 0 && <button type="button" onClick={rescheduleOverdue} className="text-sm font-semibold tracking-normal text-primary normal-case">Move {overdueOpen.length} overdue</button>}
-              </div>
+              <AgendaHead
+                label="Upcoming"
+                action={overdueOpen.length > 0 ? <button type="button" onClick={rescheduleOverdue} className="text-sm font-semibold tracking-normal text-primary normal-case">Move {overdueOpen.length} overdue</button> : undefined}
+              />
             )}
             {groupByDay(entries).map(([day, list]) => {
               const over = day < t && list.some(e => e.task && !e.task.done)

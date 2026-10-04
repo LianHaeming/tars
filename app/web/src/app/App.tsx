@@ -1,12 +1,14 @@
+import { lazy } from 'react'
 import { Navigate, RouterProvider, createBrowserRouter } from 'react-router'
-import { AppsPage } from '@/features/apps/AppsPage'
-import { ListPage } from '@/features/food/ListPage'
-import { RecipePage } from '@/features/food/RecipePage'
 import { Home } from '@/features/home/Home'
-import { InboxPage } from '@/features/inbox/InboxPage'
-import { TarsPage } from '@/features/tars/TarsPage'
 import { StoreProvider } from '@/features/tasks/store'
 import { Layout } from './Layout'
+
+const AppsPage = lazy(() => import('@/features/apps/AppsPage').then(m => ({ default: m.AppsPage })))
+const InboxPage = lazy(() => import('@/features/inbox/InboxPage').then(m => ({ default: m.InboxPage })))
+const TarsPage = lazy(() => import('@/features/tars/TarsPage').then(m => ({ default: m.TarsPage })))
+const ListPage = lazy(() => import('@/features/food/ListPage').then(m => ({ default: m.ListPage })))
+const RecipePage = lazy(() => import('@/features/food/RecipePage').then(m => ({ default: m.RecipePage })))
 
 const router = createBrowserRouter([
   {

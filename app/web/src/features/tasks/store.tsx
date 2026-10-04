@@ -1,13 +1,13 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { toast } from 'sonner'
 import { api, localGet, type Project, type State, type Task } from '@/lib/api'
-import { dueLabel, longDate, today, ymd } from '@/lib/dates'
+import { longDate, today, ymd } from '@/lib/dates'
 
 const PROJECT_COLORS = ['#dc4c3e', '#eb8909', '#fad000', '#7ecc49', '#299438', '#14aaf5', '#4073ff', '#884dff', '#e05194', '#808080']
 
-export const byPriority = (a: Task, b: Task) => a.priority - b.priority || (a.due || '9').localeCompare(b.due || '9') || a.createdAt - b.createdAt
-export const byTime = (a: Task, b: Task) => (a.dueTime || '99:99').localeCompare(b.dueTime || '99:99') || a.priority - b.priority || a.createdAt - b.createdAt
-export const byWhen = (a: Task, b: Task) => a.due!.localeCompare(b.due!) || (a.dueTime || '').localeCompare(b.dueTime || '') || a.priority - b.priority
+export const byCreated = (a: Task, b: Task) => (a.due || '9').localeCompare(b.due || '9') || a.createdAt - b.createdAt
+export const byTime = (a: Task, b: Task) => (a.dueTime || '99:99').localeCompare(b.dueTime || '99:99') || a.createdAt - b.createdAt
+export const byWhen = (a: Task, b: Task) => a.due!.localeCompare(b.due!) || (a.dueTime || '').localeCompare(b.dueTime || '') || a.createdAt - b.createdAt
 
 export type ViewInfo = { title: string; sub?: string; project?: Project; tasks: Task[]; defaults: Partial<Task> }
 
@@ -35,6 +35,7 @@ function useStoreValue() {
   stateRef.current = state
   const draftIds = useRef(new Set<string>())
   const persisted = useRef(new Set<string>())
+  const creating = useRef(new Map<string, Promise<unknown>>())
 
   const load = useCallback(async () => { setState(await api<State>('GET', 'state')); setLoaded(true) }, [])
 
@@ -78,8 +79,12 @@ function useStoreValue() {
     if (draftIds.current.has(id) && !persisted.current.has(id)) {
       persisted.current.add(id)
       const task = { ...stateRef.current.tasks.find(t => t.id === id), ...fields }
-      await api('POST', 'tasks', task)
+      const p = api('POST', 'tasks', task)
+      creating.current.set(id, p)
+      try { await p } finally { creating.current.delete(id) }
     } else {
+      const pending = creating.current.get(id)
+      if (pending) await pending
       await api('PATCH', 'tasks/' + id, fields)
     }
   }
@@ -92,7 +97,7 @@ function useStoreValue() {
       if (f && state.projects.some(p => p.id === f)) defaults.projectId = f
     }
     if (dayView && defaults.due == null) defaults.due = calSel
-    const task: Task = { id, title: '', description: '', due: null, dueTime: null, priority: 4, projectId: null, subId: null, done: false, createdAt: Date.now(), completedAt: null, ...defaults }
+    const task: Task = { id, title: '', description: '', due: null, dueTime: null, projectId: null, subId: null, done: false, createdAt: Date.now(), completedAt: null, ...defaults }
     draftIds.current.add(id)
     setState(s => ({ ...s, tasks: [...s.tasks, task] }))
     setOpenId(id)
@@ -106,11 +111,6 @@ function useStoreValue() {
     draftIds.current.delete(id)
     setState(s => ({ ...s, tasks: s.tasks.filter(x => x.id !== id) }))
     if (persisted.current.has(id)) { persisted.current.delete(id); api('DELETE', 'tasks/' + id) }
-  }
-
-  async function addTask(task: Partial<Task>) {
-    await api('POST', 'tasks', task)
-    await load()
   }
 
   async function toggleDone(id: string) {
@@ -172,9 +172,6 @@ function useStoreValue() {
   const deleteSub = (projectId: string, subId: string) =>
     saveSubs(projectId, subsOf(projectId).filter(s => s.id !== subId))
 
-  const whereAdded = (task: Partial<Task>) =>
-    task.projectId ? project(task.projectId)?.name ?? 'list' : task.due ? dueLabel(task.due) : 'Inbox'
-
   useEffect(() => { load() }, [load])
 
   useEffect(() => {
@@ -192,7 +189,7 @@ function useStoreValue() {
     dayView, enterDay: (ds: string) => { setCalSel(ds); setDayView(true) }, exitDay: () => { setDayView(false); setOpenId(null) }, closeDay: () => setDayView(false),
     calMonth, setCalMonth,
     adding, setAdding, pendingAdd, setPendingAdd, flash, clearFlash,
-    patch, addTask, addDraft, discardIfEmpty, toggleDone, deleteTask, rescheduleOverdue, whereAdded,
+    patch, addDraft, discardIfEmpty, toggleDone, deleteTask, rescheduleOverdue,
     addProject, renameProject, deleteProject,
     subsOf, addSub, renameSub, deleteSub,
   }

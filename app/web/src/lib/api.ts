@@ -4,7 +4,6 @@ export type Task = {
   description: string
   due: string | null
   dueTime: string | null
-  priority: 1 | 2 | 3 | 4
   projectId: string | null
   subId: string | null
   done: boolean

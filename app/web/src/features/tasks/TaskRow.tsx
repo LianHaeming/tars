@@ -26,8 +26,6 @@ function Check({ task, color, onDone }: { task: Task; color: string; onDone: () 
   )
 }
 
-const checkColor = (_color?: string) => 'var(--p4)'
-
 export function TaskRow({ task, hideProject, hideDue, compact, tag }: { task: Task } & Opts) {
   const { openId, setOpenId, toggleDone, project } = useTars()
   const [completing, setCompleting] = useState(false)
@@ -52,7 +50,7 @@ export function TaskRow({ task, hideProject, hideDue, compact, tag }: { task: Ta
       className={cn('group/task hairline-b transition-opacity duration-200', completing && 'opacity-40')}
     >
       <div className="flex cursor-pointer items-start gap-3 py-3" onClick={() => setOpenId(task.id)}>
-        <Check task={task} color={checkColor(p?.color)} onDone={done} />
+        <Check task={task} color="var(--p4)" onDone={done} />
         <div className="min-w-0 flex-1">
           <div className="break-words group-data-[done=true]/task:text-muted-foreground group-data-[done=true]/task:line-through">{task.title}</div>
           {task.description && !compact && (
@@ -100,7 +98,6 @@ function TaskEditor({ task, onDone }: { task: Task; onDone: () => void }) {
   const [title, setTitle] = useState(task.title)
   const ref = useRef<HTMLDivElement>(null)
   const titleRef = useRef<HTMLTextAreaElement>(null)
-  const p = state.projects.find(x => x.id === task.projectId)
   const subs = subsOf(task.projectId)
 
   useEffect(() => {
@@ -139,7 +136,7 @@ function TaskEditor({ task, onDone }: { task: Task; onDone: () => void }) {
   return (
     <div ref={ref} data-editor data-done={task.done} className="group/task glass -mx-3 my-2 scroll-mb-dock rounded-xl px-3 pb-3">
       <div className="flex items-start gap-3 pt-3">
-        <Check task={task} color={checkColor(p?.color)} onDone={onDone} />
+        <Check task={task} color="var(--p4)" onDone={onDone} />
         <div className="min-w-0 flex-1">
           <textarea
             ref={el => { titleRef.current = el; grow(el) }}

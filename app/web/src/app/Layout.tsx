@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { Suspense, useEffect } from 'react'
 import { flushSync } from 'react-dom'
 import { Outlet, ScrollRestoration, useLocation, useNavigate } from 'react-router'
 import { Toaster } from '@/components/ui/sonner'
@@ -28,7 +28,9 @@ export function Layout() {
 
   return (
     <>
-      <Outlet />
+      <Suspense fallback={<div className="pt-safe-16 text-center text-sm text-muted-foreground">Loading…</div>}>
+        <Outlet />
+      </Suspense>
       <Dock />
       <Toaster position="bottom-center" offset={{ bottom: 'calc(96px + env(safe-area-inset-bottom))' }} mobileOffset={{ bottom: 'calc(96px + env(safe-area-inset-bottom))' }} />
       <ScrollRestoration />
