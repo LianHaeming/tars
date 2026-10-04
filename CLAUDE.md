@@ -12,7 +12,7 @@ One data folder, one server, one React frontend.
 ```
 data/            all data — only the server reads or writes it
   food/          Food content: menu.json, r/<id>.json, sainsburys/ocado.json, photos/ (in git; published from the Mac)
-  state/         live data (PC only, gitignored): tasks.json (lists + tasks), food.json (basket, shop), chat.json (Tars)
+  state/         live data (PC only, gitignored): tasks.json (lists + tasks), food.json (basket, shop), chat.json (Tars), money.json (AI labels + insights)
 app/
   server/        Node, no dependencies: index.js (routes + static), store.js (data/state docs), ask.js (Tars chat), money.js (Monzo), claude.js (shared `claude` CLI runner for ask/burmese), burmese.js
   web/           React + TypeScript + Vite + Tailwind v4 + shadcn/ui — display only, everything via /api
@@ -28,8 +28,9 @@ bin/             sync, up, backup, gmail, monzo, burmese, email-tasks
   in place for notes / Mark done / Edit), then **To-do · no date**. Rows show the list as a coloured tag under All.
   **Apps** (`/apps`) — one flat multi-app page: a sticky filter (All / Food / Burmese / Money — All shows every section,
   each tab shows just one; choice kept in browser storage) over titled sections for **Food** (menu search + recipe
-  carousels + shopping-list link), **Burmese** (daily phrase, reveal, seen list) and **Money** (Monzo balance, pots,
-  spending charts by day/week and category, top places, transactions; period 7/30/89 days); the Email review card sits
+  carousels + shopping-list link), **Burmese** (daily phrase, reveal, seen list) and **Money** (a small dashboard, not a
+  Monzo copy: balance line, "goes out automatically every month" total split by group, Claude's "Tars noticed" insights,
+  the repeating payments by group with logos, next 30 days); the Email review card sits
   atop the All view when there are candidates. Dock (on Schedule, Apps and app pages, not `/tars`): round **Add task**
   button, centred Schedule | Apps pill (Apps stays lit on app pages), round **Tars** (chat) button. Safari's status strip
   is `theme-color` = `--chrome` (#15263a) — keep them equal so the top reads as one navy surface; added to the Home
@@ -42,6 +43,8 @@ bin/             sync, up, backup, gmail, monzo, burmese, email-tasks
   `GET|DELETE /api/chat` · `POST /api/ask {message}` (runs `claude -p` in `~/tars`, streams NDJSON text/status/error/done,
   saves the conversation in chat.json; read-only tools + `bin/gmail` + curl to the API, never edits code) ·
   `GET /api/money[/fresh]` (runs `bin/monzo json` via `server/money.js`, cached 2 min; 503 with the message if sign-in is needed) ·
+  `GET /api/money/summary[-fresh]` (repeating payments as monthly costs + `claude -p` once a London day for clean names, groups,
+  logo domains and 3–5 insights, kept in data/state/money.json) ·
   `GET /api/expected` (repeating payments/income predicted from the last 89 days — monthly or weekly, split by amount when a
   payee has several, stopped ones dropped, late ones shown today; next 90 days; Monzo data reused up to 1 h).
   Static: `/data/food/*` from data/food; anything else is the built app (page URLs fall back to index.html).
@@ -53,8 +56,8 @@ bin/             sync, up, backup, gmail, monzo, burmese, email-tasks
     filter + the three sections). `features/food/` — data.ts (content + server-backed basket/shop), parts.tsx
     (RecipeTile etc.), FoodSection.tsx, RecipePage.tsx, ListPage.tsx. `features/burmese/` — data.ts, BurmeseSection.tsx.
     `features/inbox/` — data.ts (useInbox), InboxPage.tsx (email → task review). `features/tars/` — TarsPage.tsx.
-    `features/money/` — data.ts (fetch + spend maths), charts.tsx, MoneySection.tsx, expected.tsx (useExpected +
-    PaymentRow, used by Home and calendar). Each app's `*Section.tsx` is bare content (no page header) composed by
+    `features/money/` — data.ts (useSummary), MoneySection.tsx, expected.tsx (useExpected, Logo,
+    PaymentRow — used by Home, calendar and Money). Each app's `*Section.tsx` is bare content (no page header) composed by
     AppsPage; shared bits in `components/common.tsx` — `FilterBar`/`FilterLabel` (the sticky pill), SectionHead, etc.
   - `components/` — Page.tsx (every page's header/back/width), common.tsx (FilterBar, FilterLabel, SectionHead, Section, Empty, PillBar, pill),
     `ui/` (shadcn: `cd app/web && npx shadcn@latest add <name>`). `lib/` — api.ts, dates.ts, utils.ts, use-resource.ts (shared `{data,error,loading,reload}` fetch hook for read-mostly features).

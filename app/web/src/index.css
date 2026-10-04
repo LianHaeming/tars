@@ -115,6 +115,11 @@
     --claude: #b18cff;
     --money: #2bc4b4;
     --p4: #6d727b;
+    --chart-1: #4593d6;
+    --chart-2: #b18cff;
+    --chart-3: #ffb547;
+    --chart-4: #3ddc84;
+    --chart-5: #ff6a5f;
 }
 
 @layer base {

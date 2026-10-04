@@ -101,9 +101,9 @@ export function CalendarPanel({ filter = 'all' }: { filter?: string }) {
                   className={cn('flex flex-col items-center gap-1 rounded-lg border py-2 active:bg-muted', sel ? 'border-primary/50 bg-primary/10' : 'border-transparent')}
                 >
                   <span className={cn('text-sm font-semibold tabular-nums', d === ymd(today()) && 'text-primary')}>{dt.getDate()}</span>
-                  <span className="flex h-1 gap-1">
+                  <span className="flex h-3 items-center gap-1">
                     {ts.slice(0, 3).map(x => <span key={x.id} className="size-1 rounded-full" style={{ background: dim(project(x.projectId)?.color || 'var(--primary)') }} />)}
-                    {pays.length > 0 && <span className="size-1 rounded-full bg-money" />}
+                    {pays.length > 0 && (pays[0].logo ? <img src={pays[0].logo} alt="" className="size-3 rounded-full bg-white object-cover" /> : <span className="size-1 rounded-full bg-money" />)}
                   </span>
                 </button>
               )
@@ -116,7 +116,7 @@ export function CalendarPanel({ filter = 'all' }: { filter?: string }) {
                 >
                   <span className={cn('ml-1 text-xs font-semibold tabular-nums', d === ymd(today()) && 'text-primary')}>{dt.getDate()}</span>
                   {shown.map(x => <Chip key={x.id} color={project(x.projectId)?.color || 'var(--primary)'} done={x.done} label={x.title} />)}
-                  {pays.length > 0 && <Chip color="var(--money)" label={pays[0].name} />}
+                  {pays.length > 0 && <Chip color="var(--money)" label={pays[0].name} logo={pays[0].logo} />}
                   {extra > 0 && <span className="pl-1 text-micro font-semibold text-muted-foreground">+{extra}</span>}
                 </button>
               )
@@ -136,14 +136,15 @@ export function CalendarPanel({ filter = 'all' }: { filter?: string }) {
   )
 }
 
-function Chip({ color, label, done }: { color: string; label: string; done?: boolean }) {
+function Chip({ color, label, done, logo }: { color: string; label: string; done?: boolean; logo?: string | null }) {
   const c = dim(color)
   return (
     <span
-      className={cn('truncate rounded-mark border-l-2 px-1 text-micro font-medium', done && 'line-through opacity-50')}
+      className={cn('flex items-center gap-1 truncate rounded-mark border-l-2 px-1 text-micro font-medium', done && 'line-through opacity-50')}
       style={{ borderColor: c, color: c, background: `color-mix(in srgb, ${color} 14%, transparent)` }}
     >
-      {label || 'Untitled'}
+      {logo && <img src={logo} alt="" loading="lazy" className="size-3 shrink-0 rounded-full bg-white object-cover" />}
+      <span className="truncate">{label || 'Untitled'}</span>
     </span>
   )
 }

@@ -6,7 +6,7 @@ const path = require('path');
 const crypto = require('crypto');
 const store = require('./store');
 const { ask, isBusy } = require('./ask');
-const { money, expected } = require('./money');
+const { money, expected, summary } = require('./money');
 const burmese = require('./burmese');
 
 const PORT = process.env.PORT || 8400;
@@ -135,7 +135,7 @@ async function api(req, res, parts) {
   }
 
   if (resource === 'money' && req.method === 'GET') {
-    try { return send(res, 200, await money(rid === 'fresh')); }
+    try { return send(res, 200, rid === 'summary' ? await summary(false) : rid === 'summary-fresh' ? await summary(true) : await money(rid === 'fresh')); }
     catch (e) { return send(res, 503, { error: e.message }); }
   }
 
