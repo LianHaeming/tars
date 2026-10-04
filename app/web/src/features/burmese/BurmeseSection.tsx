@@ -1,41 +1,78 @@
-import { SectionHead } from '@/components/common'
-import { isMastered, useBurmese } from './data'
+import { useState } from 'react'
+import { cn } from '@/lib/utils'
+import { localGet, localSet } from '@/lib/api'
+import { SectionHead, pill } from '@/components/common'
+import { isMastered, useBurmese, type BurmeseState } from './data'
 import { Practice } from './Practice'
+import { PhraseOfDay } from './PhraseOfDay'
 import { Translate } from './Translate'
 
-export function BurmeseSection() {
-  const { data, error, learn, review, save, clearHistory, translate } = useBurmese()
+const TABS = [
+  { key: 'practice', label: 'Practice' },
+  { key: 'phrase', label: 'Phrase of the day' },
+  { key: 'translate', label: 'Translate' },
+] as const
+type Tab = (typeof TABS)[number]['key']
 
-  if (!data) return <p className="pt-8 text-sm text-muted-foreground">{error ? `Couldn't load Burmese — ${error}.` : 'Loading…'}</p>
-
+function Learned({ data, unlearn }: { data: BurmeseState; unlearn: (id: string) => Promise<unknown> }) {
+  const [open, setOpen] = useState<string | null>(null)
   const learned = data.deck.filter(c => data.progress[c.id]).reverse()
+  if (!learned.length) return null
+  return (
+    <section>
+      <SectionHead title="Learned" count={learned.length} />
+      {learned.map(c => {
+        const p = data.progress[c.id]
+        const on = open === c.id
+        return (
+          <div key={c.id} className="hairline-b">
+            <button type="button" onClick={() => setOpen(on ? null : c.id)} className="flex w-full items-center gap-3 py-3 text-left">
+              <div className="min-w-0 flex-1">
+                <div className={cn('font-semibold text-primary', !on && 'truncate')}>{c.phonetic}</div>
+                <div className={cn('text-xs text-muted-foreground', !on && 'truncate')}>{c.english}</div>
+              </div>
+              <span className="text-xs font-semibold text-muted-foreground tabular-nums">
+                {isMastered(p) ? <span className="text-today">Solid</span> : `${p.my.box + p.en.box}/12`}
+              </span>
+            </button>
+            {on && (
+              <div className="pb-3">
+                <p lang="my" className="text-base">{c.burmese}</p>
+                {c.note && <p className="mt-1 text-sm text-muted-foreground">{c.note}</p>}
+                <button type="button" onClick={() => { setOpen(null); unlearn(c.id) }} className="mt-3 rounded-full bg-secondary px-3 py-1 text-xs font-semibold text-overdue">
+                  Unlearn — teach me this again
+                </button>
+              </div>
+            )}
+          </div>
+        )
+      })}
+    </section>
+  )
+}
+
+export function BurmeseSection() {
+  const { data, error, learn, review, unlearn, save, clearHistory, translate } = useBurmese()
+  const [tab, setTab] = useState<Tab>(() => (localGet('burmese-tab') as Tab) || 'practice')
+  const pick = (t: Tab) => { setTab(t); localSet('burmese-tab', t) }
 
   return (
     <>
-      {data.deck.length
-        ? <Practice data={data} learn={learn} review={review} />
-        : <p className="pt-4 text-sm text-muted-foreground">No sentences yet — the deck is still being made.</p>}
+      <div className="scrollbar-none mt-3 flex gap-2 overflow-x-auto">
+        {TABS.map(t => <button key={t.key} type="button" data-on={tab === t.key} onClick={() => pick(t.key)} className={pill}>{t.label}</button>)}
+      </div>
 
-      <Translate history={data.history} deck={data.deck} translate={translate} save={save} clear={clearHistory} />
-
-      {learned.length > 0 && (
-        <section>
-          <SectionHead title="Learned" count={learned.length} />
-          {learned.map(c => {
-            const p = data.progress[c.id]
-            return (
-              <div key={c.id} className="flex items-center gap-3 hairline-b py-3">
-                <div className="min-w-0 flex-1">
-                  <div className="truncate font-semibold text-primary">{c.phonetic}</div>
-                  <div className="truncate text-xs text-muted-foreground">{c.english}</div>
-                </div>
-                <span className="text-xs font-semibold text-muted-foreground tabular-nums" title="Strength each way">
-                  {isMastered(p) ? <span className="text-today">Solid</span> : `${p.my.box + p.en.box}/12`}
-                </span>
-              </div>
-            )
-          })}
-        </section>
+      {tab === 'phrase' ? <PhraseOfDay /> : !data ? (
+        <p className="pt-8 text-sm text-muted-foreground">{error ? `Couldn't load Burmese — ${error}.` : 'Loading…'}</p>
+      ) : tab === 'translate' ? (
+        <Translate history={data.history} deck={data.deck} translate={translate} save={save} clear={clearHistory} />
+      ) : (
+        <>
+          {data.deck.length
+            ? <Practice data={data} learn={learn} review={review} unlearn={unlearn} />
+            : <p className="pt-4 text-sm text-muted-foreground">No sentences yet — the deck is still being made.</p>}
+          <Learned data={data} unlearn={unlearn} />
+        </>
       )}
     </>
   )

@@ -1,6 +1,5 @@
 import { useState, type FormEvent } from 'react'
 import { ArrowUpIcon, CheckIcon, CopyIcon, PlusIcon } from 'lucide-react'
-import { SectionHead } from '@/components/common'
 import type { Card, Translation } from './data'
 
 type Props = {
@@ -32,7 +31,6 @@ export function Translate({ history, deck, translate, save, clear }: Props) {
 
   return (
     <section>
-      <SectionHead title="Translate" />
       <form onSubmit={submit} className="flex items-center gap-2 pt-3">
         <input
           value={text}

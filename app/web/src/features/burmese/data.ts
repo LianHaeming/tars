@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { api } from '@/lib/api'
+import { useResource } from '@/lib/use-resource'
 
 export type Dir = 'my' | 'en'
 export type Card = { id: string; english: string; burmese: string; phonetic: string; note: string; topic: string }
@@ -26,6 +27,7 @@ export function useBurmese() {
     data, error,
     learn: (id: string) => call('POST', '/learn', { id }),
     review: (id: string, dir: Dir, ok: boolean) => call('POST', '/review', { id, dir, ok }),
+    unlearn: (id: string) => call('POST', '/unlearn', { id }),
     save: (t: Translation) => call('POST', '/save', t),
     clearHistory: () => call('DELETE', '/history'),
     translate: async (text: string) => {
@@ -51,3 +53,14 @@ export function hash(s: string) {
   for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619)
   return h >>> 0
 }
+
+export type Phrase = { burmese: string; phonetic: string; english: string; note: string }
+export type Bank = { index: number; total: number; phrases: Phrase[] }
+
+const bankCache: { current: Bank | null } = { current: null }
+
+export function useBank() {
+  return useResource<Bank>(() => api('GET', 'burmese/phrases'), { cache: bankCache })
+}
+
+export const revealNext = () => api('POST', 'burmese/phrase')

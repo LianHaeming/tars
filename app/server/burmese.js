@@ -90,6 +90,12 @@ function save(card) {
   return state();
 }
 
+function unlearn(id) {
+  delete doc().progress[id];
+  burmese.save();
+  return state();
+}
+
 function clearHistory() {
   doc().history = [];
   burmese.save();
@@ -113,11 +119,10 @@ Reply with ONLY a JSON array, no markdown or code fence, each item exactly:
   const d = doc();
   const mine = d.deck.filter(c => c.id.startsWith('u'));
   d.deck = [...items.slice(0, size).map((o, i) => ({ id: 'c' + (i + 1), ...o })), ...mine];
-  for (const k of ['phrases', 'index', 'lastDay']) delete d[k];
   for (const id of Object.keys(d.progress)) if (id.startsWith('c')) delete d.progress[id];
   burmese.save();
   log(`deck now ${d.deck.length} sentences`);
   return d.deck.length;
 }
 
-module.exports = { state, learn, review, translate, save, clearHistory, build };
+module.exports = { state, learn, review, unlearn, translate, save, clearHistory, build };

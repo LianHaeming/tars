@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 // Usage: bin/burmese build [N]   (re)write the deck of N everyday sentences (default 100) via `claude -p`; resets their progress.
+//        bin/burmese phrases [N]  top up the phrase-of-the-day bank to N phrases (default 365).
 //        bin/burmese count       how many sentences are in the deck and how many are learned.
 // Stop the service first (systemctl --user stop tars-app) — it keeps burmese.json in memory — and start it again after.
 const { build } = require('../app/server/burmese');
+const phrases = require('../app/server/phrases');
 const { burmese } = require('../app/server/store');
 
 const [cmd, arg] = process.argv.slice(2);
@@ -10,12 +12,14 @@ const [cmd, arg] = process.argv.slice(2);
 if (cmd === 'count') {
   const d = burmese.get();
   console.log(`${(d.deck || []).length} sentences, ${Object.keys(d.progress || {}).length} learned`);
+} else if (cmd === 'phrases') {
+  phrases.build(Number(arg) || 365, 40, msg => console.log(msg)).then(() => process.exit(0), e => { console.error(e.message); process.exit(1); });
 } else if (cmd === 'build') {
   build(Number(arg) || 100, msg => console.log(msg)).then(
     () => process.exit(0),
     e => { console.error('build failed:', e.message); process.exit(1); },
   );
 } else {
-  console.error('usage: bin/burmese build [N] | count');
+  console.error('usage: bin/burmese build [N] | phrases [N] | count');
   process.exit(1);
 }

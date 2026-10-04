@@ -8,6 +8,7 @@ const store = require('./store');
 const { ask, isBusy } = require('./ask');
 const { money, expected, summary } = require('./money');
 const burmese = require('./burmese');
+const phrases = require('./phrases');
 
 const PORT = process.env.PORT || 8400;
 const DIST = path.join(__dirname, '..', 'dist');
@@ -146,11 +147,14 @@ async function api(req, res, parts) {
 
   if (resource === 'burmese') {
     if (req.method === 'GET' && !rid) return send(res, 200, burmese.state());
+    if (req.method === 'GET' && rid === 'phrases') return send(res, 200, phrases.all());
+    if (req.method === 'POST' && rid === 'phrase') return send(res, 200, phrases.advance());
     if (req.method === 'DELETE' && rid === 'history') return send(res, 200, burmese.clearHistory());
     if (req.method === 'POST') {
       try {
         if (rid === 'learn') return send(res, 200, burmese.learn(body.id));
         if (rid === 'review') return send(res, 200, burmese.review(body.id, body.dir, !!body.ok));
+        if (rid === 'unlearn') return send(res, 200, burmese.unlearn(body.id));
         if (rid === 'save') return send(res, 200, burmese.save(body));
         if (rid === 'translate') return send(res, 200, await burmese.translate(body.text));
       } catch (e) { return send(res, rid === 'translate' ? 502 : 400, { error: e.message }); }
