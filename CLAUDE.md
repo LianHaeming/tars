@@ -14,25 +14,30 @@ data/            all data — only the server reads or writes it
   food/          Food content: menu.json, r/<id>.json, sainsburys/ocado.json, photos/ (in git; published from the Mac)
   state/         live data (PC only, gitignored): tasks.json (lists + tasks), food.json (basket, shop), chat.json (Tars)
 app/
-  server/        Node, no dependencies: index.js (routes + static), store.js (data/state docs), ask.js (Tars chat)
+  server/        Node, no dependencies: index.js (routes + static), store.js (data/state docs), ask.js (Tars chat), money.js (Monzo)
   web/           React + TypeScript + Vite + Tailwind v4 + shadcn/ui — display only, everything via /api
   app.json       service config for bin/up (build → app/dist/, start → node server)
-bin/             sync, up, backup, gmail
+bin/             sync, up, backup, gmail, monzo, burmese, email-tasks
 ```
 
-- **The app** (Lian's phone, over Tailscale): two tabs. **Schedule** (`/`) — greeting + date, a row of list filter
-  labels (All + one per list, in the list's colour; choice kept in browser storage), **Upcoming** grouped by day
-  (next 14 days only, then an "N more · See Month" link; Overdue first; expected Monzo payments mixed in as teal Money rows with a Money filter label;
-  today's next timed task is a highlighted "main event" pill that expands in place for notes / Mark done /
-  Edit), then **To-do · no date**. Rows show the list as a coloured tag under All. **Apps** (`/apps`) — a 3-column grid of
-  tiles: Food, Shopping, Calendar (`/month`), Lists, Money (`/money` — Monzo balance, pots, spending charts by
-  day/week and category, top places, transactions; period 7/30/89 days). Dock (on Schedule, Apps and app pages, not `/tars`): round **Add task**
+- **The app** (Lian's phone, over Tailscale): two tabs. **Schedule** (`/`) — a flat **"Life, so far"** strip, then a
+  sticky row of list filter labels (All + one per list in the list's colour, + Completed; choice kept in browser
+  storage; on scroll the strip slides up behind the Dynamic Island while the filters lock to the top), **Upcoming**
+  grouped by day (next 14 days only, then an "N more · See Month" link; Overdue first; expected Monzo payments mixed in
+  as teal Money rows with a Money filter label; today's next timed task is a highlighted "main event" pill that expands
+  in place for notes / Mark done / Edit), then **To-do · no date**. Rows show the list as a coloured tag under All.
+  **Apps** (`/apps`) — one flat multi-app page: a sticky filter (All / Food / Burmese / Money — All shows every section,
+  each tab shows just one; choice kept in browser storage) over titled sections for **Food** (menu search + recipe
+  carousels + shopping-list link), **Burmese** (daily phrase, reveal, seen list) and **Money** (Monzo balance, pots,
+  spending charts by day/week and category, top places, transactions; period 7/30/89 days); the Email review card sits
+  atop the All view when there are candidates. Dock (on Schedule, Apps and app pages, not `/tars`): round **Add task**
   button, centred Schedule | Apps pill (Apps stays lit on app pages), round **Tars** (chat) button. Safari's status strip
   is `theme-color` = `--chrome` (#15263a) — keep them equal so the top reads as one navy surface; added to the Home
   Screen it runs standalone (manifest) under the Dynamic Island. Everything else is a **page** with its own URL and a
-  back button (app pages go back to `/apps`) — Lian doesn't want pop-up windows: `/lists/:key`, `/month?d=`,
-  `/shopping`, `/money`, `/tars`, `/food`, `/food/:id`, `/food/list`. "Todo"/"calendar" = this app.
-- **API** (`app/server/index.js`): `GET /api/state` · `POST|PATCH|DELETE /api/tasks[/id]` · `/api/projects[/id]` ·
+  back button (app pages go back to `/apps`) — Lian doesn't want pop-up windows: `/tars`, `/inbox`, `/food/:id`,
+  `/food/list`. Legacy `/money`, `/food`, `/burmese`, `/month` now just redirect to their home (`/apps` or `/`).
+  "Todo"/"calendar" = this app.
+- **API** (`app/server/index.js`): `GET /api/state` · `POST|PATCH|DELETE /api/tasks[/id]` · `/api/projects[/id]` (a project PATCH with `subs` sets its sub-categories; tasks carry an optional `subId`) ·
   `POST /api/shopping {items}` (replaces the Shopping list's unticked items) · `GET|PATCH /api/food {basket, shop}` ·
   `GET|DELETE /api/chat` · `POST /api/ask {message}` (runs `claude -p` in `~/tars`, streams NDJSON text/status/error/done,
   saves the conversation in chat.json; read-only tools + `bin/gmail` + curl to the API, never edits code) ·
@@ -42,11 +47,16 @@ bin/             sync, up, backup, gmail
   Static: `/data/food/*` from data/food; anything else is the built app (page URLs fall back to index.html).
 - **Frontend** (`app/web/src/`), grouped by feature:
   - `app/` — App.tsx (routes), Layout.tsx (dock, quick-add, toasts), Dock.tsx.
-  - `features/tasks/` — store.tsx (`useTars()`: all task state + actions), parse-quick-add.ts, TaskRow, QuickAdd,
-    NameDialog, ListsPage (+ ShoppingPage), MonthPage. `features/home/` — Home (the Schedule tab), MainEvent.
-    `features/apps/` — AppsPage (the tile list lives in it). `features/food/` — data.ts (content + server-backed basket/shop),
-    parts.tsx, MenuPage, RecipePage, ListPage. `features/tars/` — TarsPage. `features/money/` — data.ts (fetch + spend maths), charts.tsx, MoneyPage, expected.tsx (useExpected + PaymentRow, used by Home and MonthPage).
-  - `components/` — Page.tsx (every page's header/back/width), common.tsx (SectionHead, Section, Empty, PillBar, pill),
+  - `features/tasks/` — store.tsx (`useTars()`: all task state + actions), parse-quick-add.ts, TaskRow.tsx,
+    TagManager.tsx (lists + their sub-categories), calendar.tsx (CalendarPanel, folded into Home). `features/home/` —
+    Home.tsx (the Schedule tab, incl. the "Life, so far" strip), MainEvent.tsx. `features/apps/` — AppsPage.tsx (the
+    filter + the three sections). `features/food/` — data.ts (content + server-backed basket/shop), parts.tsx
+    (RecipeTile etc.), FoodSection.tsx, RecipePage.tsx, ListPage.tsx. `features/burmese/` — data.ts, BurmeseSection.tsx.
+    `features/inbox/` — data.ts (useInbox), InboxPage.tsx (email → task review). `features/tars/` — TarsPage.tsx.
+    `features/money/` — data.ts (fetch + spend maths), charts.tsx, MoneySection.tsx, expected.tsx (useExpected +
+    PaymentRow, used by Home and calendar). Each app's `*Section.tsx` is bare content (no page header) composed by
+    AppsPage; shared bits in `components/common.tsx` — `FilterBar`/`FilterLabel` (the sticky pill), SectionHead, etc.
+  - `components/` — Page.tsx (every page's header/back/width), common.tsx (FilterBar, FilterLabel, SectionHead, Section, Empty, PillBar, pill),
     `ui/` (shadcn: `cd app/web && npx shadcn@latest add <name>`). `lib/` — api.ts, dates.ts, utils.ts.
   - **One look everywhere**: shadcn components + the shared pieces above; never hard-code colours — use the tokens in
     `src/index.css` (dark only, blue `primary`, due/priority colours). No second theme or CSS file.
@@ -78,9 +88,15 @@ bin/             sync, up, backup, gmail
   then Lian approves in the Monzo app. Not yet available to Tars chat (`app/server/ask.js` allowlist).
 
 ## Working rules
-- Pull before starting work; commit and push when a change is done. Only one session edits `~/tars` at a time.
+- Pull before starting work; commit and push when a change is done.
+- `~/tars` on `main` is the one live checkout (the running service reads its `data/state/`). Parallel or risky work goes
+  in a **git worktree**, not a second edit of `~/tars`: `git -C ~/tars worktree add -b <branch> ~/tars-wt/<branch> main`,
+  edit/build/commit there, then merge and `git -C ~/tars worktree remove ~/tars-wt/<branch>`. Worktrees have no
+  `data/state/` (it's gitignored and lives only in `~/tars`), so they're for code; the live service always runs from `~/tars`.
 - After a change: `bin/up app` (builds the UI and restarts), then give Lian the link to check on their phone.
-- Before committing UI changes, `cd app/web && npm run build` must pass (it type-checks).
+  `bin/up` reinstalls deps only when `package-lock.json` changed, so repeat deploys are fast.
+- Quick check mid-work: `cd app/web && npm run typecheck` (`tsc -b`, no bundle). Before committing UI changes,
+  `cd app/web && npm run build` must still pass.
 - Try risky changes on a spare port: build `app/web`, run `TARS_DATA=<copy of data/> PORT=9xxx node app/server`, `tailscale serve --bg --https=9xxx http://127.0.0.1:9xxx`, remove after.
 - Service: `systemctl --user status|restart tars-app`; logs: `journalctl --user -u tars-app`.
 - Don't write explanatory comments in code. After a meaningful change, give a short list of next steps.

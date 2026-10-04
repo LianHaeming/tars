@@ -1,5 +1,34 @@
 {
   "permissions": {
+    "allow": [
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "Bash(git branch:*)",
+      "Bash(git stash list:*)",
+      "Bash(git worktree list:*)",
+      "Bash(git worktree add:*)",
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(grep:*)",
+      "Bash(rg:*)",
+      "Bash(find:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(wc:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm run typecheck:*)",
+      "Bash(npm run lint:*)",
+      "Bash(bin/up:*)",
+      "Bash(bin/sync:*)",
+      "Bash(bin/backup:*)",
+      "Bash(bin/gmail:*)",
+      "Bash(bin/monzo:*)",
+      "Bash(systemctl --user status:*)",
+      "Bash(systemctl --user restart tars-app:*)",
+      "Bash(journalctl --user:*)"
+    ],
     "deny": [
       "mcp__claude_ai_Gmail",
       "mcp__claude_ai_Todoist"

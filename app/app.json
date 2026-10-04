@@ -3,5 +3,5 @@
   "port": 8400,
   "https": 443,
   "start": "node server",
-  "build": "cd web && npm ci --no-audit --no-fund --loglevel=error && npm run build"
+  "build": "cd web && if [ ! -d node_modules ] || [ package-lock.json -nt node_modules/.package-lock.json ]; then npm ci --no-audit --no-fund --loglevel=error; fi && npm run build"
 }
