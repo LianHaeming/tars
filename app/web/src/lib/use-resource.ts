@@ -1,5 +1,22 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
+// Debounce a boolean "busy" flag so a loader never flashes on fast responses: it only turns on
+// after showDelay, and once on it stays on for at least minVisible so it can't strobe.
+export function useDeferredFlag(active: boolean, showDelay = 200, minVisible = 400) {
+  const [shown, setShown] = useState(false)
+  const shownAt = useRef(0)
+  useEffect(() => {
+    let t: ReturnType<typeof setTimeout>
+    if (active && !shown) {
+      t = setTimeout(() => { shownAt.current = Date.now(); setShown(true) }, showDelay)
+    } else if (!active && shown) {
+      t = setTimeout(() => setShown(false), Math.max(0, minVisible - (Date.now() - shownAt.current)))
+    }
+    return () => clearTimeout(t)
+  }, [active, shown, showDelay, minVisible])
+  return shown
+}
+
 type Opts<T> = { cache?: { current: T | null }; reloadOnVisible?: boolean }
 
 // One contract for read-mostly server/static data: { data, error, loading, reload }. Pass a module-level
@@ -29,5 +46,5 @@ export function useResource<T>(fetcher: () => Promise<T>, { cache, reloadOnVisib
     return () => document.removeEventListener('visibilitychange', onVisible)
   }, [reload, reloadOnVisible])
 
-  return { data, error, loading, reload }
+  return { data, error, loading: useDeferredFlag(loading), reload }
 }

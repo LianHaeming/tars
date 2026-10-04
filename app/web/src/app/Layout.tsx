@@ -5,7 +5,7 @@ import { useQuickAdd, useTars } from '@/features/tasks/store'
 import { Dock, hasTaskList, showsDock } from './Dock'
 
 export function Layout() {
-  const { openId, setOpenId } = useTars()
+  const { openId, setOpenId, flash } = useTars()
   const quickAdd = useQuickAdd()
   const { pathname } = useLocation()
 
@@ -30,6 +30,7 @@ export function Layout() {
         <Outlet />
       </Suspense>
       <Dock />
+      <div role="status" aria-live="polite" className="sr-only">{flash?.label ?? ''}</div>
       <Toaster position="bottom-center" offset={{ bottom: 'calc(96px + env(safe-area-inset-bottom))' }} mobileOffset={{ bottom: 'calc(96px + env(safe-area-inset-bottom))' }} />
       <ScrollRestoration />
     </>

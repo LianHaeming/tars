@@ -17,7 +17,8 @@ function Check({ task, color, onDone }: { task: Task; color: string; onDone: () 
       style={{ '--pc': color } as CSSProperties}
       onClick={e => { e.stopPropagation(); onDone() }}
       className={cn(
-        'group/check mt-px grid size-5 shrink-0 place-items-center rounded-full border-2 border-(--pc) bg-(--pc)/12 transition-colors',
+        'group/check relative mt-px grid size-5 shrink-0 place-items-center rounded-full border-2 border-(--pc) bg-(--pc)/12 transition-colors',
+        'before:absolute before:-inset-2.5 before:content-[""]',
         'group-data-[done=true]/task:bg-(--pc)',
       )}
     >
@@ -49,7 +50,14 @@ export function TaskRow({ task, hideProject, hideDue, compact, tag }: { task: Ta
       data-done={task.done || completing}
       className={cn('group/task hairline-b transition-opacity duration-200', completing && 'opacity-40')}
     >
-      <div className="flex cursor-pointer items-start gap-3 py-3" onClick={() => setOpenId(task.id)}>
+      <div
+        role="button"
+        tabIndex={0}
+        aria-label={task.title || 'Edit task'}
+        className="flex cursor-pointer items-start gap-3 rounded-lg py-3"
+        onClick={() => setOpenId(task.id)}
+        onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setOpenId(task.id) } }}
+      >
         <Check task={task} color="var(--p4)" onDone={done} />
         <div className="min-w-0 flex-1">
           <div className="break-words group-data-[done=true]/task:text-muted-foreground group-data-[done=true]/task:line-through">{task.title}</div>
@@ -148,7 +156,7 @@ function TaskEditor({ task, onDone }: { task: Task; onDone: () => void }) {
             onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); e.currentTarget.blur() } }}
             placeholder="Task"
             autoComplete="off"
-            className="block w-full resize-none overflow-hidden bg-transparent py-0 text-field leading-6 font-semibold break-words outline-none placeholder:text-muted-foreground"
+            className="block w-full resize-none overflow-hidden rounded bg-transparent py-0 text-field leading-6 font-semibold break-words outline-none focus-visible:ring-2 focus-visible:ring-ring/50 placeholder:text-muted-foreground"
           />
           <textarea
             ref={el => grow(el)}
@@ -157,7 +165,7 @@ function TaskEditor({ task, onDone }: { task: Task; onDone: () => void }) {
             rows={1}
             onInput={e => grow(e.currentTarget)}
             onBlur={e => { const v = e.target.value.trim(); if (v !== task.description) patch(task.id, { description: v }) }}
-            className="mt-1 block w-full resize-none overflow-hidden bg-transparent text-field text-muted-foreground outline-none placeholder:text-muted-foreground"
+            className="mt-1 block w-full resize-none overflow-hidden rounded bg-transparent text-field text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring/50 placeholder:text-muted-foreground"
           />
         </div>
       </div>

@@ -45,7 +45,7 @@ export function FilterLabel({ on, color, onClick, children }: { on: boolean; col
       aria-pressed={on}
       onClick={onClick}
       style={on ? undefined : { color }}
-      className={cn('shrink-0 rounded-full px-3 py-2 text-base font-semibold whitespace-nowrap transition-colors', on && 'bg-foreground text-background')}
+      className={cn('shrink-0 rounded-full px-3 py-2.5 text-base font-semibold whitespace-nowrap transition-colors', on && 'bg-foreground text-background')}
     >
       {children}
     </button>

@@ -26,7 +26,7 @@ function Stat({ label, value, children }: { label: string; value: string; childr
 }
 
 export function MoneySection() {
-  const { data, error, loading, refresh } = useMoney()
+  const { data, error, loading, busy, refresh } = useMoney()
   const [days, setDays] = useState(() => Number(localGet('money-days')) || 30)
   const [table, setTable] = useState(false)
   const [more, setMore] = useState(30)
@@ -36,7 +36,7 @@ export function MoneySection() {
 
   const refreshBtn = (
     <button type="button" onClick={refresh} disabled={loading} aria-label="Refresh Monzo" className="grid size-10 shrink-0 place-items-center text-primary disabled:opacity-60">
-      <RefreshCwIcon className={cn('size-5', loading && 'animate-spin')} />
+      <RefreshCwIcon className={cn('size-5', busy && 'animate-spin')} />
     </button>
   )
 
@@ -56,7 +56,7 @@ export function MoneySection() {
   const delta = view!.prev ? (view!.total - view!.prev) / view!.prev : null
 
   return (
-    <div className={cn('transition-opacity duration-200', loading && 'opacity-60')}>
+    <div className={cn('transition-opacity duration-200', busy && 'opacity-60')}>
         {error && <div className="mt-3 rounded-xl bg-secondary px-3 py-2 text-sm text-muted-foreground">Showing data from {hhmm(new Date(data.fetchedAt))}: {error}</div>}
 
         <section className="px-1 pt-5 pb-2">

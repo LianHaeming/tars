@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { SearchIcon } from 'lucide-react'
 import { localGet, localSet } from '@/lib/api'
+import { useDeferredFlag } from '@/lib/use-resource'
 import { Empty, SectionHead } from '@/components/common'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -43,6 +44,7 @@ function Filter({ value, onChange, any, options }: { value: string; onChange: (v
 
 export function FoodSection() {
   const { food, error } = useFood()
+  const showLoading = useDeferredFlag(!food)
   const [f, setF] = useState(loadFilters)
   const set = (k: keyof Filters) => (v: string) => setF(s => ({ ...s, [k]: v }))
   useEffect(() => { localSet('menuFilters', JSON.stringify(f)) }, [f])
@@ -76,7 +78,7 @@ export function FoodSection() {
         {filtered && <Button variant="ghost" size="sm" className="shrink-0 text-muted-foreground" onClick={() => setF(DEFAULTS)}>Reset</Button>}
       </div>
 
-      {!food ? <Loading error={error} /> : !list.length ? <Empty>No dishes match these filters.</Empty> : CARBS.map(c => {
+      {!food ? (showLoading || error) && <Loading error={error} /> : !list.length ? <Empty>No dishes match these filters. {filtered && <button type="button" onClick={() => setF(DEFAULTS)} className="font-semibold text-primary">Clear filters</button>}</Empty> : CARBS.map(c => {
         const rs = list.filter(r => r.cf === c)
         if (!rs.length) return null
         return (

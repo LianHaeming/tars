@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { api } from '@/lib/api'
+import { useDeferredFlag } from '@/lib/use-resource'
 import { addDays, parseYmd, today, ymd } from '@/lib/dates'
 import type { Bucket } from './charts'
 
@@ -31,7 +32,7 @@ export function useMoney() {
   }, [])
 
   useEffect(() => { load() }, [load])
-  return { data, error, loading, refresh: () => load(true) }
+  return { data, error, loading, busy: useDeferredFlag(loading), refresh: () => load(true) }
 }
 
 const gbp = new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' })

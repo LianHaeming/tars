@@ -7,7 +7,7 @@ import { dayDiff, hhmm, parseYmd, relDay, shortDate, today, ymd } from '@/lib/da
 import { byCreated, byWhen, useTars } from '@/features/tasks/store'
 import { TaskRow } from '@/features/tasks/TaskRow'
 import { CalendarPanel } from '@/features/tasks/calendar'
-import { FilterBar, FilterLabel, Section, SectionHead } from '@/components/common'
+import { Empty, FilterBar, FilterLabel, Section, SectionHead } from '@/components/common'
 import { PaymentRow, useExpected, type Expected } from '@/features/money/expected'
 import { MainEvent } from './MainEvent'
 
@@ -238,7 +238,11 @@ export function Home() {
           )}
 
           {!showTodo && !hasCalData && !showAgenda && (
-            <p className="py-12 text-center text-sm text-muted-foreground">Nothing here yet.</p>
+            <Empty icon="🗓">
+              {active === 'all'
+                ? <>No tasks scheduled yet.<br /><button type="button" onClick={addDraft} className="mt-3 inline-block font-semibold text-primary">Add your first task</button></>
+                : <>Nothing in <span className="text-foreground">{activeProject?.name ?? 'this list'}</span> yet.<br /><button type="button" onClick={addDraft} className="mt-3 inline-block font-semibold text-primary">Add a task</button></>}
+            </Empty>
           )}
         </>
       )}

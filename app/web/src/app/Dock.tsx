@@ -27,13 +27,13 @@ export function Dock() {
   const add = () => quickAdd(hasTaskList(pathname))
   const tab = hidden ? -1 : 0
   const onSchedule = pathname === '/'
-  const seg = (on: boolean) => cn('relative z-10 grid h-10 w-14 place-items-center rounded-full transition-colors duration-200 [&_svg]:size-5', on ? 'text-background' : 'text-muted-foreground')
+  const seg = (on: boolean) => cn('relative z-10 grid h-10 w-14 place-items-center rounded-full transition-colors duration-200 before:absolute before:inset-x-0 before:-inset-y-0.5 before:content-[""] [&_svg]:size-5', on ? 'text-background' : 'text-muted-foreground')
 
   const editing = !hidden && !!openId
   const showUndo = !editing && !!flash
   const doneEditing = () => { (document.activeElement as HTMLElement | null)?.blur(); setOpenId(null) }
-  const barPrimary = 'grid h-10 place-items-center rounded-full bg-foreground px-5 text-sm font-semibold text-background active:scale-98 animate-in fade-in duration-200'
-  const barGhost = 'grid h-10 place-items-center rounded-full px-4 text-sm font-semibold text-destructive active:scale-98 animate-in fade-in duration-200'
+  const barPrimary = 'relative grid h-10 place-items-center rounded-full bg-foreground px-5 text-sm font-semibold text-background active:scale-98 animate-in fade-in duration-200 before:absolute before:inset-x-0 before:-inset-y-0.5 before:content-[""]'
+  const barGhost = 'relative grid h-10 place-items-center rounded-full px-4 text-sm font-semibold text-destructive active:scale-98 animate-in fade-in duration-200 before:absolute before:inset-x-0 before:-inset-y-0.5 before:content-[""]'
 
   const actions = [
     { key: 'tars', label: 'Tars', Icon: BotIcon, run: () => navigate('/tars') },
