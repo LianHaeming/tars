@@ -1,26 +1,21 @@
 #!/usr/bin/env node
-// Usage: bin/burmese build [N]   top up the Burmese phrase bank to N phrases (default 365) via `claude -p`.
-//        bin/burmese count       how many phrases are in the bank.
-//        bin/burmese reset       empty the bank.
-// Safe to stop and re-run: build saves after every batch and resumes toward N.
+// Usage: bin/burmese build [N]   (re)write the deck of N everyday sentences (default 100) via `claude -p`; resets their progress.
+//        bin/burmese count       how many sentences are in the deck and how many are learned.
+// Stop the service first (systemctl --user stop tars-app) — it keeps burmese.json in memory — and start it again after.
 const { build } = require('../app/server/burmese');
 const { burmese } = require('../app/server/store');
 
 const [cmd, arg] = process.argv.slice(2);
 
 if (cmd === 'count') {
-  console.log(`${(burmese.get().phrases || []).length} phrases`);
-} else if (cmd === 'reset') {
-  Object.assign(burmese.get(), { phrases: [], index: 0, lastDay: null });
-  burmese.save();
-  console.log('bank emptied');
+  const d = burmese.get();
+  console.log(`${(d.deck || []).length} sentences, ${Object.keys(d.progress || {}).length} learned`);
 } else if (cmd === 'build') {
-  const target = Number(arg) || 365;
-  build(target, 40, msg => console.log(msg)).then(
-    n => { console.log(`bank now ${n} phrases`); process.exit(0); },
+  build(Number(arg) || 100, msg => console.log(msg)).then(
+    () => process.exit(0),
     e => { console.error('build failed:', e.message); process.exit(1); },
   );
 } else {
-  console.error('usage: bin/burmese build [N] | count | reset');
+  console.error('usage: bin/burmese build [N] | count');
   process.exit(1);
 }

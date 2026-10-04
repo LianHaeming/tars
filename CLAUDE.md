@@ -14,10 +14,10 @@ data/            all data — only the server reads or writes it
   food/          Food content: menu.json, r/<id>.json, sainsburys/ocado.json, photos/ (in git; published from the Mac)
   state/         live data (PC only, gitignored): tasks.json (lists + tasks), food.json (basket, shop), chat.json (Tars), money.json (AI labels + insights)
 app/
-  server/        Node, no dependencies: index.js (routes + static), store.js (data/state docs), ask.js (Tars chat), money.js (Monzo), claude.js (shared `claude` CLI runner for ask/burmese), burmese.js
+  server/        Node, no dependencies: index.js (routes + static), store.js (data/state docs), ask.js (Tars chat), money.js (Monzo), claude.js (shared `claude` CLI runner for ask/burmese/money), burmese.js (deck, progress, translator)
   web/           React + TypeScript + Vite + Tailwind v4 + shadcn/ui — display only, everything via /api
   app.json       service config for bin/up (build → app/dist/, start → node server)
-bin/             sync, up, backup, gmail, monzo, burmese, email-tasks
+bin/             sync, up, backup, gmail, monzo, burmese (rebuilds the deck — stop the service first), email-tasks
 ```
 
 - **The app** (Lian's phone, over Tailscale): two tabs. **Schedule** (`/`) — a flat **"Life, so far"** strip, then a
@@ -28,7 +28,8 @@ bin/             sync, up, backup, gmail, monzo, burmese, email-tasks
   in place for notes / Mark done / Edit), then **To-do · no date**. Rows show the list as a coloured tag under All.
   **Apps** (`/apps`) — one flat multi-app page: a sticky filter (All / Food / Burmese / Money — All shows every section,
   each tab shows just one; choice kept in browser storage) over titled sections for **Food** (menu search + recipe
-  carousels + shopping-list link), **Burmese** (daily phrase, reveal, seen list) and **Money** (a small dashboard, not a
+  carousels + shopping-list link), **Burmese** (daily practice of a 100-sentence deck in both directions with spaced repetition — 3 new a day, phonetic first;
+  a quick English → Burmese translator that can add a sentence to the deck; learned list) and **Money** (a small dashboard, not a
   Monzo copy: balance line, "goes out automatically every month" total split by group, Claude's "Tars noticed" insights,
   the repeating payments by group with logos, next 30 days); the Email review card sits
   atop the All view when there are candidates. Dock (on Schedule, Apps and app pages, not `/tars`): round **Add task**
@@ -45,7 +46,7 @@ bin/             sync, up, backup, gmail, monzo, burmese, email-tasks
   `GET /api/money[/fresh]` (runs `bin/monzo json` via `server/money.js`, cached 2 min; 503 with the message if sign-in is needed) ·
   `GET /api/money/summary[-fresh]` (repeating payments as monthly costs + `claude -p` once a London day for clean names, groups,
   logo domains and 3–5 insights, kept in data/state/money.json) ·
-  `GET /api/expected` (repeating payments/income predicted from the last 89 days — monthly or weekly, split by amount when a
+  `GET /api/burmese` · `POST /api/burmese/{learn,review,save,translate}` (translate = `claude -p --model opus`, ~12 s) · `GET /api/expected` (repeating payments/income predicted from the last 89 days — monthly or weekly, split by amount when a
   payee has several, stopped ones dropped, late ones shown today; next 90 days; Monzo data reused up to 1 h).
   Static: `/data/food/*` from data/food; anything else is the built app (page URLs fall back to index.html).
 - **Frontend** (`app/web/src/`), grouped by feature:
