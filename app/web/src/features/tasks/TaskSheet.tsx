@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Dialog as DialogPrimitive } from 'radix-ui'
-import { CalendarIcon, CheckIcon, ChevronRightIcon, ClockIcon, LayersIcon, TagIcon, Trash2Icon, XIcon } from 'lucide-react'
+import { CalendarIcon, CheckIcon, ChevronRightIcon, ClockIcon, LayersIcon, RepeatIcon, TagIcon, Trash2Icon, XIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Task } from '@/lib/api'
-import { dueLabel } from '@/lib/dates'
+import { REPEATS, dueLabel, repeatLabel } from '@/lib/dates'
 import { useTars } from '@/features/tasks/store'
 import { Dot } from '@/components/common'
 import { SubManager, TagManager } from '@/features/tasks/TagManager'
@@ -73,7 +73,7 @@ function SheetBody({ task, onClose }: { task: Task; onClose: () => void }) {
   const [title, setTitle] = useState(task.title)
   const titleRef = useRef<HTMLTextAreaElement>(null)
   const [confirmDelete, setConfirmDelete] = useState(false)
-  const [picker, setPicker] = useState<null | 'list' | 'sub'>(null)
+  const [picker, setPicker] = useState<null | 'list' | 'sub' | 'repeat'>(null)
   const draft = isDraft(task.id)
   const p = project(task.projectId)
   const subs = subsOf(task.projectId)
@@ -147,6 +147,21 @@ function SheetBody({ task, onClose }: { task: Task; onClose: () => void }) {
           <DateRow icon={<ClockIcon />} label="Time" value={task.dueTime || null} tone="var(--today)" type="time" current={task.dueTime || ''}
             onChange={v => patch(task.id, { dueTime: v || null })}
             onClear={task.dueTime ? () => patch(task.id, { dueTime: null }) : undefined} />
+
+          <Collapsible open={picker === 'repeat'} onOpenChange={o => setPicker(o ? 'repeat' : null)}>
+            <CollapsibleTrigger className={cn(row, 'group hairline-t')}>
+              <RepeatIcon /><span>Repeat</span>
+              <span className="ml-auto font-semibold" style={{ color: task.repeat ? 'var(--today)' : undefined }}>
+                {task.repeat ? repeatLabel(task.repeat) : <span className="text-muted-foreground">Never</span>}
+              </span>
+              <ChevronRightIcon className="size-4 text-muted-foreground/60 transition-transform group-data-[state=open]:rotate-90" />
+            </CollapsibleTrigger>
+            <CollapsibleContent className="hairline-t bg-background/30">
+              {REPEATS.map(r => (
+                <PickRow key={r.label} selected={(task.repeat ?? null) === r.code} onClick={() => { patch(task.id, { repeat: r.code }); setPicker(null) }}>{r.label}</PickRow>
+              ))}
+            </CollapsibleContent>
+          </Collapsible>
 
           <Collapsible open={picker === 'list'} onOpenChange={o => setPicker(o ? 'list' : null)}>
             <CollapsibleTrigger className={cn(row, 'group hairline-t')}>

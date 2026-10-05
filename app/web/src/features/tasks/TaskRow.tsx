@@ -1,8 +1,8 @@
 import { useState, type CSSProperties } from 'react'
-import { CalendarIcon, ClockIcon } from 'lucide-react'
+import { CalendarIcon, ClockIcon, RepeatIcon } from 'lucide-react'
 import { cn, dim, primeKeyboard } from '@/lib/utils'
 import type { Task } from '@/lib/api'
-import { dueColor, today, whenLabel, ymd } from '@/lib/dates'
+import { dueColor, repeatLabel, today, whenLabel, ymd } from '@/lib/dates'
 import { useTars } from '@/features/tasks/store'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Badge } from '@/components/ui/badge'
@@ -77,6 +77,11 @@ function Meta({ task, hideDue, project, tag }: { task: Task; hideDue?: boolean; 
       <span key="time" style={{ color: task.done ? undefined : dueColor(task.due || ymd(today())) }}>
         <ClockIcon />{task.dueTime}
       </span>,
+    )
+  }
+  if (task.repeat && !task.done) {
+    items.push(
+      <span key="repeat"><RepeatIcon />{repeatLabel(task.repeat)}</span>,
     )
   }
   if (project && tag) {

@@ -17,12 +17,39 @@ const db = store.tasks.get();
 
 const id = () => crypto.randomBytes(6).toString('hex');
 const okId = v => typeof v === 'string' && /^[\w-]{6,64}$/.test(v);
-const TASK_FIELDS = ['title', 'description', 'due', 'dueTime', 'projectId', 'subId', 'done'];
+const TASK_FIELDS = ['title', 'description', 'due', 'dueTime', 'projectId', 'subId', 'done', 'repeat'];
 const pick = (obj, keys) => Object.fromEntries(keys.filter(k => k in obj).map(k => [k, obj[k]]));
 const newTask = fields => ({ id: okId(fields.id) ? fields.id : id(),
   title: '', description: '', due: null, dueTime: null, projectId: null, subId: null, done: false,
   ...pick(fields, TASK_FIELDS), createdAt: Number(fields.createdAt) || Date.now(), completedAt: null });
 const save = () => store.tasks.save();
+
+const pad2 = n => String(n).padStart(2, '0');
+const fmtYmd = d => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+const parseYmd = s => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
+
+// Advance a date by one repeat step (e.g. "6m", "1y", "2w"); null for a bad code.
+function stepRepeat(base, code) {
+  const m = /^(\d+)([wmy])$/.exec(code || '');
+  if (!m) return null;
+  const n = Number(m[1]), d = new Date(base);
+  if (m[2] === 'w') d.setDate(d.getDate() + 7 * n);
+  else if (m[2] === 'm') d.setMonth(d.getMonth() + n);
+  else d.setFullYear(d.getFullYear() + n);
+  return d;
+}
+
+// When a repeating task is completed, drop in its next occurrence, rolled forward to today or later.
+function spawnNext(task) {
+  const start = parseYmd(fmtYmd(new Date()));
+  let next = stepRepeat(task.due ? parseYmd(task.due) : start, task.repeat);
+  if (!next) return;
+  for (let guard = 0; next < start && guard < 240; guard++) next = stepRepeat(next, task.repeat);
+  db.tasks.push(newTask({
+    title: task.title, description: task.description, projectId: task.projectId,
+    subId: task.subId, dueTime: task.dueTime, repeat: task.repeat, due: fmtYmd(next),
+  }));
+}
 
 // A task's subId only makes sense inside its own list; drop it otherwise.
 function fixSub(task) {
@@ -64,9 +91,11 @@ async function api(req, res, parts) {
     const task = db.tasks.find(t => t.id === rid);
     if (!task) return send(res, 404, { error: 'not found' });
     if (req.method === 'PATCH') {
+      const wasDone = task.done;
       Object.assign(task, pick(body, TASK_FIELDS));
       if ('done' in body) task.completedAt = body.done ? Date.now() : null;
       fixSub(task);
+      if ('done' in body && body.done && !wasDone && task.repeat) spawnNext(task);
       save(); return send(res, 200, task);
     }
     if (req.method === 'DELETE') {

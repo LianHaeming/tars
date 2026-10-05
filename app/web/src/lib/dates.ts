@@ -33,3 +33,14 @@ export function relDay(s: string) {
   const n = dayDiff(s)
   return n === 0 ? 'Today' : n === 1 ? 'Tomorrow' : n === -1 ? 'Yesterday' : ''
 }
+
+export const REPEATS: { code: string | null; label: string }[] = [
+  { code: null, label: 'Never' },
+  { code: '1w', label: 'Weekly' },
+  { code: '2w', label: 'Fortnightly' },
+  { code: '1m', label: 'Monthly' },
+  { code: '3m', label: 'Every 3 months' },
+  { code: '6m', label: 'Every 6 months' },
+  { code: '1y', label: 'Yearly' },
+]
+export const repeatLabel = (code?: string | null) => REPEATS.find(r => r.code === code)?.label ?? null

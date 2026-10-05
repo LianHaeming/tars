@@ -7,6 +7,7 @@ export type Task = {
   projectId: string | null
   subId: string | null
   done: boolean
+  repeat?: string | null
   createdAt: number
   completedAt: number | null
 }
