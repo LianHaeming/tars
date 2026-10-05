@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { useSearchParams } from 'react-router'
-import { cn, dim } from '@/lib/utils'
+import { cn, dim, primeKeyboard } from '@/lib/utils'
 import { localGet, localSet, type Task } from '@/lib/api'
 import { addDays, dayDiff, hhmm, parseYmd, shortDate, today, ymd } from '@/lib/dates'
 import { byCreated, byWhen, useTars } from '@/features/tasks/store'
@@ -8,6 +8,7 @@ import { TaskRow } from '@/features/tasks/TaskRow'
 import { CalendarPanel } from '@/features/tasks/calendar'
 import { Empty, FilterBar, FilterLabel, Section, SectionHead } from '@/components/common'
 import { PaymentRow, useExpected, type Expected } from '@/features/money/expected'
+import { Button } from '@/components/ui/button'
 import { MainEvent } from './MainEvent'
 
 type Entry = { day: string; task?: Task; pay?: Expected }
@@ -157,12 +158,12 @@ export function Home() {
   return (
     <main className="mx-auto max-w-page px-4 pt-safe-3 pb-safe-40">
       <LifeStrip />
-      <FilterBar>
-        <FilterLabel on={active === 'all'} color="var(--foreground)" onClick={() => pick('all')}>All</FilterLabel>
+      <FilterBar value={active} onValueChange={pick}>
+        <FilterLabel value="all" color="var(--foreground)">All</FilterLabel>
         {state.projects.map(p => (
-          <FilterLabel key={p.id} on={active === p.id} color={dim(p.color)} onClick={() => pick(p.id)}>{p.name}</FilterLabel>
+          <FilterLabel key={p.id} value={p.id} color={dim(p.color)}>{p.name}</FilterLabel>
         ))}
-        <FilterLabel on={completed} color="var(--muted-foreground)" onClick={() => pick('completed')}>Completed</FilterLabel>
+        <FilterLabel value="completed" color="var(--muted-foreground)">Completed</FilterLabel>
       </FilterBar>
 
       {completed ? (
@@ -173,7 +174,7 @@ export function Home() {
           <section>
             <AgendaHead
               label="Upcoming"
-              action={overdueOpen.length > 0 ? <button type="button" onClick={rescheduleOverdue} className="text-sm font-semibold tracking-normal text-primary normal-case">Move {overdueOpen.length} overdue</button> : undefined}
+              action={overdueOpen.length > 0 ? <Button variant="link" size="inline" onClick={rescheduleOverdue} className="tracking-normal normal-case">Move {overdueOpen.length} overdue</Button> : undefined}
             />
             {groupByDay(entries).map(([day, list]) => {
               const over = day < t && list.some(e => e.task && !e.task.done)
@@ -223,8 +224,8 @@ export function Home() {
           {!showTodo && !hasCalData && !showAgenda && (
             <Empty icon="🗓">
               {active === 'all'
-                ? <>No tasks scheduled yet.<br /><button type="button" onClick={addDraft} className="mt-3 inline-block font-semibold text-primary">Add your first task</button></>
-                : <>Nothing in <span className="text-foreground">{activeProject?.name ?? 'this list'}</span> yet.<br /><button type="button" onClick={addDraft} className="mt-3 inline-block font-semibold text-primary">Add a task</button></>}
+                ? <>No tasks scheduled yet.<br /><Button variant="link" size="inline" onClick={() => { primeKeyboard(); addDraft() }} className="mt-3">Add your first task</Button></>
+                : <>Nothing in <span className="text-foreground">{activeProject?.name ?? 'this list'}</span> yet.<br /><Button variant="link" size="inline" onClick={() => { primeKeyboard(); addDraft() }} className="mt-3">Add a task</Button></>}
             </Empty>
           )}
         </>

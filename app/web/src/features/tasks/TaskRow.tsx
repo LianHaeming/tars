@@ -1,27 +1,24 @@
 import { useState, type CSSProperties } from 'react'
-import { CalendarIcon, CheckIcon, ClockIcon } from 'lucide-react'
-import { cn, dim } from '@/lib/utils'
+import { CalendarIcon, ClockIcon } from 'lucide-react'
+import { cn, dim, primeKeyboard } from '@/lib/utils'
 import type { Task } from '@/lib/api'
 import { dueColor, today, whenLabel, ymd } from '@/lib/dates'
 import { useTars } from '@/features/tasks/store'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Badge } from '@/components/ui/badge'
 
 type Opts = { hideProject?: boolean; hideDue?: boolean; compact?: boolean; tag?: boolean }
 
-export function Check({ task, color, onDone }: { task: Task; color: string; onDone: () => void }) {
+export function Check({ task, color, checked, onDone }: { task: Task; color: string; checked: boolean; onDone: () => void }) {
   return (
-    <button
-      type="button"
+    <Checkbox
       aria-label={task.done ? 'Mark not done' : 'Complete'}
+      checked={checked}
       style={{ '--pc': color } as CSSProperties}
-      onClick={e => { e.stopPropagation(); onDone() }}
-      className={cn(
-        'group/check relative mt-px grid size-5 shrink-0 place-items-center rounded-full border-2 border-(--pc) bg-(--pc)/12 transition-colors',
-        'before:absolute before:-inset-2.5 before:content-[""]',
-        'group-data-[done=true]/task:bg-(--pc)',
-      )}
-    >
-      <CheckIcon strokeWidth={3} className="size-3 text-(--pc) opacity-0 transition-opacity group-data-[done=true]/task:text-background group-data-[done=true]/task:opacity-100 [@media(hover:hover)]:group-hover/check:opacity-100" />
-    </button>
+      onClick={e => e.stopPropagation()}
+      onCheckedChange={() => onDone()}
+      className="mt-px size-5 rounded-full border-2 border-(--pc) bg-(--pc)/12 data-checked:border-(--pc) data-checked:bg-(--pc) data-checked:text-background [&_svg]:size-3 [&_svg]:stroke-[3]"
+    />
   )
 }
 
@@ -51,10 +48,10 @@ export function TaskRow({ task, hideProject, hideDue, compact, tag }: { task: Ta
         tabIndex={0}
         aria-label={task.title || 'Edit task'}
         className="flex cursor-pointer items-start gap-3 rounded-lg py-3"
-        onClick={() => setOpenId(task.id)}
-        onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setOpenId(task.id) } }}
+        onClick={() => { primeKeyboard(); setOpenId(task.id) }}
+        onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); primeKeyboard(); setOpenId(task.id) } }}
       >
-        <Check task={task} color="var(--p4)" onDone={done} />
+        <Check task={task} color="var(--p4)" checked={task.done || completing} onDone={done} />
         <div className="min-w-0 flex-1">
           <div className="break-words group-data-[done=true]/task:text-muted-foreground group-data-[done=true]/task:line-through">{task.title}</div>
           {task.description && !compact && (
@@ -83,7 +80,9 @@ function Meta({ task, hideDue, project, tag }: { task: Task; hideDue?: boolean; 
     )
   }
   if (project && tag) {
-    items.unshift(<span key="proj" className="text-xxs font-semibold" style={{ color: dim(project.color) }}>{project.name}</span>)
+    items.unshift(
+      <Badge key="proj" variant="tag" style={{ color: dim(project.color) }}>{project.name}</Badge>,
+    )
   } else if (project) {
     items.push(
       <span key="proj"><span className="size-2 rounded-full" style={{ background: project.color }} />{project.name}</span>,

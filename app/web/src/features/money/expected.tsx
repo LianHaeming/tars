@@ -3,6 +3,8 @@ import { Link } from 'react-router'
 import { cn } from '@/lib/utils'
 import { api } from '@/lib/api'
 import { parseYmd } from '@/lib/dates'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Badge } from '@/components/ui/badge'
 import { fmt } from './data'
 
 export type Expected = {
@@ -22,9 +24,12 @@ export function useExpected() {
 }
 
 export function Logo({ src, name, className }: { src: string | null; name: string; className?: string }) {
-  const [broken, setBroken] = useState(false)
-  if (src && !broken) return <img src={src} alt="" loading="lazy" onError={() => setBroken(true)} className={cn('size-8 shrink-0 rounded-full bg-white object-cover', className)} />
-  return <span className={cn('grid size-8 shrink-0 place-items-center rounded-full bg-money/15 text-sm font-semibold text-money', className)}>{(name || '?')[0].toUpperCase()}</span>
+  return (
+    <Avatar className={cn('size-8 bg-white', className)}>
+      {src && <AvatarImage src={src} alt="" loading="lazy" />}
+      <AvatarFallback className={cn('bg-money/15 text-sm font-semibold text-money', className)}>{(name || '?')[0].toUpperCase()}</AvatarFallback>
+    </Avatar>
+  )
 }
 
 export const amountLabel = (p: { amount: number; varies: boolean }, value = p.amount) => `${value > 0 ? '+' : ''}${p.varies ? '~' : ''}${fmt(Math.abs(value))}`
@@ -39,7 +44,7 @@ export function PaymentRow({ p, tag, dated }: { p: Expected; tag?: boolean; date
       <span className="min-w-0 flex-1">
         <span className="block truncate">{p.name}</span>
         <span className="mt-1 flex gap-3 text-xs text-muted-foreground">
-          {tag && <span className="font-semibold tracking-wider text-money uppercase">Money</span>}
+          {tag && <Badge variant="tag" className="tracking-wider text-money uppercase">Money</Badge>}
           <span>{when}</span>
         </span>
       </span>

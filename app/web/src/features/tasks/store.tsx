@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { toast } from 'sonner'
 import { api, localGet, type Project, type State, type Task } from '@/lib/api'
+import { primeKeyboard } from '@/lib/utils'
 import { today, ymd } from '@/lib/dates'
 
 const PROJECT_COLORS = ['#3fa9f5', '#ff7a59', '#c77dff', '#fad000', '#ff5fa2', '#4cc38a', '#7f8cff', '#eb8909', '#808080']
@@ -180,5 +181,5 @@ export function useTars() {
 
 export function useQuickAdd() {
   const { addDraft } = useTars()
-  return useCallback(() => { addDraft() }, [addDraft])
+  return useCallback(() => { primeKeyboard(); addDraft() }, [addDraft])
 }

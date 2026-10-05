@@ -63,9 +63,9 @@ export function AppsPage() {
 
   return (
     <main className="mx-auto max-w-page px-4 pt-safe-2 pb-safe-40">
-      <FilterBar>
+      <FilterBar value={active} onValueChange={pick}>
         {TABS.map(t => (
-          <FilterLabel key={t.key} on={active === t.key} color={t.color} onClick={() => pick(t.key)}>{t.label}</FilterLabel>
+          <FilterLabel key={t.key} value={t.key} color={t.color}>{t.label}</FilterLabel>
         ))}
       </FilterBar>
 

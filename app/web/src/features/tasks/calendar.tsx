@@ -5,6 +5,8 @@ import { byTime, useTars } from '@/features/tasks/store'
 import { TaskRow } from '@/features/tasks/TaskRow'
 import { PaymentRow, useExpected, type Expected } from '@/features/money/expected'
 import { SectionHead } from '@/components/common'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { cn, dim } from '@/lib/utils'
 
 const DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
@@ -79,7 +81,7 @@ export function CalendarPanel({ filter = 'all' }: { filter?: string }) {
       <div onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
           <div className="flex items-center justify-between pt-1 pb-1">
             <span className="text-sm font-semibold tracking-wider text-muted-foreground uppercase tabular-nums">{calLabel}</span>
-            {dayView && <button type="button" onClick={closeDay} className="text-sm font-semibold text-primary">Month</button>}
+            {dayView && <Button variant="link" size="inline" className="text-sm" onClick={closeDay}>Month</Button>}
           </div>
           <div className="mt-2 grid grid-cols-7 px-1">
             {DOW.map(d => <span key={d} className="pb-1 text-center text-micro font-semibold tracking-wide text-muted-foreground">{d}</span>)}
@@ -94,31 +96,31 @@ export function CalendarPanel({ filter = 'all' }: { filter?: string }) {
               const extra = ts.length - shown.length
               const sel = dayView && d === calSel
               if (dayView) return (
-                <button
+                <Button
                   key={d}
-                  type="button"
+                  variant="ghost"
                   onClick={() => clickDay(d)}
-                  className={cn('flex flex-col items-center gap-1 rounded-lg border py-2 active:bg-muted', sel ? 'border-primary/50 bg-primary/10' : 'border-transparent')}
+                  className={cn('h-auto flex-col gap-1 rounded-lg border py-2', sel ? 'border-primary/50 bg-primary/10' : 'border-transparent')}
                 >
                   <span className={cn('text-sm font-semibold tabular-nums', d === ymd(today()) && 'text-primary')}>{dt.getDate()}</span>
                   <span className="flex h-3 items-center gap-1">
                     {ts.slice(0, 3).map(x => <span key={x.id} className="size-1 rounded-full" style={{ background: dim(project(x.projectId)?.color || 'var(--primary)') }} />)}
                     {pays.length > 0 && (pays[0].logo ? <img src={pays[0].logo} alt="" className="size-3 rounded-full bg-white object-cover" /> : <span className="size-1 rounded-full bg-money" />)}
                   </span>
-                </button>
+                </Button>
               )
               return (
-                <button
+                <Button
                   key={d}
-                  type="button"
+                  variant="ghost"
                   onClick={() => clickDay(d)}
-                  className={cn('flex min-h-16 flex-col gap-1 rounded-lg border p-1 text-left active:bg-muted', sel ? 'border-primary/50 bg-primary/10' : 'border-transparent', other && 'opacity-40')}
+                  className={cn('h-auto min-h-16 flex-col items-stretch justify-start gap-1 rounded-lg border p-1 text-left', sel ? 'border-primary/50 bg-primary/10' : 'border-transparent', other && 'opacity-40')}
                 >
                   <span className={cn('ml-1 text-xs font-semibold tabular-nums', d === ymd(today()) && 'text-primary')}>{dt.getDate()}</span>
                   {shown.map(x => <Chip key={x.id} color={project(x.projectId)?.color || 'var(--primary)'} done={x.done} label={x.title} />)}
                   {pays.length > 0 && <Chip color="var(--money)" label={pays[0].name} logo={pays[0].logo} />}
                   {extra > 0 && <span className="pl-1 text-micro font-semibold text-muted-foreground">+{extra}</span>}
-                </button>
+                </Button>
               )
             })}
           </div>
@@ -139,12 +141,13 @@ export function CalendarPanel({ filter = 'all' }: { filter?: string }) {
 function Chip({ color, label, done, logo }: { color: string; label: string; done?: boolean; logo?: string | null }) {
   const c = dim(color)
   return (
-    <span
-      className={cn('flex items-center gap-1 truncate rounded-mark border-l-2 px-1 text-micro font-medium', done && 'line-through opacity-50')}
+    <Badge
+      variant="outline"
+      className={cn('h-auto w-full justify-start gap-1 truncate rounded-mark border-y-0 border-r-0 border-l-2 px-1 text-micro font-medium', done && 'line-through opacity-50')}
       style={{ borderColor: c, color: c, background: `color-mix(in srgb, ${color} 14%, transparent)` }}
     >
       {logo && <img src={logo} alt="" loading="lazy" className="size-3 shrink-0 rounded-full bg-white object-cover" />}
       <span className="truncate">{label || 'Untitled'}</span>
-    </span>
+    </Badge>
   )
 }
