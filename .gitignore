@@ -7,3 +7,4 @@ data/food/*.zip
 
 .claude/worktrees/
 .claude/settings.local.json
+.wwebjs_cache/
