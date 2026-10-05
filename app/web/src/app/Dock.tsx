@@ -4,7 +4,7 @@ import { BotIcon, CircleCheckIcon, LayoutGridIcon, MenuIcon, PlusIcon, XIcon } f
 import { cn } from '@/lib/utils'
 import { useQuickAdd, useTars } from '@/features/tasks/store'
 
-export const showsDock = (path: string) => path === '/' || /^\/(apps|food)(\/|$)/.test(path)
+export const showsDock = (path: string) => path === '/' || /^\/(apps|food|burmese|money)(\/|$)/.test(path)
 export const hasTaskList = (path: string) => path === '/'
 
 export function focusDraft() {

@@ -39,7 +39,7 @@ export function PaymentRow({ p, tag, dated }: { p: Expected; tag?: boolean; date
     ? `Due ${parseYmd(p.expectedOn).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })} · not taken yet`
     : `${dated ? parseYmd(p.date).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' }) : 'Expected'} · ${p.kind}${p.cadence === 'weekly' ? ' · weekly' : ''}`
   return (
-    <Link to="/apps" className="flex items-start gap-3 hairline-b py-3">
+    <Link to="/money" className="flex items-start gap-3 hairline-b py-3">
       <Logo src={p.logo} name={p.name} className="mt-px size-5 text-micro" />
       <span className="min-w-0 flex-1">
         <span className="block truncate">{p.name}</span>

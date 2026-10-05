@@ -26,20 +26,21 @@ bin/             sync, up, backup, gmail, monzo, burmese (rebuilds the deck — 
   grouped by day (next 14 days only, then an "N more · See Month" link; Overdue first; expected Monzo payments mixed in
   as teal Money rows with a Money filter label; today's next timed task is a highlighted "main event" pill that expands
   in place for notes / Mark done / Edit), then **To-do · no date**. Rows show the list as a coloured tag under All.
-  **Apps** (`/apps`) — one flat multi-app page: a sticky filter (All / Burmese / Money / Food — All shows every section,
-  each tab shows just one; choice kept in browser storage) over titled sections for **Food** (menu search + recipe
-  carousels + shopping-list link; recipes have a continuous servings slider with "use whole packs" shortcuts and per-ingredient spare), **Burmese** (tabs: Practice — a 100-sentence deck in both directions with spaced repetition — 3 new a day, phonetic first;
-  learned list with unlearn, extra practice rounds; Phrase of the day — the original phrase bank (server/phrases.js);
-  Translate — quick English → Burmese that can add a sentence to the deck) and **Money** (a small dashboard, not a
-  Monzo copy: balance line, "goes out automatically every month" total split by group, Claude's "Tars noticed" insights,
-  the repeating payments by group with logos, next 30 days); the Email review card sits
-  atop the All view when there are candidates. Dock (on Schedule, Apps and app pages, not `/tars`): round **Add task**
-  button, centred Schedule | Apps pill (Apps stays lit on app pages), round **Tars** (chat) button. Safari's status strip
+  **Apps** (`/apps`) — a **launcher**: the Email review card atop (when there are candidates), then a tappable tile per
+  app leading into its own page. Each app is its own full `Page` (header + back to `/apps`): **Food** (`/food` — menu
+  search + recipe carousels; a basket-icon header action opens the shopping list; recipes have a continuous servings
+  slider with "use whole packs" shortcuts and per-ingredient spare), **Burmese** (`/burmese` — tabs: Practice, a
+  100-sentence deck in both directions with spaced repetition — 3 new a day, phonetic first; learned list with unlearn,
+  extra practice rounds; Phrase of the day — the original phrase bank (server/phrases.js); Translate — quick English →
+  Burmese that can add a sentence to the deck) and **Money** (`/money` — a small dashboard, not a Monzo copy: balance
+  line, "goes out automatically every month" total split by group, Claude's "Tars noticed" insights, the repeating
+  payments by group with logos, next 30 days). Each app's `*Section.tsx` is still bare content; a thin `*Page.tsx`
+  wraps it in `Page`. Dock (on Schedule, Apps and app pages, not `/tars`): round **Add task** button, centred
+  Schedule | Apps pill (Apps stays lit on every non-Schedule page), round **Tars** (chat) button. Safari's status strip
   is `theme-color` = `--chrome` (#15263a) — keep them equal so the top reads as one navy surface; added to the Home
   Screen it runs standalone (manifest) under the Dynamic Island. Everything else is a **page** with its own URL and a
-  back button (app pages go back to `/apps`) — Lian doesn't want pop-up windows: `/tars`, `/inbox`, `/food/:id`,
-  `/food/list`. Legacy `/money`, `/food`, `/burmese`, `/month` now just redirect to their home (`/apps` or `/`).
-  "Todo"/"calendar" = this app.
+  back button — Lian doesn't want pop-up windows: `/tars`, `/inbox`, `/food/:id`, `/food/list` (these two back to
+  `/food`). `/month` redirects to `/`. "Todo"/"calendar" = this app.
 - **API** (`app/server/index.js`): `GET /api/state` · `POST|PATCH|DELETE /api/tasks[/id]` · `/api/projects[/id]` (a project PATCH with `subs` sets its sub-categories; tasks carry an optional `subId`) ·
   `POST /api/shopping {items}` (replaces the Shopping list's unticked items) · `GET|PATCH /api/food {basket, shop, servings}` (servings per recipe id, base 2) ·
   `GET|DELETE /api/chat` · `POST /api/ask {message}` (runs `claude -p` in `~/tars`, streams NDJSON text/status/error/done,
@@ -55,13 +56,14 @@ bin/             sync, up, backup, gmail, monzo, burmese (rebuilds the deck — 
   - `features/tasks/` — store.tsx (`useTars()`: all task state + actions; `useQuickAdd()` shared by Dock/Layout; quick-add is draft-based — an empty optimistic row that persists on first edit, no NL parsing), TaskRow.tsx,
     TagManager.tsx (lists + their sub-categories), calendar.tsx (CalendarPanel, folded into Home). `features/home/` —
     Home.tsx (the Schedule tab, incl. the "Life, so far" strip), MainEvent.tsx. `features/apps/` — AppsPage.tsx (the
-    filter + the three sections). `features/food/` — data.ts (content + server-backed basket/shop), parts.tsx
-    (RecipeTile etc.), FoodSection.tsx, RecipePage.tsx, ListPage.tsx. `features/burmese/` — data.ts, BurmeseSection.tsx.
+    launcher: Email card + one tile per app). `features/food/` — data.ts (content + server-backed basket/shop), parts.tsx
+    (RecipeTile etc.), FoodSection.tsx, FoodPage.tsx, RecipePage.tsx, ListPage.tsx. `features/burmese/` — data.ts, BurmeseSection.tsx, BurmesePage.tsx.
     `features/inbox/` — data.ts (useInbox), InboxPage.tsx (email → task review). `features/tars/` — TarsPage.tsx.
-    `features/money/` — data.ts (useSummary), MoneySection.tsx, expected.tsx (useExpected, Logo,
-    PaymentRow — used by Home, calendar and Money). Each app's `*Section.tsx` is bare content (no page header) composed by
-    AppsPage; shared bits in `components/common.tsx` — `FilterBar`/`FilterLabel` (the sticky pill), SectionHead, etc.
-  - `components/` — Page.tsx (every page's header/back/width), common.tsx (FilterBar, FilterLabel, SectionHead, Section, Empty, PillBar, pill),
+    `features/money/` — data.ts (useSummary), MoneySection.tsx, MoneyPage.tsx, expected.tsx (useExpected, Logo,
+    PaymentRow — used by Home, calendar and Money). Each app's `*Section.tsx` is bare content (no page header), wrapped by
+    its `*Page.tsx` in `Page`; the Schedule tab still uses `FilterBar`/`FilterLabel` (the sticky filter rail) from
+    `components/common.tsx`, alongside SectionHead, etc.
+  - `components/` — Page.tsx (every page's header/back/width), common.tsx (FilterBar, FilterLabel, SectionHead, Section, Empty, Dot),
     `ui/` (shadcn: `cd app/web && npx shadcn@latest add <name>`). `lib/` — api.ts, dates.ts, utils.ts, use-resource.ts (shared `{data,error,loading,reload}` fetch hook for read-mostly features).
   - **One look everywhere**: shadcn components + the shared pieces above; never hard-code colours — use the tokens in
     `src/index.css` (dark only, blue `primary`, due/priority colours). No second theme or CSS file.
