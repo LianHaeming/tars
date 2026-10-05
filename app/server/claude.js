@@ -1,5 +1,5 @@
-// Shared helper for shelling out to the `claude` CLI from the tars folder. ask.js streams the reply;
-// burmese.js buffers whole batches — both get the same spawn + timeout + stderr-tail error handling here.
+// Shared helper for shelling out to the `claude` CLI from the tars folder.
+// money.js and burmese.js buffer whole batches — both get the same spawn + timeout + stderr-tail error handling here.
 const { spawn } = require('child_process');
 const { TARS } = require('./store');
 

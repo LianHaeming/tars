@@ -5,7 +5,6 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const store = require('./store');
-const { ask, isBusy } = require('./ask');
 const { money, expected, summary } = require('./money');
 const burmese = require('./burmese');
 const phrases = require('./phrases');
@@ -129,16 +128,6 @@ async function api(req, res, parts) {
     }
   }
 
-  if (resource === 'chat') {
-    const chat = store.chat.get();
-    if (req.method === 'GET') return send(res, 200, { ...chat, busy: isBusy() });
-    if (req.method === 'DELETE') {
-      if (isBusy()) return send(res, 409, { error: 'Claude is still answering' });
-      chat.messages = []; chat.sessionId = null; store.chat.save();
-      return send(res, 204);
-    }
-  }
-
   if (resource === 'money' && req.method === 'GET') {
     try { return send(res, 200, rid === 'summary' ? await summary(false) : rid === 'summary-fresh' ? await summary(true) : await money(rid === 'fresh')); }
     catch (e) { return send(res, 503, { error: e.message }); }
@@ -196,13 +185,6 @@ async function api(req, res, parts) {
       inbox.candidates = inbox.candidates.filter(c => c.id !== rid); store.inbox.save();
       return send(res, 204);
     }
-  }
-
-  if (resource === 'ask' && req.method === 'POST') {
-    const message = String(body.message || '').trim();
-    if (!message) return send(res, 400, { error: 'message required' });
-    if (isBusy()) return send(res, 409, { error: 'Claude is still answering the last message' });
-    return ask(res, message, PORT);
   }
 
   send(res, 404, { error: 'not found' });

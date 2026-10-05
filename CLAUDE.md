@@ -12,9 +12,9 @@ One data folder, one server, one React frontend.
 ```
 data/            all data — only the server reads or writes it
   food/          Food content: menu.json, r/<id>.json, sainsburys/ocado.json, photos/ (in git; published from the Mac)
-  state/         live data (PC only, gitignored): tasks.json (lists + tasks), food.json (basket, shop, servings), chat.json (Tars), money.json (AI labels + insights)
+  state/         live data (PC only, gitignored): tasks.json (lists + tasks), food.json (basket, shop, servings), money.json (AI labels + insights)
 app/
-  server/        Node, no dependencies: index.js (routes + static), store.js (data/state docs), ask.js (Tars chat), money.js (Monzo), claude.js (shared `claude` CLI runner for ask/burmese/money), burmese.js (deck, progress, translator)
+  server/        Node, no dependencies: index.js (routes + static), store.js (data/state docs), money.js (Monzo), claude.js (shared `claude` CLI runner for burmese/money), burmese.js (deck, progress, translator)
   web/           React + TypeScript + Vite + Tailwind v4 + shadcn/ui — display only, everything via /api
   app.json       service config for bin/up (build → app/dist/, start → node server)
 bin/             sync, up, backup, gmail, monzo, burmese (rebuilds the deck — stop the service first), email-tasks
@@ -35,16 +35,15 @@ bin/             sync, up, backup, gmail, monzo, burmese (rebuilds the deck — 
   Burmese that can add a sentence to the deck) and **Money** (`/money` — a small dashboard, not a Monzo copy: balance
   line, "goes out automatically every month" total split by group, Claude's "Tars noticed" insights, the repeating
   payments by group with logos, next 30 days). Each app's `*Section.tsx` is still bare content; a thin `*Page.tsx`
-  wraps it in `Page`. Dock (on Schedule, Apps and app pages, not `/tars`): round **Add task** button, centred
-  Schedule | Apps pill (Apps stays lit on every non-Schedule page), round **Tars** (chat) button. Safari's status strip
+  wraps it in `Page`. Dock (on Schedule, Apps and app pages): a **page-specific primary action in the centre** (Schedule
+  = one-tap **Add task**; other apps none yet — `Dock.tsx` chooses it by path) and the Schedule | Apps nav pill on the
+  **right** (Apps stays lit on every non-Schedule page); the undo flash borrows the centre slot. Safari's status strip
   is `theme-color` = `--chrome` (#15263a) — keep them equal so the top reads as one navy surface; added to the Home
   Screen it runs standalone (manifest) under the Dynamic Island. Everything else is a **page** with its own URL and a
-  back button — Lian doesn't want pop-up windows: `/tars`, `/inbox`, `/food/:id`, `/food/list` (these two back to
+  back button — Lian doesn't want pop-up windows: `/inbox`, `/food/:id`, `/food/list` (these two back to
   `/food`). `/month` redirects to `/`. "Todo"/"calendar" = this app.
 - **API** (`app/server/index.js`): `GET /api/state` · `POST|PATCH|DELETE /api/tasks[/id]` · `/api/projects[/id]` (a project PATCH with `subs` sets its sub-categories; tasks carry an optional `subId`) ·
   `POST /api/shopping {items}` (replaces the Shopping list's unticked items) · `GET|PATCH /api/food {basket, shop, servings}` (servings per recipe id, base 2) ·
-  `GET|DELETE /api/chat` · `POST /api/ask {message}` (runs `claude -p` in `~/tars`, streams NDJSON text/status/error/done,
-  saves the conversation in chat.json; read-only tools + `bin/gmail` + curl to the API, never edits code) ·
   `GET /api/money[/fresh]` (runs `bin/monzo json` via `server/money.js`, cached 2 min; 503 with the message if sign-in is needed) ·
   `GET /api/money/summary[-fresh]` (repeating payments as monthly costs + `claude -p` once a London day for clean names, groups,
   logo domains and 3–5 insights, kept in data/state/money.json) ·
@@ -58,7 +57,7 @@ bin/             sync, up, backup, gmail, monzo, burmese (rebuilds the deck — 
     Home.tsx (the Schedule tab, incl. the "Life, so far" strip), MainEvent.tsx. `features/apps/` — AppsPage.tsx (the
     launcher: Email card + one tile per app). `features/food/` — data.ts (content + server-backed basket/shop), parts.tsx
     (RecipeTile etc.), FoodSection.tsx, FoodPage.tsx, RecipePage.tsx, ListPage.tsx. `features/burmese/` — data.ts, BurmeseSection.tsx, BurmesePage.tsx.
-    `features/inbox/` — data.ts (useInbox), InboxPage.tsx (email → task review). `features/tars/` — TarsPage.tsx.
+    `features/inbox/` — data.ts (useInbox), InboxPage.tsx (email → task review).
     `features/money/` — data.ts (useSummary), MoneySection.tsx, MoneyPage.tsx, expected.tsx (useExpected, Logo,
     PaymentRow — used by Home, calendar and Money). Each app's `*Section.tsx` is bare content (no page header), wrapped by
     its `*Page.tsx` in `Page`; the Schedule tab still uses `FilterBar`/`FilterLabel` (the sticky filter rail) from
@@ -100,7 +99,7 @@ bin/             sync, up, backup, gmail, monzo, burmese (rebuilds the deck — 
 - `bin/monzo` — read-only Monzo (balance, pots, transactions; never moves money): `bin/monzo status|balance`,
   `bin/monzo transactions [-d DAYS]` (max 89 days - older needs re-verification). Client + token in `~/.config/tars/monzo-*.json`
   (never copy into the repo or print). Sign-in: `bin/monzo login`, give Lian the link, `bin/monzo login '<address>'`,
-  then Lian approves in the Monzo app. Not yet available to Tars chat (`app/server/ask.js` allowlist).
+  then Lian approves in the Monzo app.
 
 ## Working rules
 - Pull before starting work; commit and push when a change is done.
