@@ -161,7 +161,7 @@ export function Home() {
       <FilterBar value={active} onValueChange={pick}>
         <FilterLabel value="all">All</FilterLabel>
         {state.projects.map(p => (
-          <FilterLabel key={p.id} value={p.id} dot={dim(p.color)}>{p.name}</FilterLabel>
+          <FilterLabel key={p.id} value={p.id} color={dim(p.color)}>{p.name}</FilterLabel>
         ))}
         <FilterLabel value="completed">Completed</FilterLabel>
       </FilterBar>

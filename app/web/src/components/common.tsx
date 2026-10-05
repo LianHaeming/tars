@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router'
-import { ChevronRightIcon } from 'lucide-react'
+import { ChevronRightIcon, TagIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
@@ -46,13 +46,13 @@ export function FilterBar({ value, onValueChange, children }: { value: string; o
   )
 }
 
-export function FilterLabel({ value, dot, children }: { value: string; dot?: string; children: ReactNode }) {
+export function FilterLabel({ value, color, children }: { value: string; color?: string; children: ReactNode }) {
   return (
     <ToggleGroupItem
       value={value}
-      className="h-auto shrink-0 gap-2 rounded-full px-3 py-2.5 text-base font-semibold whitespace-nowrap text-muted-foreground hover:bg-transparent data-[state=on]:bg-foreground data-[state=on]:text-background"
+      className="h-auto shrink-0 gap-1.5 rounded-full px-3 py-2.5 text-base font-semibold whitespace-nowrap text-muted-foreground hover:bg-transparent data-[state=on]:bg-foreground data-[state=on]:text-background [&_svg]:size-4"
     >
-      {dot && <Dot color={dot} />}
+      {color && <TagIcon style={{ color }} />}
       {children}
     </ToggleGroupItem>
   )
