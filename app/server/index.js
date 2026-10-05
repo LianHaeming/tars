@@ -11,6 +11,7 @@ const phrases = require('./phrases');
 const whatsapp = require('./whatsapp');
 const { organise } = require('./organise');
 const { discover } = require('./discover');
+const { suggest } = require('./recipe');
 
 const PORT = process.env.PORT || 8400;
 const DIST = path.join(__dirname, '..', 'dist');
@@ -146,6 +147,10 @@ async function api(req, res, parts) {
   }
 
   if (resource === 'food') {
+    if (req.method === 'POST' && rid === 'suggest') {
+      try { return send(res, 200, await suggest(body.id, body.dislike)); }
+      catch (e) { return send(res, 502, { error: e.message }); }
+    }
     const food = store.food.get();
     if (req.method === 'GET') return send(res, 200, food);
     if (req.method === 'PATCH') {

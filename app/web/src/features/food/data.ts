@@ -113,6 +113,10 @@ export function useServings() {
   }
 }
 
+export type Swap = { for: string; use: string; how: string }
+export type Suggestion = { swaps: Swap[]; note: string }
+export const suggestSwaps = (id: string, dislike: string) => api<Suggestion>('POST', 'food/suggest', { id, dislike })
+
 export const shopEntry = (shop: Shop | null, buy: string | null) => (buy && shop?.data[buy.toLowerCase()]) || null
 
 export const tagline = (r: Recipe) => [r.cf === 'Other' ? '' : r.cs || r.cf, r.cu === 'Other' ? '' : r.cu, r.p].filter(Boolean).join(' · ')

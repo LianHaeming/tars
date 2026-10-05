@@ -1,12 +1,16 @@
+import { useState } from 'react'
 import { useParams } from 'react-router'
+import { SparklesIcon } from 'lucide-react'
 import { Page } from '@/components/Page'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Progress } from '@/components/ui/progress'
 import { Slider } from '@/components/ui/slider'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
-import { BASE_SERVINGS, NUTRIENT_TILES, RI, meta, packFits, scaledAmount, shopEntry, shopPacks, spare, tagline, useDetail, useFood, useServings, useShop, type Detail, type Shop } from './data'
+import { BASE_SERVINGS, NUTRIENT_TILES, RI, meta, packFits, scaledAmount, shopEntry, shopPacks, spare, suggestSwaps, tagline, useDetail, useFood, useServings, useShop, type Detail, type Recipe, type Shop, type Suggestion } from './data'
 import { BasketButton, Loading, ShopName, ShopSwitch } from './parts'
 
 const TIMING = /\b\d+(?:[.,]\d+)?(?:\s?[-–]\s?\d+)?\s?(?:mins?|minutes|secs?|seconds|hrs?|hours)\b|\b\d+\s?°[CF]/gi
@@ -163,6 +167,55 @@ function Nutrition({ d }: { d: Detail }) {
   )
 }
 
+function DislikeDialog({ r, d }: { r: Recipe; d: Detail }) {
+  const [open, setOpen] = useState(false)
+  const [dislike, setDislike] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [result, setResult] = useState<Suggestion | null>(null)
+  const [error, setError] = useState('')
+
+  const ask = async () => {
+    if (!dislike.trim() || loading) return
+    setLoading(true); setError(''); setResult(null)
+    try { setResult(await suggestSwaps(r.id, dislike)) }
+    catch (e) { setError(e instanceof Error ? e.message : 'Tars could not help just now') }
+    finally { setLoading(false) }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={o => { setOpen(o); if (!o) { setDislike(''); setResult(null); setError('') } }}>
+      <DialogTrigger asChild>
+        <Button variant="secondary" size="sm" className="gap-1.5"><SparklesIcon className="size-4" />Not keen on something?</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Not keen on something?</DialogTitle>
+          <DialogDescription>Tell Tars what you'd rather not eat and it'll suggest swaps for this dish.</DialogDescription>
+        </DialogHeader>
+        <div className="flex flex-wrap gap-2">
+          {d.ingredients.map((i, k) => (
+            <Button key={k} variant="secondary" size="xs" className="rounded-full" onClick={() => setDislike(i.name)}>{i.name}</Button>
+          ))}
+        </div>
+        <Textarea value={dislike} onChange={e => setDislike(e.target.value)} placeholder="e.g. I don't like courgettes" rows={2} />
+        <Button onClick={ask} disabled={!dislike.trim() || loading}>{loading ? 'Asking Tars…' : 'Ask Tars'}</Button>
+        {error && <p className="text-sm text-tomorrow">{error}</p>}
+        {result && (
+          <div className="flex flex-col gap-3">
+            {result.swaps.map((s, k) => (
+              <div key={k} className="glass rounded-xl p-3 text-sm">
+                <div><span className="text-muted-foreground">{s.for || 'Swap'}</span> → <span className="font-semibold">{s.use}</span></div>
+                {s.how && <div className="mt-1 text-xs text-muted-foreground">{s.how}</div>}
+              </div>
+            ))}
+            {result.note && <p className="text-sm text-muted-foreground">{result.note}</p>}
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  )
+}
+
 export function RecipePage() {
   const { id } = useParams()
   const { food, error } = useFood()
@@ -183,6 +236,7 @@ export function RecipePage() {
             </div>
             <BasketButton id={r.id} />
           </div>
+          <div className="mt-4"><DislikeDialog r={r} d={d} /></div>
           <Tabs defaultValue="ingredients" className="mt-5">
             <TabsList variant="line" className="sticky top-below-header z-10 -mx-4 flex w-auto justify-start gap-4 hairline-b bg-chrome px-4">
               <TabsTrigger value="ingredients" className="flex-none">Ingredients</TabsTrigger>
