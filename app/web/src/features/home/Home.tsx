@@ -42,7 +42,7 @@ const YEAR = 365.25 * DAY
 
 type Parent = { name: string; born: string; to: number; marks?: { at: number; label: string }[] }
 const PARENTS: Parent[] = [
-  { name: 'Mum', born: '1973-08-29', to: 87, marks: [{ at: 58, label: 'her mum' }] },
+  { name: 'Mum', born: '1973-08-29', to: 87, marks: [{ at: 66, label: 'her mum' }] },
 ]
 
 const num = (n: number) => n.toLocaleString()
