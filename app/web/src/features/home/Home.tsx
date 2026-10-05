@@ -71,10 +71,25 @@ function quirkyStats(age: number) {
   return stats
 }
 
+function Bar({ pct, marks, endTitle }: { pct: number; marks: { at: number; label: string; main?: boolean }[]; endTitle?: string }) {
+  return (
+    <div className="mt-2 flex items-center gap-3">
+      <div className="relative h-2 flex-1 overflow-hidden rounded-full bg-secondary">
+        <div className="absolute inset-y-0 left-0 overflow-hidden rounded-full" style={{ width: `${pct}%` }}>
+          <div className="h-full" style={{ width: `${10000 / pct}%`, background: 'linear-gradient(90deg, var(--today), var(--tomorrow), var(--overdue))' }} />
+        </div>
+        {marks.map(m => (
+          <div key={m.at} className={cn('absolute inset-y-0 w-px', m.main ? 'bg-primary' : 'bg-foreground/50')} style={{ left: `${(m.at / SPAN) * 100}%` }} title={`${m.at} — ${m.label}`} />
+        ))}
+      </div>
+      <span className="text-xs font-semibold tabular-nums text-muted-foreground" title={endTitle}>{SPAN}</span>
+    </div>
+  )
+}
+
 function LifeStrip() {
   const [open, setOpen] = useState(false)
   const age = (Date.now() - +BIRTH) / YEAR
-  const pct = (age / SPAN) * 100
   const toAvg = Math.round((age / LIKELY) * 100)
   const quip = QUIPS[Math.floor(+today() / DAY) % QUIPS.length]
   const stats = quirkyStats(age)
@@ -85,22 +100,24 @@ function LifeStrip() {
           <span className="text-sm font-semibold">Life, so far — you’re {Math.floor(age)}</span>
           <span className="text-xs text-muted-foreground">{toAvg}% to the average</span>
         </div>
-        <div className="mt-3 flex items-center gap-3">
-          <div className="relative h-2 flex-1 overflow-hidden rounded-full bg-secondary">
-            <div className="absolute inset-y-0 left-0 overflow-hidden rounded-full" style={{ width: `${pct}%` }}>
-              <div className="h-full" style={{ width: `${10000 / pct}%`, background: 'linear-gradient(90deg, var(--today), var(--tomorrow), var(--overdue))' }} />
-            </div>
-            {MARKS.map(m => (
-              <div key={m.at} className={cn('absolute inset-y-0 w-px', m.main ? 'bg-primary' : 'bg-foreground/50')} style={{ left: `${(m.at / SPAN) * 100}%` }} title={`${m.at} — ${m.label}`} />
-            ))}
-          </div>
-          <span className="text-xs font-semibold tabular-nums text-muted-foreground" title="100 — about 1 in 9 men">100</span>
-        </div>
+        <Bar pct={(age / SPAN) * 100} marks={MARKS} endTitle="100 — about 1 in 9 men" />
         <p className="mt-2 text-xs text-muted-foreground">
           81 today’s rates · <span className="text-primary">87 likely</span> · 90 ≈ 1 in 4 · 100 ≈ 1 in 9 · {open ? quip : 'tap for more'}
         </p>
       </CollapsibleTrigger>
       <CollapsibleContent>
+        {PARENTS.map(p => {
+          const pAge = (Date.now() - +new Date(p.born)) / YEAR
+          return (
+            <div key={p.name} className="mt-3">
+              <div className="flex items-baseline justify-between">
+                <span className="text-sm font-semibold">{p.name}, so far — {Math.floor(pAge)}</span>
+                <span className="text-xs text-muted-foreground">{Math.round((pAge / p.to) * 100)}% to {p.to}</span>
+              </div>
+              <Bar pct={(pAge / SPAN) * 100} marks={[{ at: p.to, label: 'likely', main: true }]} />
+            </div>
+          )
+        })}
         <div className="mt-3 grid grid-cols-2 gap-2">
           {stats.map(s => (
             <div key={s.l} className="glass rounded-lg px-3 py-2">
