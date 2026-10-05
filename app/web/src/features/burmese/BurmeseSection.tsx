@@ -1,7 +1,10 @@
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
 import { localGet, localSet } from '@/lib/api'
-import { SectionHead, pill } from '@/components/common'
+import { SectionHead } from '@/components/common'
+import { Button } from '@/components/ui/button'
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { isMastered, useBurmese, type BurmeseState } from './data'
 import { Practice } from './Practice'
 import { PhraseOfDay } from './PhraseOfDay'
@@ -25,8 +28,8 @@ function Learned({ data, unlearn }: { data: BurmeseState; unlearn: (id: string) 
         const p = data.progress[c.id]
         const on = open === c.id
         return (
-          <div key={c.id} className="hairline-b">
-            <button type="button" onClick={() => setOpen(on ? null : c.id)} className="flex w-full items-center gap-3 py-3 text-left">
+          <Collapsible key={c.id} open={on} onOpenChange={o => setOpen(o ? c.id : null)} className="hairline-b">
+            <CollapsibleTrigger className="flex w-full items-center gap-3 py-3 text-left">
               <div className="min-w-0 flex-1">
                 <div className={cn('font-semibold text-primary', !on && 'truncate')}>{c.phonetic}</div>
                 <div className={cn('text-xs text-muted-foreground', !on && 'truncate')}>{c.english}</div>
@@ -34,17 +37,15 @@ function Learned({ data, unlearn }: { data: BurmeseState; unlearn: (id: string) 
               <span className="text-xs font-semibold text-muted-foreground tabular-nums">
                 {isMastered(p) ? <span className="text-today">Solid</span> : `${p.my.box + p.en.box}/12`}
               </span>
-            </button>
-            {on && (
-              <div className="pb-3">
-                <p lang="my" className="text-base">{c.burmese}</p>
-                {c.note && <p className="mt-1 text-sm text-muted-foreground">{c.note}</p>}
-                <button type="button" onClick={() => { setOpen(null); unlearn(c.id) }} className="mt-3 rounded-full bg-secondary px-3 py-1 text-xs font-semibold text-overdue">
-                  Unlearn — teach me this again
-                </button>
-              </div>
-            )}
-          </div>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="pb-3">
+              <p lang="my" className="text-base">{c.burmese}</p>
+              {c.note && <p className="mt-1 text-sm text-muted-foreground">{c.note}</p>}
+              <Button variant="secondary" size="xs" onClick={() => { setOpen(null); unlearn(c.id) }} className="mt-3 rounded-full text-overdue">
+                Unlearn — teach me this again
+              </Button>
+            </CollapsibleContent>
+          </Collapsible>
         )
       })}
     </section>
@@ -58,9 +59,11 @@ export function BurmeseSection() {
 
   return (
     <>
-      <div className="scrollbar-none mt-3 flex gap-2 overflow-x-auto">
-        {TABS.map(t => <button key={t.key} type="button" data-on={tab === t.key} onClick={() => pick(t.key)} className={pill}>{t.label}</button>)}
-      </div>
+      <ToggleGroup type="single" value={tab} onValueChange={t => t && pick(t as Tab)} className="scrollbar-none mt-3 w-full justify-start overflow-x-auto">
+        {TABS.map(t => (
+          <ToggleGroupItem key={t.key} value={t.key} variant="pill" className="shrink-0 px-3 whitespace-nowrap">{t.label}</ToggleGroupItem>
+        ))}
+      </ToggleGroup>
 
       {tab === 'phrase' ? <PhraseOfDay /> : !data ? (
         <p className="pt-8 text-sm text-muted-foreground">{error ? `Couldn't load Burmese — ${error}.` : 'Loading…'}</p>

@@ -3,6 +3,7 @@ import { RefreshCwIcon, SparklesIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { addDays, hhmm, parseYmd, shortDate, today, ymd } from '@/lib/dates'
 import { Empty, SectionHead } from '@/components/common'
+import { Button } from '@/components/ui/button'
 import { Logo, PaymentRow, amountLabel, useExpected } from './expected'
 import { fmt0, refreshSummary, useSummary, type Recurring } from './data'
 
@@ -30,9 +31,9 @@ export function MoneySection() {
 
   const refresh = () => { setBusy(true); refreshSummary().then(reload, () => {}).finally(() => setBusy(false)) }
   const refreshBtn = (
-    <button type="button" onClick={refresh} disabled={busy} aria-label="Refresh Monzo" className="grid size-10 shrink-0 place-items-center text-primary disabled:opacity-60">
+    <Button variant="ghost" size="icon" onClick={refresh} disabled={busy} aria-label="Refresh Monzo" className="size-10 shrink-0 text-primary hover:text-primary">
       <RefreshCwIcon className={cn('size-5', (busy || loading) && 'animate-spin')} />
-    </button>
+    </Button>
   )
 
   if (!data) {

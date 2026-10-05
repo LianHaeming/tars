@@ -78,7 +78,7 @@ export function FoodSection() {
         {filtered && <Button variant="ghost" size="sm" className="shrink-0 text-muted-foreground" onClick={() => setF(DEFAULTS)}>Reset</Button>}
       </div>
 
-      {!food ? (showLoading || error) && <Loading error={error} /> : !list.length ? <Empty>No dishes match these filters. {filtered && <button type="button" onClick={() => setF(DEFAULTS)} className="font-semibold text-primary">Clear filters</button>}</Empty> : CARBS.map(c => {
+      {!food ? (showLoading || error) && <Loading error={error} /> : !list.length ? <Empty>No dishes match these filters. {filtered && <Button variant="link" size="inline" onClick={() => setF(DEFAULTS)}>Clear filters</Button>}</Empty> : CARBS.map(c => {
         const rs = list.filter(r => r.cf === c)
         if (!rs.length) return null
         return (

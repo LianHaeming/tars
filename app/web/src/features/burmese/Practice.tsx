@@ -1,6 +1,9 @@
 import { useMemo, useState } from 'react'
 import { CheckIcon, RepeatIcon, RotateCcwIcon, SparklesIcon } from 'lucide-react'
 import { localGet, localSet } from '@/lib/api'
+import { Button } from '@/components/ui/button'
+import { Progress } from '@/components/ui/progress'
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { hash, isMastered, streak, type BurmeseState, type Card, type Dir } from './data'
 
 type Mode = 'mix' | Dir
@@ -76,23 +79,20 @@ export function Practice({ data, learn, review, unlearn }: Props) {
           <span><span className="font-semibold">{learned.length}</span> <span className="text-muted-foreground">of {goal} sentences</span></span>
           <span className="text-xs text-muted-foreground">{mastered} solid · {days_ ? `${days_}-day streak` : 'start a streak today'}</span>
         </div>
-        <div className="mt-2 h-2 overflow-hidden rounded-full bg-secondary">
-          <div className="h-full rounded-full bg-week" style={{ width: `${Math.min(100, (learned.length / goal) * 100)}%` }} />
-        </div>
+        <Progress value={Math.min(100, (learned.length / goal) * 100)} className="mt-2 h-2 bg-secondary [&>[data-slot=progress-indicator]]:bg-week" />
       </div>
 
       {!showNew && learned.length > 0 && (
-        <div className="mt-4 flex gap-2">
+        <ToggleGroup type="single" value={mode} onValueChange={m => m && pickMode(m as Mode)} className="mt-4 w-fit">
           {MODES.map(m => {
             const n = dueIn(m.key).length
             return (
-              <button key={m.key} type="button" data-on={mode === m.key} onClick={() => pickMode(m.key)}
-                className="inline-flex shrink-0 items-center gap-1 rounded-full bg-secondary px-3 py-2 text-sm font-semibold whitespace-nowrap data-[on=true]:bg-foreground data-[on=true]:text-background">
+              <ToggleGroupItem key={m.key} value={m.key} variant="pill" className="shrink-0 px-3 whitespace-nowrap">
                 {m.label}{n > 0 && <span className="opacity-60 tabular-nums">{n}</span>}
-              </button>
+              </ToggleGroupItem>
             )
           })}
-        </div>
+        </ToggleGroup>
       )}
 
       <div className="glass mt-3 rounded-2xl p-5">
@@ -108,14 +108,14 @@ export function Practice({ data, learn, review, unlearn }: Props) {
             <p className="mt-1 text-sm text-muted-foreground">Come back tomorrow — the ones you know get spaced further apart.</p>
             <div className="mt-4 flex flex-wrap justify-center gap-2">
               {learned.length > 0 && (
-                <button type="button" onClick={practiseAll} className="inline-flex items-center gap-2 rounded-full bg-secondary px-4 py-2 text-sm font-semibold text-primary">
-                  <RepeatIcon className="size-4" />Practise all {learned.length} again
-                </button>
+                <Button variant="secondary" onClick={practiseAll} className="rounded-full text-primary">
+                  <RepeatIcon />Practise all {learned.length} again
+                </Button>
               )}
               {next && (
-                <button type="button" onClick={() => { setFree(null); setExtra(x => x + 1) }} className="inline-flex items-center gap-2 rounded-full bg-secondary px-4 py-2 text-sm font-semibold text-week">
-                  <SparklesIcon className="size-4" />Learn one more
-                </button>
+                <Button variant="secondary" onClick={() => { setFree(null); setExtra(x => x + 1) }} className="rounded-full text-week">
+                  <SparklesIcon />Learn one more
+                </Button>
               )}
             </div>
           </div>
@@ -137,9 +137,7 @@ function NewCard({ card, label, busy, onLearn }: { card: Card; label: string; bu
       <Script text={card.burmese} />
       {card.note && <p className="mt-3 text-sm text-muted-foreground">{card.note}</p>}
       <p className="mt-4 text-xs text-muted-foreground">Say it out loud three times, then you'll be tested on it both ways.</p>
-      <button type="button" disabled={busy} onClick={onLearn} className="mt-4 w-full rounded-2xl bg-primary py-3 text-sm font-semibold text-primary-foreground disabled:opacity-50">
-        Got it
-      </button>
+      <Button size="block" disabled={busy} onClick={onLearn} className="mt-4 w-full">Got it</Button>
     </>
   )
 }
@@ -178,22 +176,20 @@ function ReviewCard({ item: { card, dir }, left, extra, shown, busy, onShow, onG
             {card.note && <p className="mt-2 text-sm text-muted-foreground">{card.note}</p>}
           </div>
           <div className="mt-5 grid grid-cols-2 gap-3">
-            <button type="button" disabled={busy} onClick={() => onGrade(false)} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-secondary py-3 text-sm font-semibold text-overdue disabled:opacity-50">
-              <RotateCcwIcon className="size-4" />Missed it
-            </button>
-            <button type="button" disabled={busy} onClick={() => onGrade(true)} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-today/15 py-3 text-sm font-semibold text-today disabled:opacity-50">
-              <CheckIcon className="size-4" />Got it
-            </button>
+            <Button size="block" variant="secondary" disabled={busy} onClick={() => onGrade(false)} className="text-overdue">
+              <RotateCcwIcon />Missed it
+            </Button>
+            <Button size="block" disabled={busy} onClick={() => onGrade(true)} className="bg-today/15 text-today hover:bg-today/25">
+              <CheckIcon />Got it
+            </Button>
           </div>
         </>
       ) : (
-        <button type="button" onClick={onShow} className="mt-5 w-full rounded-2xl bg-secondary py-3 text-sm font-semibold text-primary">
-          Show answer
-        </button>
+        <Button size="block" variant="secondary" onClick={onShow} className="mt-5 w-full text-primary">Show answer</Button>
       )}
-      <div className="mt-3 flex justify-between text-xs font-semibold text-muted-foreground">
-        <button type="button" disabled={busy} onClick={onForget}>Forgot completely · unlearn</button>
-        {onStop && <button type="button" onClick={onStop}>Stop</button>}
+      <div className="mt-3 flex justify-between text-xs">
+        <Button variant="link" size="inline" disabled={busy} onClick={onForget} className="font-semibold text-muted-foreground">Forgot completely · unlearn</Button>
+        {onStop && <Button variant="link" size="inline" onClick={onStop} className="font-semibold text-muted-foreground">Stop</Button>}
       </div>
     </>
   )

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { ChevronLeftIcon, ChevronRightIcon, SparklesIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { SectionHead } from '@/components/common'
+import { Button } from '@/components/ui/button'
 import { revealNext, useBank } from './data'
 
 export function PhraseOfDay() {
@@ -38,37 +39,20 @@ export function PhraseOfDay() {
         {p.note && <p className="mt-2 text-sm text-muted-foreground">{p.note}</p>}
 
         <div className="mt-5 flex items-center justify-between">
-          <button
-            type="button"
-            onClick={() => setSel(s => Math.max(0, s - 1))}
-            disabled={sel === 0}
-            aria-label="Older phrase"
-            className="inline-flex size-9 items-center justify-center rounded-full bg-secondary disabled:opacity-40"
-          >
-            <ChevronLeftIcon className="size-5" />
-          </button>
+          <Button variant="secondary" size="icon" onClick={() => setSel(s => Math.max(0, s - 1))} disabled={sel === 0} aria-label="Older phrase" className="size-9 rounded-full [&_svg]:size-5">
+            <ChevronLeftIcon />
+          </Button>
           <span className="text-xs text-muted-foreground">swipe through what you've seen</span>
-          <button
-            type="button"
-            onClick={() => setSel(s => Math.min(bank.index, s + 1))}
-            disabled={sel >= bank.index}
-            aria-label="Newer phrase"
-            className="inline-flex size-9 items-center justify-center rounded-full bg-secondary disabled:opacity-40"
-          >
-            <ChevronRightIcon className="size-5" />
-          </button>
+          <Button variant="secondary" size="icon" onClick={() => setSel(s => Math.min(bank.index, s + 1))} disabled={sel >= bank.index} aria-label="Newer phrase" className="size-9 rounded-full [&_svg]:size-5">
+            <ChevronRightIcon />
+          </Button>
         </div>
       </div>
 
-      <button
-        type="button"
-        onClick={reveal}
-        disabled={busy || !more}
-        className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-3 text-sm font-semibold text-primary-foreground disabled:opacity-50"
-      >
-        <SparklesIcon className="size-4" />
+      <Button size="block" onClick={reveal} disabled={busy || !more} className="mt-3 w-full">
+        <SparklesIcon />
         {more ? (busy ? 'Revealing…' : 'Reveal another now') : "That's all for now"}
-      </button>
+      </Button>
 
       <SectionHead title="Seen so far" count={seen} />
       <ul>
@@ -76,18 +60,14 @@ export function PhraseOfDay() {
           const ph = bank.phrases[i]
           return (
             <li key={i}>
-              <button
-                type="button"
-                onClick={() => setSel(i)}
-                className={cn('flex w-full items-baseline gap-3 hairline-b py-3 text-left', i === sel && 'opacity-100', i !== sel && 'opacity-80')}
-              >
+              <Button variant="ghost" onClick={() => setSel(i)} className={cn('h-auto w-full items-baseline justify-start gap-3 rounded-none hairline-b py-3 text-left font-normal', i === sel ? 'opacity-100' : 'opacity-80')}>
                 <span className="w-6 shrink-0 text-xs text-muted-foreground tabular-nums">{i + 1}</span>
                 <span className="min-w-0 flex-1">
                   <span lang="my" className="block truncate font-semibold">{ph.burmese}</span>
                   <span className="mt-0.5 block truncate text-xs text-muted-foreground">{ph.phonetic} · {ph.english}</span>
                 </span>
                 {i === bank.index && <span className="shrink-0 text-xs font-semibold tracking-wider text-primary uppercase">Today</span>}
-              </button>
+              </Button>
             </li>
           )
         })}

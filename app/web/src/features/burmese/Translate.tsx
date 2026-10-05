@@ -1,5 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { ArrowUpIcon, CheckIcon, CopyIcon, PlusIcon } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import type { Card, Translation } from './data'
 
 type Props = {
@@ -32,16 +34,16 @@ export function Translate({ history, deck, translate, save, clear }: Props) {
   return (
     <section>
       <form onSubmit={submit} className="flex items-center gap-2 pt-3">
-        <input
+        <Input
           value={text}
           onChange={e => setText(e.target.value)}
           placeholder="What do you want to say?"
           enterKeyHint="send"
-          className="min-w-0 flex-1 rounded-full bg-secondary px-4 py-2 text-field outline-none"
+          className="h-10 min-w-0 flex-1 rounded-full bg-secondary dark:bg-secondary"
         />
-        <button type="submit" disabled={!text.trim() || !!pending} aria-label="Translate" className="grid size-10 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground disabled:opacity-40">
-          <ArrowUpIcon className="size-5" />
-        </button>
+        <Button type="submit" size="icon" disabled={!text.trim() || !!pending} aria-label="Translate" className="size-10 shrink-0 rounded-full [&_svg]:size-5">
+          <ArrowUpIcon />
+        </Button>
       </form>
       {error && <p className="pt-2 text-sm text-overdue">{error}</p>}
 
@@ -60,21 +62,21 @@ export function Translate({ history, deck, translate, save, clear }: Props) {
             {t.literal && <p className="mt-2 text-xs text-muted-foreground">{t.literal}</p>}
             {t.note && <p className="mt-1 text-xs text-muted-foreground">{t.note}</p>}
             <div className="mt-3 flex gap-2">
-              <button type="button" onClick={() => copy(t)} className="inline-flex items-center gap-1 rounded-full bg-secondary px-3 py-1 text-xs font-semibold">
-                {copied === t.id ? <CheckIcon className="size-3" /> : <CopyIcon className="size-3" />}{copied === t.id ? 'Copied' : 'Copy Burmese'}
-              </button>
+              <Button variant="secondary" size="xs" onClick={() => copy(t)} className="rounded-full">
+                {copied === t.id ? <CheckIcon /> : <CopyIcon />}{copied === t.id ? 'Copied' : 'Copy Burmese'}
+              </Button>
               {inDeck(t) ? (
                 <span className="inline-flex items-center gap-1 px-3 py-1 text-xs font-semibold text-muted-foreground"><CheckIcon className="size-3" />In practice</span>
               ) : (
-                <button type="button" onClick={() => save(t)} className="inline-flex items-center gap-1 rounded-full bg-secondary px-3 py-1 text-xs font-semibold text-week">
-                  <PlusIcon className="size-3" />Learn this next
-                </button>
+                <Button variant="secondary" size="xs" onClick={() => save(t)} className="rounded-full text-week">
+                  <PlusIcon />Learn this next
+                </Button>
               )}
             </div>
           </div>
         ))}
         {history.length > 2 && (
-          <button type="button" onClick={clear} className="py-2 text-sm font-semibold text-muted-foreground">Clear translations</button>
+          <Button variant="link" size="inline" onClick={clear} className="self-start font-semibold text-muted-foreground">Clear translations</Button>
         )}
       </div>
     </section>

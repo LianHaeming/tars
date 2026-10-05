@@ -1,5 +1,6 @@
 import { useParams } from 'react-router'
 import { Page } from '@/components/Page'
+import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { Slider } from '@/components/ui/slider'
@@ -52,7 +53,7 @@ function Servings({ d, shop }: { d: Detail; shop: Shop | null }) {
       <div className="flex items-baseline justify-between">
         <span className="text-sm text-muted-foreground">Servings</span>
         <span className="flex items-baseline gap-3">
-          {n !== BASE_SERVINGS && <button type="button" onClick={() => servings.set(d.id, BASE_SERVINGS)} className="text-xs font-semibold text-primary">Reset</button>}
+          {n !== BASE_SERVINGS && <Button variant="link" size="inline" onClick={() => servings.set(d.id, BASE_SERVINGS)} className="text-xs">Reset</Button>}
           <span className="text-2xl font-semibold tabular-nums">{n.toFixed(1)}</span>
         </span>
       </div>
@@ -62,9 +63,9 @@ function Servings({ d, shop }: { d: Detail; shop: Shop | null }) {
           <p className="mt-4 text-xs text-muted-foreground">Use whole packs, nothing left over:</p>
           <div className="mt-2 flex flex-wrap gap-2">
             {fits.map(f => (
-              <button key={f.name + f.packs} type="button" onClick={() => servings.set(d.id, f.servings)} className="rounded-full bg-secondary px-3 py-1 text-xs font-semibold">
+              <Button key={f.name + f.packs} variant="secondary" size="xs" onClick={() => servings.set(d.id, f.servings)} className="rounded-full">
                 {f.name} · {f.packs} pack{f.packs > 1 ? 's' : ''} <span className="text-primary">→ {f.servings.toFixed(1)}</span>
-              </button>
+              </Button>
             ))}
           </div>
         </>

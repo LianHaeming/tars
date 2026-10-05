@@ -58,14 +58,4 @@ export function FilterLabel({ value, color, children }: { value: string; color: 
   )
 }
 
-export const pill = 'inline-flex shrink-0 items-center gap-2 rounded-full bg-secondary px-3 py-2 text-sm font-semibold whitespace-nowrap transition-colors data-[on=true]:bg-foreground data-[on=true]:text-background'
-
-export function PillBar({ children, className }: { children: ReactNode; className?: string }) {
-  return (
-    <nav className={cn('scrollbar-none sticky top-below-header z-10 -mx-4 flex gap-2 overflow-x-auto bg-chrome px-4 pt-3 pb-3', className)}>
-      {children}
-    </nav>
-  )
-}
-
 export const Dot = ({ color }: { color: string }) => <span className="size-2 shrink-0 rounded-full" style={{ background: color }} />
