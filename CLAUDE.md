@@ -22,7 +22,9 @@ bin/             sync, up, backup, gmail, monzo, burmese (rebuilds the deck — 
 
 - **The app** (Lian's phone, over Tailscale): two tabs. **Schedule** (`/`) — a flat **"Life, so far"** strip, then a
   sticky row of monochrome list filter labels (All + one per list with a small colour-matched tag icon, + Completed; choice kept in browser
-  storage; on scroll the strip slides up behind the Dynamic Island while the filters lock to the top), **Upcoming**
+  storage; on scroll the strip slides up behind the Dynamic Island — shaded by a global top gradient scrim
+  (`.island-scrim` in index.css, z-10: fades content under the status bar, sits below the sticky filter/headers) —
+  while the filters lock to the top), **Upcoming**
   grouped by day (next 14 days only, then an "N more · See Month" link; Overdue first; expected Monzo payments mixed in
   as teal Money rows with a Money filter label; today's next timed task is a highlighted "main event" pill that expands
   in place for notes / Mark done / Edit), then **To-do · no date**. Rows show the list as a coloured tag under All.

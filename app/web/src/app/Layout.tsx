@@ -27,6 +27,7 @@ export function Layout() {
 
   return (
     <>
+      <div aria-hidden className="island-scrim" />
       <Suspense fallback={<div className="pt-safe-16 text-center text-sm text-muted-foreground">Loading…</div>}>
         <Outlet />
       </Suspense>
