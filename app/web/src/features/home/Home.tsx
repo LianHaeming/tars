@@ -1,6 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { useSearchParams } from 'react-router'
-import { focusDraft } from '@/app/Dock'
 import { cn, dim } from '@/lib/utils'
 import { localGet, localSet, type Task } from '@/lib/api'
 import { addDays, dayDiff, hhmm, parseYmd, shortDate, today, ymd } from '@/lib/dates'
@@ -120,18 +119,11 @@ function Completed({ tasks }: { tasks: Task[] }) {
 }
 
 export function Home() {
-  const { open, state, rescheduleOverdue, pendingAdd, setPendingAdd, addDraft, dayView } = useTars()
+  const { open, state, rescheduleOverdue, addDraft, dayView } = useTars()
   const expected = useExpected()
   const [params, setParams] = useSearchParams()
   const urlFilter = params.get('filter')
 
-  useEffect(() => {
-    if (!pendingAdd) return
-    setPendingAdd(false)
-    addDraft()
-    const t = setTimeout(focusDraft, 60)
-    return () => clearTimeout(t)
-  }, [pendingAdd, setPendingAdd, addDraft])
   const [filter, setFilter] = useState(() => localGet('home-filter') || 'all')
   const known = (k: string) => k === 'all' || k === 'completed' || state.projects.some(p => p.id === k)
   const active = known(filter) ? filter : 'all'

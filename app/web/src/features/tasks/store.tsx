@@ -1,6 +1,4 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import { flushSync } from 'react-dom'
-import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
 import { api, localGet, type Project, type State, type Task } from '@/lib/api'
 import { today, ymd } from '@/lib/dates'
@@ -161,6 +159,7 @@ function useStoreValue() {
     calMonth, setCalMonth,
     pendingAdd, setPendingAdd, flash, clearFlash,
     patch, addDraft, discardIfEmpty, toggleDone, deleteTask, rescheduleOverdue,
+    isDraft: (id: string | null) => !!id && draftIds.current.has(id),
     addProject, renameProject, deleteProject,
     subsOf, addSub, renameSub, deleteSub,
   }
@@ -180,10 +179,6 @@ export function useTars() {
 }
 
 export function useQuickAdd() {
-  const { addDraft, setPendingAdd } = useTars()
-  const navigate = useNavigate()
-  return useCallback((onTaskList: boolean) => {
-    if (onTaskList) { flushSync(() => { addDraft() }); document.getElementById('qa')?.focus() }
-    else { setPendingAdd(true); navigate('/') }
-  }, [addDraft, setPendingAdd, navigate])
+  const { addDraft } = useTars()
+  return useCallback(() => { addDraft() }, [addDraft])
 }

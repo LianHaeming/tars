@@ -3,7 +3,6 @@ import { Link, useLocation, useNavigate } from 'react-router'
 import { BotIcon, CircleCheckIcon, LayoutGridIcon, MenuIcon, PlusIcon, XIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useQuickAdd, useTars } from '@/features/tasks/store'
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 
 export const showsDock = (path: string) => path === '/' || /^\/(apps|food)(\/|$)/.test(path)
 export const hasTaskList = (path: string) => path === '/'
@@ -13,27 +12,23 @@ export function focusDraft() {
 }
 
 export function Dock() {
-  const { openId, setOpenId, deleteTask, flash, state, exitDay } = useTars()
+  const { flash, exitDay } = useTars()
   const quickAdd = useQuickAdd()
   const { pathname } = useLocation()
   const navigate = useNavigate()
   const hidden = !showsDock(pathname)
   const [open, setOpen] = useState(false)
-  const [confirmDelete, setConfirmDelete] = useState(false)
 
   useEffect(() => { setOpen(false) }, [pathname])
   useEffect(() => { if (hidden) setOpen(false) }, [hidden])
 
-  const add = () => quickAdd(hasTaskList(pathname))
+  const add = () => quickAdd()
   const tab = hidden ? -1 : 0
   const onSchedule = pathname === '/'
   const seg = (on: boolean) => cn('relative z-10 grid h-10 w-14 place-items-center rounded-full transition-colors duration-200 before:absolute before:inset-x-0 before:-inset-y-0.5 before:content-[""] [&_svg]:size-5', on ? 'text-background' : 'text-muted-foreground')
 
-  const editing = !hidden && !!openId
-  const showUndo = !editing && !!flash
-  const doneEditing = () => { (document.activeElement as HTMLElement | null)?.blur(); setOpenId(null) }
+  const showUndo = !hidden && !!flash
   const barPrimary = 'relative grid h-10 place-items-center rounded-full bg-foreground px-5 text-sm font-semibold text-background active:scale-98 animate-in fade-in duration-200 before:absolute before:inset-x-0 before:-inset-y-0.5 before:content-[""]'
-  const barGhost = 'relative grid h-10 place-items-center rounded-full px-4 text-sm font-semibold text-destructive active:scale-98 animate-in fade-in duration-200 before:absolute before:inset-x-0 before:-inset-y-0.5 before:content-[""]'
 
   const actions = [
     { key: 'tars', label: 'Tars', Icon: BotIcon, run: () => navigate('/tars') },
@@ -50,12 +45,7 @@ export function Dock() {
     >
       <div aria-hidden className="size-12 shrink-0" />
       <div className={cn('dock relative flex items-center gap-1 rounded-full p-1', !hidden && 'pointer-events-auto')}>
-        {editing ? (
-          <>
-            <button type="button" onClick={doneEditing} className={barPrimary}>Done</button>
-            <button type="button" onClick={() => setConfirmDelete(true)} className={barGhost}>Delete</button>
-          </>
-        ) : showUndo ? (
+        {showUndo ? (
           <>
             <span className="grid h-10 place-items-center px-3 text-sm font-semibold text-muted-foreground animate-in fade-in duration-200">{flash!.label}</span>
             <button type="button" onClick={flash!.run} className={barPrimary}>Undo</button>
@@ -107,20 +97,6 @@ export function Dock() {
           {open ? <XIcon /> : <MenuIcon />}
         </button>
       </div>
-      <AlertDialog open={confirmDelete} onOpenChange={setConfirmDelete}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete this task?</AlertDialogTitle>
-            <AlertDialogDescription>
-              {state.tasks.find(t => t.id === openId)?.title?.trim() || 'This task'} will be removed. You can still undo it from the bar afterwards.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction variant="destructive" onClick={() => { if (openId) deleteTask(openId) }}>Delete</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </nav>
   )
 }

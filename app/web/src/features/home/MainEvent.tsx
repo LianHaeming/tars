@@ -3,14 +3,11 @@ import { ChevronRightIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Task } from '@/lib/api'
 import { useTars } from '@/features/tasks/store'
-import { TaskRow } from '@/features/tasks/TaskRow'
 import { Button } from '@/components/ui/button'
 
 export function MainEvent({ task }: { task: Task }) {
-  const { openId, setOpenId, toggleDone } = useTars()
+  const { setOpenId, toggleDone } = useTars()
   const [expanded, setExpanded] = useState(false)
-
-  if (openId === task.id) return <TaskRow task={task} />
 
   const notes = task.description.trim()
   return (

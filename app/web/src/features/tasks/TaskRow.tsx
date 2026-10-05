@@ -1,15 +1,13 @@
-import { useEffect, useRef, useState, type CSSProperties } from 'react'
-import { CalendarIcon, CheckIcon, ClockIcon, LayersIcon, TagIcon, XIcon } from 'lucide-react'
+import { useState, type CSSProperties } from 'react'
+import { CalendarIcon, CheckIcon, ClockIcon } from 'lucide-react'
 import { cn, dim } from '@/lib/utils'
 import type { Task } from '@/lib/api'
-import { dueColor, dueLabel, today, whenLabel, ymd } from '@/lib/dates'
+import { dueColor, today, whenLabel, ymd } from '@/lib/dates'
 import { useTars } from '@/features/tasks/store'
-import { Dot } from '@/components/common'
-import { SubManager, TagManager } from '@/features/tasks/TagManager'
 
 type Opts = { hideProject?: boolean; hideDue?: boolean; compact?: boolean; tag?: boolean }
 
-function Check({ task, color, onDone }: { task: Task; color: string; onDone: () => void }) {
+export function Check({ task, color, onDone }: { task: Task; color: string; onDone: () => void }) {
   return (
     <button
       type="button"
@@ -28,7 +26,7 @@ function Check({ task, color, onDone }: { task: Task; color: string; onDone: () 
 }
 
 export function TaskRow({ task, hideProject, hideDue, compact, tag }: { task: Task } & Opts) {
-  const { openId, setOpenId, toggleDone, project } = useTars()
+  const { setOpenId, toggleDone, project } = useTars()
   const [completing, setCompleting] = useState(false)
   const p = project(task.projectId)
 
@@ -41,8 +39,6 @@ export function TaskRow({ task, hideProject, hideDue, compact, tag }: { task: Ta
     await toggleDone(task.id)
     setCompleting(false)
   }
-
-  if (openId === task.id) return <TaskEditor task={task} onDone={done} />
 
   return (
     <div
@@ -95,124 +91,4 @@ function Meta({ task, hideDue, project, tag }: { task: Task; hideDue?: boolean; 
   }
   if (!items.length) return null
   return <div className="mt-1 flex gap-3 text-xs text-muted-foreground [&>span]:inline-flex [&>span]:items-center [&>span]:gap-1 [&_svg]:size-3">{items}</div>
-}
-
-const tbtn = 'inline-flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold whitespace-nowrap text-muted-foreground transition-colors data-[on=true]:bg-secondary data-[on=true]:text-foreground [&_svg]:size-4'
-
-const grow = (el: HTMLTextAreaElement | null) => { if (el) { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px' } }
-
-function TaskEditor({ task, onDone }: { task: Task; onDone: () => void }) {
-  const { patch, state, setOpenId, discardIfEmpty, subsOf } = useTars()
-  const [title, setTitle] = useState(task.title)
-  const ref = useRef<HTMLDivElement>(null)
-  const titleRef = useRef<HTMLTextAreaElement>(null)
-  const subs = subsOf(task.projectId)
-
-  useEffect(() => {
-    // new draft: focus the title and let the browser scroll it above the keyboard.
-    // existing task: no keyboard, so bring the whole card into view ourselves.
-    if (!task.title) {
-      titleRef.current?.focus()
-    } else {
-      const id = requestAnimationFrame(() => ref.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }))
-      return () => { cancelAnimationFrame(id); discardIfEmpty(task.id) }
-    }
-    return () => discardIfEmpty(task.id)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  useEffect(() => {
-    const away = (e: MouseEvent) => {
-      const el = e.target as Element
-      if (!el.isConnected || ref.current?.contains(el) || el.closest('[data-radix-popper-content-wrapper], [data-sonner-toaster], [data-task-row], [data-dock]')) return
-      const dialog = el.closest('[role=dialog], [role=alertdialog]')
-      if (dialog && !dialog.contains(ref.current)) return
-      finish()
-    }
-    const t = setTimeout(() => document.addEventListener('click', away), 0)
-    return () => { clearTimeout(t); document.removeEventListener('click', away) }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [title])
-
-  const saveTitle = () => {
-    const t = title.trim()
-    if (t && t !== task.title) patch(task.id, { title: t })
-    else if (!t) setTitle(task.title)
-  }
-  const finish = () => { saveTitle(); setOpenId(null) }
-
-  return (
-    <div ref={ref} data-editor data-done={task.done} className="group/task glass -mx-3 my-2 scroll-mb-dock rounded-xl px-3 pb-3">
-      <div className="flex items-start gap-3 pt-3">
-        <Check task={task} color="var(--p4)" onDone={onDone} />
-        <div className="min-w-0 flex-1">
-          <textarea
-            ref={el => { titleRef.current = el; grow(el) }}
-            id="qa"
-            value={title}
-            rows={1}
-            onChange={e => { setTitle(e.target.value); grow(e.currentTarget) }}
-            onBlur={saveTitle}
-            onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); e.currentTarget.blur() } }}
-            placeholder="Task"
-            autoComplete="off"
-            className="block w-full resize-none overflow-hidden rounded bg-transparent py-0 text-field leading-6 font-semibold break-words outline-none focus-visible:ring-2 focus-visible:ring-ring/50 placeholder:text-muted-foreground"
-          />
-          <textarea
-            ref={el => grow(el)}
-            defaultValue={task.description}
-            placeholder="Notes"
-            rows={1}
-            onInput={e => grow(e.currentTarget)}
-            onBlur={e => { const v = e.target.value.trim(); if (v !== task.description) patch(task.id, { description: v }) }}
-            className="mt-1 block w-full resize-none overflow-hidden rounded bg-transparent text-field text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring/50 placeholder:text-muted-foreground"
-          />
-        </div>
-      </div>
-
-      <div className="mt-3 -mx-3 flex flex-col gap-1 hairline-t px-2 pt-2">
-        <div className="scrollbar-none flex gap-1 overflow-x-auto">
-          <button type="button" data-on={!task.projectId} className={tbtn} onClick={() => patch(task.id, { projectId: null, subId: null })}>Inbox</button>
-          {state.projects.map(pr => (
-            <button key={pr.id} type="button" data-on={task.projectId === pr.id} className={tbtn} onClick={() => patch(task.id, { projectId: pr.id, subId: null })}>
-              <Dot color={pr.color} />{pr.name}
-            </button>
-          ))}
-          <TagManager
-            onCreate={id => patch(task.id, { projectId: id, subId: null })}
-            trigger={<button type="button" className={tbtn}><TagIcon />Tags</button>}
-          />
-        </div>
-
-        {task.projectId && (
-          <div className="scrollbar-none flex gap-1 overflow-x-auto">
-            {subs.map(s => (
-              <button key={s.id} type="button" data-on={task.subId === s.id} className={tbtn} onClick={() => patch(task.id, { subId: task.subId === s.id ? null : s.id })}>
-                {s.name}
-              </button>
-            ))}
-            <SubManager
-              projectId={task.projectId}
-              onCreate={id => patch(task.id, { subId: id })}
-              trigger={<button type="button" className={tbtn}><LayersIcon />{subs.length ? 'Edit' : 'Sub-categories'}</button>}
-            />
-          </div>
-        )}
-
-        <div className="flex flex-wrap items-center gap-1">
-          <label className={cn(tbtn, 'relative cursor-pointer')} data-on={!!task.due}>
-            <CalendarIcon />{task.due ? dueLabel(task.due) : 'Add date'}
-            <input type="date" value={task.due || ''} onChange={e => patch(task.id, { due: e.target.value || null, ...(e.target.value ? {} : { dueTime: null }) })} className="absolute inset-0 opacity-0" />
-          </label>
-          <label className={cn(tbtn, 'relative cursor-pointer')} data-on={!!task.dueTime}>
-            <ClockIcon />{task.dueTime || 'Add time'}
-            <input type="time" value={task.dueTime || ''} onChange={e => patch(task.id, { dueTime: e.target.value || null })} className="absolute inset-0 opacity-0" />
-          </label>
-          {(task.due || task.dueTime) && (
-            <button type="button" className={tbtn} onClick={() => patch(task.id, { due: null, dueTime: null })}><XIcon />Clear</button>
-          )}
-        </div>
-      </div>
-    </div>
-  )
 }
