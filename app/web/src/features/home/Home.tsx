@@ -11,6 +11,7 @@ import { PaymentRow, useExpected, type Expected } from '@/features/money/expecte
 import { Button } from '@/components/ui/button'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { MainEvent } from './MainEvent'
+import { OrganiseCard } from './OrganiseCard'
 
 type Entry = { day: string; task?: Task; pay?: Expected }
 
@@ -211,6 +212,8 @@ export function Home() {
         ))}
         <FilterLabel value="completed">Completed</FilterLabel>
       </FilterBar>
+
+      {active === 'all' && !completed && <OrganiseCard />}
 
       {completed ? (
         <Completed tasks={state.tasks.filter(x => x.done)} />
