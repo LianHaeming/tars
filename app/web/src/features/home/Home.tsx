@@ -41,8 +41,10 @@ const QUIPS = ['make today count', 'go make a memory', 'carpe that diem', 'you c
 const DAY = 864e5
 const YEAR = 365.25 * DAY
 
-type Parent = { name: string; born: number; to: number }
-const PARENTS: Parent[] = []
+type Parent = { name: string; born: string; to: number }
+const PARENTS: Parent[] = [
+  { name: 'Mum', born: '1973-08-29', to: 87 },
+]
 
 const num = (n: number) => n.toLocaleString()
 
@@ -63,7 +65,7 @@ function quirkyStats(age: number) {
     { n: String(ageAt(2029)), l: 'your age when AGI’s tipped to land' },
   ]
   for (const p of PARENTS) {
-    const pAge = (now - new Date(p.born, 0, 1).getTime()) / YEAR
+    const pAge = (now - +new Date(p.born)) / YEAR
     stats.push({ n: num(Math.max(0, Math.round((p.to - pAge) * 52))), l: `weekends with ${p.name} left` })
   }
   return stats
