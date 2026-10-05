@@ -168,6 +168,8 @@ async function start() {
     if (connection === 'close') {
       const code = lastDisconnect?.error?.output?.statusCode;
       save(true);
+      try { sock.ev.removeAllListeners(); sock.end?.(undefined); } catch {}   // drop the old socket before reconnecting
+      const again = () => setTimeout(() => start().catch(e => { log('reconnect failed:', e.message); process.exit(1); }), 1000);
       if (code === DisconnectReason.loggedOut) {
         setStatus('needs-login');
         // While linking, a logged-out close means the saved keys are stale (expired/aborted QR):
@@ -175,17 +177,16 @@ async function start() {
         if (mode === 'login' && relinks < 3) {
           relinks++;
           log('clearing a stale session and showing a fresh QR…');
-          try { sock.ev.removeAllListeners(); sock.end?.(undefined); } catch {}
           fs.rmSync(SESSION, { recursive: true, force: true });
-          return start().catch(e => { log('restart failed:', e.message); process.exit(1); });
+          return again();
         }
         log('logged out — run `bin/whatsapp login` to re-link');
         return process.exit(0);    // in service mode, wait for a manual re-link
       }
+      // 515 (restartRequired, normal right after pairing) or a transient drop — reconnect in both modes.
       log('connection closed, reconnecting…', code || '');
       setStatus('connecting');
-      if (mode === 'run') start().catch(e => { log('reconnect failed:', e.message); process.exit(1); });
-      else process.exit(0);
+      again();
     }
   });
 
