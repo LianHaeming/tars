@@ -65,6 +65,14 @@ bin/             sync, up, backup, gmail, monzo, burmese (rebuilds the deck — 
     `ui/` (shadcn: `cd app/web && npx shadcn@latest add <name>`). `lib/` — api.ts, dates.ts, utils.ts, use-resource.ts (shared `{data,error,loading,reload}` fetch hook for read-mostly features).
   - **One look everywhere**: shadcn components + the shared pieces above; never hard-code colours — use the tokens in
     `src/index.css` (dark only, blue `primary`, due/priority colours). No second theme or CSS file.
+  - **shadcn, in-grain** (the house rule — follow it religiously): every interactive control is a shadcn/Radix
+    primitive (`Button`, `Checkbox`, `Badge`, `Avatar`, `ToggleGroup`, `Collapsible`, `Dialog`, …), added via
+    `npx shadcn@latest add <name>` — don't hand-roll a `<button>`/`<input>` when a primitive exists. **Appearance that
+    repeats across files becomes a token (`index.css`) or a `cva` variant in the `ui/` file** (e.g. button `inline`
+    size, badge `tag` variant) — never copy-pasted class strings at call sites. Call-site `className` is only for
+    **layout/positioning** (margins, width, grid placement), **per-instance data** (a list's colour via `style`), or a
+    **contextual reset** (e.g. `normal-case` on a link inside an uppercase header). A one-off shape used in a single
+    component stays local (a wrapper component or a file-level `const`); don't promote it to a global variant.
   - **Crispness rules** (see UI-CRISPNESS-BRIEF.md): type ramp only — `text-xs/sm/base/lg/xl/2xl` = 12/13/15/17/20/24,
     `text-field` (16) for every text input so iOS never zooms; weights 400 body / 600 labels / 700 headings.
     4px spacing scale, no half steps, **no arbitrary `[..px]` values** — add a named token/utility in index.css
