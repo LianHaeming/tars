@@ -1,11 +1,11 @@
-// tars WhatsApp bridge — READ-ONLY. Drives a WhatsApp Web session (whatsapp-web.js + the system Chromium)
+// tars WhatsApp bridge — READ-ONLY. Speaks the WhatsApp multi-device protocol directly (Baileys, no browser)
 // and writes every message it sees into data/state/whatsapp.json. It has no send path on purpose.
 //
 //   node bridge.js login    print a QR to link the PC (run from bin/whatsapp login)
 //   node bridge.js run       service mode: reconnect the saved session, capture forever
-//   node bridge.js status    print what's in whatsapp.json (no browser)
+//   node bridge.js status    print what's in whatsapp.json (no connection)
 //
-// The session lives in ~/.config/tars/whatsapp (LocalAuth). Only one process may use it at a time.
+// The session (Baileys multi-file auth) lives in ~/.config/tars/whatsapp. Only one process may use it at a time.
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
@@ -14,18 +14,21 @@ const TARS = path.join(__dirname, '..', '..');
 const DATA = process.env.TARS_DATA || path.join(TARS, 'data');
 const FILE = path.join(DATA, 'state', 'whatsapp.json');
 const SESSION = path.join(os.homedir(), '.config', 'tars', 'whatsapp');
-const CHROMIUM = process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium';
 
 const KEEP = 150;                  // messages kept per chat
-const BACKFILL = 40;               // messages pulled per chat on first connect
-const REAL = new Set(['chat', 'image', 'video', 'ptt', 'audio', 'document', 'sticker', 'location', 'vcard']);
-
 const mode = process.argv[2] || 'run';
 const log = (...a) => console.log(new Date().toISOString(), ...a);
+const numberOf = jid => (jid || '').split('@')[0].split(':')[0];
+function tsMs(t) {
+  const s = typeof t === 'number' ? t : (t?.toNumber?.() ?? Number(t));
+  return (s && !Number.isNaN(s) ? s : Math.floor(Date.now() / 1000)) * 1000;
+}
 
 // --- store ---------------------------------------------------------------
 let store = { status: 'starting', me: null, updatedAt: null, chats: {} };
 try { store = { ...store, ...JSON.parse(fs.readFileSync(FILE, 'utf8')) }; } catch {}
+const contacts = {};               // jid -> display name (not persisted; rebuilt each run)
+const groupNames = {};             // group jid -> subject
 
 let writeTimer = null;
 function flush() {
@@ -41,31 +44,13 @@ function save(now = false) {
 }
 function setStatus(s) { if (store.status !== s) { store.status = s; save(true); } }
 
-function upsertChat(chat) {
-  const id = chat.id._serialized;
-  const c = store.chats[id] || (store.chats[id] = { id, name: '', isGroup: false, lastAt: 0, messages: [] });
-  c.name = chat.name || c.name || id.split('@')[0];
-  c.isGroup = !!chat.isGroup;
-  return c;
-}
 function addMessage(c, m) {
-  if (c.messages.some(x => x.id === m.id)) return false;
+  if (!m.id || c.messages.some(x => x.id === m.id)) return false;
   c.messages.push(m);
   c.messages.sort((a, b) => a.at - b.at);
   if (c.messages.length > KEEP) c.messages = c.messages.slice(-KEEP);
   c.lastAt = c.messages[c.messages.length - 1].at;
   return true;
-}
-function slim(msg, author = '') {
-  return {
-    id: msg.id?._serialized || String(msg.id),
-    at: (msg.timestamp || Math.floor(Date.now() / 1000)) * 1000,
-    fromMe: !!msg.fromMe,
-    author,
-    body: msg.body || '',
-    type: msg.type || 'chat',
-    hasMedia: !!msg.hasMedia,
-  };
 }
 
 if (mode === 'status') {
@@ -79,78 +64,138 @@ if (mode === 'status') {
   process.exit(0);
 }
 
-// --- client --------------------------------------------------------------
-const { Client, LocalAuth } = require('whatsapp-web.js');
+// --- message content -----------------------------------------------------
+// WhatsApp messages are a union; pull out a type + any text, flag media, skip non-messages (reactions, receipts…).
+function content(message) {
+  if (!message) return null;
+  const m = message.ephemeralMessage?.message || message.viewOnceMessage?.message
+    || message.viewOnceMessageV2?.message || message.documentWithCaptionMessage?.message || message;
+  if (m.conversation) return { type: 'chat', body: m.conversation };
+  if (m.extendedTextMessage) return { type: 'chat', body: m.extendedTextMessage.text || '' };
+  if (m.imageMessage) return { type: 'image', body: m.imageMessage.caption || '', hasMedia: true };
+  if (m.videoMessage) return { type: 'video', body: m.videoMessage.caption || '', hasMedia: true };
+  if (m.audioMessage) return { type: m.audioMessage.ptt ? 'ptt' : 'audio', body: '', hasMedia: true };
+  if (m.documentMessage) return { type: 'document', body: m.documentMessage.caption || m.documentMessage.fileName || '', hasMedia: true };
+  if (m.stickerMessage) return { type: 'sticker', body: '', hasMedia: true };
+  if (m.locationMessage || m.liveLocationMessage) return { type: 'location', body: '', hasMedia: true };
+  if (m.contactMessage || m.contactsArrayMessage) return { type: 'vcard', body: m.contactMessage?.displayName || '', hasMedia: true };
+  return null;
+}
+
+function chatOf(jid, isGroup) {
+  const c = store.chats[jid] || (store.chats[jid] = { id: jid, name: '', isGroup, lastAt: 0, messages: [] });
+  c.isGroup = isGroup;
+  const better = isGroup ? groupNames[jid] : contacts[jid];
+  if (better && better !== c.name) c.name = better;
+  if (!c.name) c.name = numberOf(jid);
+  return c;
+}
+
+function record(waMsg) {
+  const key = waMsg?.key || {};
+  const jid = key.remoteJid;
+  if (!jid || jid.endsWith('@broadcast') || jid.endsWith('@newsletter')) return false;
+  const c = content(waMsg.message);
+  if (!c) return false;
+  const isGroup = jid.endsWith('@g.us');
+  if (!key.fromMe && !isGroup && waMsg.pushName && !contacts[jid]) contacts[jid] = waMsg.pushName;
+  const chat = chatOf(jid, isGroup);
+  const author = isGroup && !key.fromMe
+    ? (waMsg.pushName || contacts[key.participant] || numberOf(key.participant)) : '';
+  return addMessage(chat, {
+    id: key.id, at: tsMs(waMsg.messageTimestamp), fromMe: !!key.fromMe,
+    author, body: c.body || '', type: c.type, hasMedia: !!c.hasMedia,
+  });
+}
+
+function learnContacts(list) {
+  for (const c of list || []) {
+    const name = c.name || c.notify || c.verifiedName;
+    if (c.id && name) contacts[c.id] = name;
+  }
+}
+function learnChats(list) {
+  for (const c of list || []) if (c.id?.endsWith('@g.us') && c.name) groupNames[c.id] = c.name;
+}
+
+// --- connection ----------------------------------------------------------
+const {
+  default: makeWASocket, useMultiFileAuthState, fetchLatestBaileysVersion,
+  makeCacheableSignalKeyStore, DisconnectReason, Browsers,
+} = require('@whiskeysockets/baileys');
+const pino = require('pino');
 const qrcode = require('qrcode-terminal');
+const logger = pino({ level: 'silent' });
 
-const client = new Client({
-  authStrategy: new LocalAuth({ dataPath: SESSION }),
-  puppeteer: {
-    headless: true,
-    executablePath: fs.existsSync(CHROMIUM) ? CHROMIUM : undefined,
-    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu'],
-  },
-});
-
-async function authorName(msg, chat) {
-  if (!chat.isGroup || msg.fromMe) return '';
-  try { const c = await msg.getContact(); return c.pushname || c.name || c.number || ''; } catch { return ''; }
+async function resolveGroups(sock) {
+  for (const c of Object.values(store.chats)) {
+    if (!c.isGroup || (c.name && c.name !== numberOf(c.id))) continue;
+    try { const meta = await sock.groupMetadata(c.id); if (meta?.subject) { groupNames[c.id] = meta.subject; c.name = meta.subject; } }
+    catch {}
+  }
+  save();
 }
 
-client.on('qr', qr => {
-  setStatus('needs-login');
-  if (mode === 'login') {
-    qrcode.generate(qr, { small: true });
-    console.log('\nWhatsApp → Settings → Linked devices → Link a device, and scan the code above.');
-  } else {
-    log('not linked — run `bin/whatsapp login` on the PC to scan a QR. Waiting…');
-  }
-});
+async function start() {
+  const { state, saveCreds } = await useMultiFileAuthState(SESSION);
+  const { version } = await fetchLatestBaileysVersion();
+  const sock = makeWASocket({
+    version,
+    logger,
+    auth: { creds: state.creds, keys: makeCacheableSignalKeyStore(state.keys, logger) },
+    browser: Browsers.ubuntu('tars'),
+    markOnlineOnConnect: false,   // don't take presence/notifications away from the phone
+    syncFullHistory: true,
+    getMessage: async () => undefined,
+  });
 
-client.on('authenticated', () => { log('authenticated'); setStatus('authenticating'); });
-client.on('auth_failure', m => { log('auth failure:', m); setStatus('needs-login'); });
+  sock.ev.on('creds.update', saveCreds);
 
-client.on('ready', async () => {
-  log('ready — backfilling recent messages');
-  try {
-    store.me = { name: client.info?.pushname || '', number: client.info?.wid?.user || '' };
-    const chats = await client.getChats();
-    for (const chat of chats) {
-      if (chat.id._serialized === 'status@broadcast') continue;
-      const c = upsertChat(chat);
-      let msgs = [];
-      try { msgs = await chat.fetchMessages({ limit: BACKFILL }); } catch {}
-      for (const m of msgs) if (REAL.has(m.type)) addMessage(c, slim(m));
+  sock.ev.on('connection.update', async u => {
+    const { connection, lastDisconnect, qr } = u;
+    if (qr) {
+      setStatus('needs-login');
+      if (mode === 'login') { qrcode.generate(qr, { small: true }); console.log('\nWhatsApp → Settings → Linked devices → Link a device, and scan the code above.'); }
+      else log('not linked — run `bin/whatsapp login` on the PC to scan a QR. Waiting…');
     }
-    setStatus('ready');
-    save(true);
-    log(`backfill done — ${chats.length} chats`);
-  } catch (e) {
-    log('backfill error:', e.message);
-    setStatus('ready');
-  }
-});
+    if (connection === 'open') {
+      store.me = { name: sock.user?.name || sock.user?.verifiedName || '', number: numberOf(sock.user?.id) };
+      setStatus('ready');
+      log('connected as', store.me.name || store.me.number);
+      setTimeout(() => resolveGroups(sock).catch(() => {}), 8000);
+    }
+    if (connection === 'close') {
+      const code = lastDisconnect?.error?.output?.statusCode;
+      save(true);
+      if (code === DisconnectReason.loggedOut) {
+        setStatus('needs-login');
+        log('logged out — run `bin/whatsapp login` to re-link');
+        process.exit(0);           // don't hot-loop; wait for a manual re-link
+      }
+      log('connection closed, reconnecting…', code || '');
+      setStatus('connecting');
+      if (mode === 'run') start().catch(e => { log('reconnect failed:', e.message); process.exit(1); });
+      else process.exit(0);
+    }
+  });
 
-async function capture(msg) {
-  try {
-    if (!REAL.has(msg.type)) return;
-    const chat = await msg.getChat();
-    if (chat.id._serialized === 'status@broadcast') return;
-    const c = upsertChat(chat);
-    if (addMessage(c, slim(msg, await authorName(msg, chat)))) save();
-  } catch (e) { log('capture error:', e.message); }
+  sock.ev.on('messaging-history.set', ({ chats, contacts: cs, messages }) => {
+    learnContacts(cs); learnChats(chats);
+    let n = 0; for (const m of messages || []) if (record(m)) n++;
+    if (n) log(`history: +${n} messages`);
+    save();
+  });
+  sock.ev.on('contacts.upsert', learnContacts);
+  sock.ev.on('contacts.update', learnContacts);
+  sock.ev.on('chats.upsert', learnChats);
+  sock.ev.on('messages.upsert', ({ messages }) => {
+    let n = 0; for (const m of messages || []) if (record(m)) n++;
+    if (n) save();
+  });
 }
-// message_create fires for both received and self-sent messages → captures the whole conversation.
-client.on('message_create', capture);
-
-client.on('disconnected', reason => {
-  log('disconnected:', reason);
-  setStatus('disconnected');
-  if (mode === 'run') process.exit(1);   // let systemd restart and reconnect
-});
 
 process.on('SIGINT', () => { save(true); process.exit(0); });
 process.on('SIGTERM', () => { save(true); process.exit(0); });
 
 setStatus(store.status === 'ready' ? 'connecting' : store.status);
-client.initialize();
+start().catch(e => { log('start failed:', e.message); process.exit(1); });

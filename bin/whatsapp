@@ -4,16 +4,17 @@
 #        bin/whatsapp install   run the capture bridge as a background user service (tars-whatsapp)
 #        bin/whatsapp status     show whether it's linked and how much was captured
 #        bin/whatsapp run        the service entrypoint (used by the unit; stays in the foreground)
-# The session lives in ~/.config/tars/whatsapp (outside the repo). Only one of these can hold it at a time.
+# Talks the WhatsApp protocol directly (Baileys — no browser). The session lives in ~/.config/tars/whatsapp
+# (outside the repo). Only one of these can hold it at a time.
 set -euo pipefail
 TARS="$(cd "$(dirname "$0")/.." && pwd)"
 DIR="$TARS/app/whatsapp"
 export PATH="$HOME/.local/share/mise/shims:$HOME/.local/bin:$PATH"
 
 ensure_deps() {
-  if [ ! -d "$DIR/node_modules/whatsapp-web.js" ]; then
-    echo "installing whatsapp bridge deps (uses the system Chromium — no browser download)…"
-    (cd "$DIR" && PUPPETEER_SKIP_DOWNLOAD=true npm install --no-audit --no-fund --loglevel=error)
+  if [ ! -d "$DIR/node_modules/@whiskeysockets/baileys" ]; then
+    echo "installing whatsapp bridge deps…"
+    (cd "$DIR" && npm install --no-audit --no-fund --loglevel=error)
   fi
 }
 
