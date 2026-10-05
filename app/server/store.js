@@ -28,4 +28,5 @@ module.exports = {
   burmese: doc('burmese', () => ({ deck: [], progress: {}, days: {}, history: [] })),
   inbox: doc('inbox', () => ({ candidates: [], seen: [] })),
   money: doc('money', () => ({ labels: {}, insights: [], day: null, at: null, error: null })),
+  discover: doc('discover', () => ({ day: null, at: null, repos: [], error: null })),
 };

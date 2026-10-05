@@ -7,6 +7,7 @@ import { Layout } from './Layout'
 const AppsPage = lazy(() => import('@/features/apps/AppsPage').then(m => ({ default: m.AppsPage })))
 const BurmesePage = lazy(() => import('@/features/burmese/BurmesePage').then(m => ({ default: m.BurmesePage })))
 const MoneyPage = lazy(() => import('@/features/money/MoneyPage').then(m => ({ default: m.MoneyPage })))
+const DiscoverPage = lazy(() => import('@/features/discover/DiscoverPage').then(m => ({ default: m.DiscoverPage })))
 const WhatsappPage = lazy(() => import('@/features/whatsapp/WhatsappPage').then(m => ({ default: m.WhatsappPage })))
 const ChatPage = lazy(() => import('@/features/whatsapp/ChatPage').then(m => ({ default: m.ChatPage })))
 const FoodPage = lazy(() => import('@/features/food/FoodPage').then(m => ({ default: m.FoodPage })))
@@ -22,6 +23,7 @@ const router = createBrowserRouter([
       { path: '/apps', element: <AppsPage /> },
       { path: '/burmese', element: <BurmesePage /> },
       { path: '/money', element: <MoneyPage /> },
+      { path: '/discover', element: <DiscoverPage /> },
       { path: '/whatsapp', element: <WhatsappPage /> },
       { path: '/whatsapp/:id', element: <ChatPage /> },
       { path: '/food', element: <FoodPage /> },

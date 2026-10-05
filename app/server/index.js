@@ -10,6 +10,7 @@ const burmese = require('./burmese');
 const phrases = require('./phrases');
 const whatsapp = require('./whatsapp');
 const { organise } = require('./organise');
+const { discover } = require('./discover');
 
 const PORT = process.env.PORT || 8400;
 const DIST = path.join(__dirname, '..', 'dist');
@@ -187,6 +188,11 @@ async function api(req, res, parts) {
 
   if (resource === 'organise' && req.method === 'GET') {
     try { return send(res, 200, await organise()); }
+    catch (e) { return send(res, 503, { error: e.message }); }
+  }
+
+  if (resource === 'discover' && req.method === 'GET') {
+    try { return send(res, 200, await discover(rid === 'fresh')); }
     catch (e) { return send(res, 503, { error: e.message }); }
   }
 
