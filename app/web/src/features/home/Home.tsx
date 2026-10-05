@@ -40,9 +40,9 @@ const MARKS = [
 const DAY = 864e5
 const YEAR = 365.25 * DAY
 
-type Parent = { name: string; born: string; to: number }
+type Parent = { name: string; born: string; to: number; marks?: { at: number; label: string }[] }
 const PARENTS: Parent[] = [
-  { name: 'Mum', born: '1973-08-29', to: 87 },
+  { name: 'Mum', born: '1973-08-29', to: 87, marks: [{ at: 58, label: 'her mum' }] },
 ]
 
 const num = (n: number) => n.toLocaleString()
@@ -98,7 +98,7 @@ function LifeStrip() {
       <CollapsibleTrigger className="w-full space-y-3 text-left">
         <LifeRow name="You" age={age} to={LIKELY} marks={MARKS} />
         {PARENTS.map(p => (
-          <LifeRow key={p.name} name={p.name} age={(Date.now() - +new Date(p.born)) / YEAR} to={p.to} marks={[{ at: p.to, label: 'likely', main: true }]} />
+          <LifeRow key={p.name} name={p.name} age={(Date.now() - +new Date(p.born)) / YEAR} to={p.to} marks={[{ at: p.to, label: 'likely', main: true }, ...(p.marks ?? [])]} />
         ))}
       </CollapsibleTrigger>
       <CollapsibleContent>
