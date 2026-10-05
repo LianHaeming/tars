@@ -6,7 +6,7 @@ const store = require('./store');
 
 const londonDay = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/London' }).format(new Date());
 const UA = 'tars-discover';
-const TOPICS = ['developer-tools', 'data-visualization', 'machine-learning', 'self-hosted', 'cli', 'creative-coding', 'automation', 'terminal', 'graphics', 'audio'];
+const TOPICS = ['self-hosted', 'productivity', 'local-first', 'personal-dashboard', 'typescript', 'react', 'cli', 'llm', 'automation', 'pwa'];
 
 async function ghSearch(q, perPage = 40) {
   const url = `https://api.github.com/search/repositories?q=${encodeURIComponent(q)}&sort=stars&order=desc&per_page=${perPage}`;
@@ -23,8 +23,8 @@ async function pool() {
   const since = new Date(Date.now() - 150 * 864e5).toISOString().slice(0, 10);
   const topic = TOPICS[Math.floor(Date.now() / 864e5) % TOPICS.length];
   const [recent, byTopic] = await Promise.all([
-    ghSearch(`created:>${since} stars:>400`),
-    ghSearch(`topic:${topic} stars:>800 pushed:>${since}`),
+    ghSearch(`created:>${since} stars:>150 language:TypeScript`),
+    ghSearch(`topic:${topic} stars:>500 pushed:>${since}`),
   ]);
   const map = new Map();
   for (const it of [...recent, ...byTopic]) if (it.description) map.set(it.full_name, it);
@@ -33,11 +33,13 @@ async function pool() {
 
 function prompt(cands) {
   const slim = cands.map(c => ({ repo: c.full_name, stars: c.stars, language: c.language, topics: c.topics.slice(0, 5), description: c.description }));
-  return `You are Tars, curating a daily "cool GitHub repos" feed for Lian, a creative software tinkerer. Today is ${londonDay()}.
+  return `You are Tars, curating a daily GitHub feed for Lian — but only repos that could realistically fit into Tars itself, Lian's self-hosted personal-assistant app. Today is ${londonDay()}.
 
-From the real repositories below, choose the 8 most genuinely interesting and idea-sparking: favour clever, surprising, beautiful or unusually useful projects a builder would love to stumble on. Avoid generic boilerplate, framework bloat and plain "awesome-*" link lists. Aim for variety across the picks.
+Tars is a dependency-free Node server plus a React + TypeScript + Vite + Tailwind + shadcn PWA, self-hosted on a Tailscale tailnet. Its modules: a tasks/calendar schedule, food recipes + shopping list, a Burmese spaced-repetition learner, a Monzo money dashboard, read-only Gmail and WhatsApp capture, and AI features that shell out to the \`claude\` CLI. It favours small, local-first, no-heavy-infra tools.
 
-For each pick, write one punchy sentence on why it's cool or what idea it could spark, and give a short category label (1 or 2 words). No emoji. Choose only from the repos listed, using the exact "repo" value.
+From the real repositories below, choose the 8 that Lian could most plausibly USE IN or BUILD INTO Tars: a library it could adopt, a self-hostable tool it could run alongside, or a project that sparks a concrete new Tars feature. Favour things compatible with the stack (JS/TS, Node, React, small, self-hostable, local-first, LLM-adjacent, personal-productivity, home-dashboard). Avoid big frameworks, infra platforms, and anything that couldn't slot into a one-person self-hosted app.
+
+For each pick, write one sentence on HOW it could fit into Tars — name the module it would slot into or the feature it would enable. Give a short category label naming the Tars area or tech (e.g. "Tasks", "Money", "Burmese", "UI", "Infra", "AI"). No emoji. Choose only from the repos listed, using the exact "repo" value.
 
 Repositories:
 ${JSON.stringify(slim)}
