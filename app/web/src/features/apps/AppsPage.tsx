@@ -1,6 +1,6 @@
 import type { ComponentType, ReactNode } from 'react'
 import { Link } from 'react-router'
-import { ChevronRightIcon, LanguagesIcon, UtensilsCrossedIcon, WalletIcon } from 'lucide-react'
+import { ChevronRightIcon, LanguagesIcon, MessageCircleIcon, UtensilsCrossedIcon, WalletIcon } from 'lucide-react'
 import { useInbox } from '@/features/inbox/data'
 
 function AppCard({ to, title, children }: { to: string; title: string; children: ReactNode }) {
@@ -43,6 +43,7 @@ const APPS: { to: string; title: string; subtitle: string; Icon: ComponentType<{
   { to: '/burmese', title: 'Burmese', subtitle: 'Practice · phrase of the day · translate', Icon: LanguagesIcon, color: 'var(--week)' },
   { to: '/money', title: 'Money', subtitle: 'Balance · spending · what’s coming', Icon: WalletIcon, color: 'var(--money)' },
   { to: '/food', title: 'Food', subtitle: 'Menu · recipes · shopping list', Icon: UtensilsCrossedIcon, color: 'var(--today)' },
+  { to: '/whatsapp', title: 'WhatsApp', subtitle: 'Your messages, captured', Icon: MessageCircleIcon, color: 'var(--chat)' },
 ]
 
 function AppTile({ to, title, subtitle, Icon, color }: (typeof APPS)[number]) {

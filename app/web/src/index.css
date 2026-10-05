@@ -40,6 +40,7 @@
     --color-week: var(--week);
     --color-claude: var(--claude);
     --color-money: var(--money);
+    --color-chat: var(--chat);
     --color-p4: var(--p4);
     --font-heading: var(--font-sans);
     --font-sans: 'Inter Variable', sans-serif;
@@ -114,6 +115,7 @@
     --week: #b18cff;
     --claude: #b18cff;
     --money: #2bc4b4;
+    --chat: #25d366;
     --p4: #6d727b;
     --chart-1: #4593d6;
     --chart-2: #b18cff;

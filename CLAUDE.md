@@ -12,12 +12,13 @@ One data folder, one server, one React frontend.
 ```
 data/            all data — only the server reads or writes it
   food/          Food content: menu.json, r/<id>.json, sainsburys/ocado.json, photos/ (in git; published from the Mac)
-  state/         live data (PC only, gitignored): tasks.json (lists + tasks), food.json (basket, shop, servings), money.json (AI labels + insights)
+  state/         live data (PC only, gitignored): tasks.json (lists + tasks), food.json (basket, shop, servings), money.json (AI labels + insights), whatsapp.json (captured messages — private, never backed up)
 app/
-  server/        Node, no dependencies: index.js (routes + static), store.js (data/state docs), money.js (Monzo), claude.js (shared `claude` CLI runner for burmese/money), burmese.js (deck, progress, translator)
+  server/        Node, no dependencies: index.js (routes + static), store.js (data/state docs), money.js (Monzo), claude.js (shared `claude` CLI runner for burmese/money), burmese.js (deck, progress, translator), whatsapp.js (read-only view over whatsapp.json)
+  whatsapp/      isolated WhatsApp capture bridge — its OWN package.json (whatsapp-web.js + the system Chromium), kept out of the no-dependency server; writes data/state/whatsapp.json, never sends
   web/           React + TypeScript + Vite + Tailwind v4 + shadcn/ui — display only, everything via /api
   app.json       service config for bin/up (build → app/dist/, start → node server)
-bin/             sync, up, backup, gmail, monzo, burmese (rebuilds the deck — stop the service first), email-tasks
+bin/             sync, up, backup, gmail, monzo, burmese (rebuilds the deck — stop the service first), email-tasks, whatsapp
 ```
 
 - **The app** (Lian's phone, over Tailscale): two tabs. **Schedule** (`/`) — a flat **"Life, so far"** strip, then a
@@ -52,6 +53,8 @@ bin/             sync, up, backup, gmail, monzo, burmese (rebuilds the deck — 
   logo domains and 3–5 insights, kept in data/state/money.json) ·
   `GET /api/burmese` · `POST /api/burmese/{learn,review,unlearn,save,translate}` · `GET /api/burmese/phrases` · `POST /api/burmese/phrase` (translate = `claude -p --model opus`, ~12 s) · `GET /api/expected` (repeating payments/income predicted from the last 89 days — monthly or weekly, split by amount when a
   payee has several, stopped ones dropped, late ones shown today; next 90 days; Monzo data reused up to 1 h).
+  `GET /api/whatsapp` (conversation list, newest first, each with a last-message preview) · `GET /api/whatsapp/:id` (one chat's full thread) —
+  read-only; `app/server/whatsapp.js` re-reads data/state/whatsapp.json (written by the separate `tars-whatsapp` bridge) when its mtime changes.
   Static: `/data/food/*` from data/food; anything else is the built app (page URLs fall back to index.html).
 - **Frontend** (`app/web/src/`), grouped by feature:
   - `app/` — App.tsx (routes), Layout.tsx (dock, quick-add, toasts), Dock.tsx.
@@ -103,6 +106,13 @@ bin/             sync, up, backup, gmail, monzo, burmese (rebuilds the deck — 
   `bin/monzo transactions [-d DAYS]` (max 89 days - older needs re-verification). Client + token in `~/.config/tars/monzo-*.json`
   (never copy into the repo or print). Sign-in: `bin/monzo login`, give Lian the link, `bin/monzo login '<address>'`,
   then Lian approves in the Monzo app.
+
+- `bin/whatsapp` — **read-only** WhatsApp capture (reads your messages into data/state/whatsapp.json; never sends). It runs
+  whatsapp-web.js in headless Chromium (`/usr/bin/chromium`) as a WhatsApp Web linked device; the session lives in
+  `~/.config/tars/whatsapp` (outside the repo). `bin/whatsapp login` (scan the QR on your phone, once — stops the service
+  while you do), `bin/whatsapp install` (runs the bridge as the `tars-whatsapp` user service), `bin/whatsapp status`.
+  History is only what WhatsApp Web syncs (recent) plus everything from link-time onward. Only one process can hold the
+  session at a time. No send path by design.
 
 ## Working rules
 - Pull before starting work; commit and push when a change is done.

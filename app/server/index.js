@@ -8,6 +8,7 @@ const store = require('./store');
 const { money, expected, summary } = require('./money');
 const burmese = require('./burmese');
 const phrases = require('./phrases');
+const whatsapp = require('./whatsapp');
 
 const PORT = process.env.PORT || 8400;
 const DIST = path.join(__dirname, '..', 'dist');
@@ -152,6 +153,12 @@ async function api(req, res, parts) {
         if (rid === 'translate') return send(res, 200, await burmese.translate(body.text));
       } catch (e) { return send(res, rid === 'translate' ? 502 : 400, { error: e.message }); }
     }
+  }
+
+  if (resource === 'whatsapp' && req.method === 'GET') {
+    if (!rid) return send(res, 200, whatsapp.list());
+    const t = whatsapp.thread(rid);
+    return t ? send(res, 200, t) : send(res, 404, { error: 'not found' });
   }
 
   if (resource === 'inbox') {

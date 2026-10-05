@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+# Read-only WhatsApp capture for tars. It reads your messages into data/state/whatsapp.json; it never sends.
+# Usage: bin/whatsapp login     link this PC to WhatsApp (scan the QR with your phone, once)
+#        bin/whatsapp install   run the capture bridge as a background user service (tars-whatsapp)
+#        bin/whatsapp status     show whether it's linked and how much was captured
+#        bin/whatsapp run        the service entrypoint (used by the unit; stays in the foreground)
+# The session lives in ~/.config/tars/whatsapp (outside the repo). Only one of these can hold it at a time.
+set -euo pipefail
+TARS="$(cd "$(dirname "$0")/.." && pwd)"
+DIR="$TARS/app/whatsapp"
+export PATH="$HOME/.local/share/mise/shims:$HOME/.local/bin:$PATH"
+
+ensure_deps() {
+  if [ ! -d "$DIR/node_modules/whatsapp-web.js" ]; then
+    echo "installing whatsapp bridge deps (uses the system Chromium — no browser download)…"
+    (cd "$DIR" && PUPPETEER_SKIP_DOWNLOAD=true npm install --no-audit --no-fund --loglevel=error)
+  fi
+}
+
+case "${1:-}" in
+  login)
+    ensure_deps
+    systemctl --user stop tars-whatsapp.service 2>/dev/null || true
+    echo "Linking WhatsApp. On your phone: Settings → Linked devices → Link a device, then scan:"
+    echo "(when it says 'ready', press Ctrl-C and run: bin/whatsapp install)"
+    echo
+    exec node "$DIR/bridge.js" login
+    ;;
+  install)
+    ensure_deps
+    unit="$HOME/.config/systemd/user/tars-whatsapp.service"
+    mkdir -p "$(dirname "$unit")"
+    cat > "$unit" <<UNIT
+[Unit]
+Description=tars: WhatsApp message capture (read-only)
+After=network-online.target
+
+[Service]
+WorkingDirectory=$DIR
+Environment=PATH=%h/.local/share/mise/shims:%h/.local/bin:/usr/local/bin:/usr/bin
+ExecStart=/bin/sh -c 'exec node $DIR/bridge.js run'
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=default.target
+UNIT
+    systemctl --user daemon-reload
+    systemctl --user enable --now tars-whatsapp.service
+    sleep 1
+    systemctl --user --no-pager --lines=0 status tars-whatsapp.service | head -4 || true
+    echo "capturing in the background. Check the WhatsApp tile in the app, or: bin/whatsapp status"
+    ;;
+  status)
+    node "$DIR/bridge.js" status
+    ;;
+  run)
+    exec node "$DIR/bridge.js" run
+    ;;
+  *)
+    echo "usage: bin/whatsapp login | install | status | run" >&2
+    exit 1
+    ;;
+esac

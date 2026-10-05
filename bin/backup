@@ -18,6 +18,7 @@ if [ "${1:-}" = install ]; then
 fi
 
 mkdir -p "$DEST"
-tar -czf "$DEST/state-$(date +%F).tgz" -C "$TARS/data" state
+# whatsapp.json is your private message log — keep it on the PC, never in a backup that leaves it.
+tar -czf "$DEST/state-$(date +%F).tgz" -C "$TARS/data" --exclude='state/whatsapp.json' state
 find "$DEST" -name 'state-*.tgz' -mtime +30 -delete
 ls -1 "$DEST" | tail -3
