@@ -1,19 +1,22 @@
 import type { ReactNode } from 'react'
 import { Link, useLocation } from 'react-router'
-import { CircleCheckIcon, LayoutGridIcon, PlusIcon } from 'lucide-react'
+import { CircleCheckIcon, LayoutGridIcon, PlusIcon, WandSparklesIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useQuickAdd, useTars } from '@/features/tasks/store'
+import { useOrganise } from '@/features/home/organise'
 
 export const showsDock = (path: string) => path === '/' || /^\/(apps|food|burmese|money)(\/|$)/.test(path)
 
 export function Dock() {
   const { flash, exitDay } = useTars()
   const quickAdd = useQuickAdd()
+  const { loose, phase, start } = useOrganise()
   const { pathname } = useLocation()
   const hidden = !showsDock(pathname)
 
   const tab = hidden ? -1 : 0
   const onSchedule = pathname === '/'
+  const showSort = onSchedule && !flash && phase === 'idle' && loose > 0
   const nav = onSchedule
     ? { to: '/apps', label: 'Apps', Icon: LayoutGridIcon }
     : { to: '/', label: 'Schedule', Icon: CircleCheckIcon }
@@ -47,7 +50,19 @@ export function Dock() {
         hidden && 'translate-y-full opacity-0',
       )}
     >
-      <div aria-hidden className="h-12 flex-1" />
+      <div className="flex flex-1 justify-start">
+        {showSort && (
+          <button
+            type="button"
+            onClick={start}
+            tabIndex={tab}
+            aria-label="Sort with Tars"
+            className="dock pointer-events-auto flex h-12 items-center gap-2 rounded-full px-5 text-sm font-semibold text-foreground transition-transform active:scale-98 animate-in fade-in duration-200 [&_svg]:size-5"
+          >
+            <WandSparklesIcon />Sort
+          </button>
+        )}
+      </div>
       <div className="flex shrink-0 justify-center">{center}</div>
       <div className="flex flex-1 justify-end">
         <Link

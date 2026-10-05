@@ -210,7 +210,7 @@ export function Home() {
         <FilterLabel value="completed">Completed</FilterLabel>
       </FilterBar>
 
-      {active === 'all' && !completed && <OrganiseCard />}
+      <OrganiseCard />
 
       {completed ? (
         <Completed tasks={state.tasks.filter(x => x.done)} />

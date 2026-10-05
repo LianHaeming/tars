@@ -1,5 +1,4 @@
-import { useState } from 'react'
-import { CheckIcon, Loader2Icon, WandSparklesIcon, XIcon } from 'lucide-react'
+import { CheckIcon, Loader2Icon, XIcon } from 'lucide-react'
 import { dueLabel } from '@/lib/dates'
 import { useTars } from '@/features/tasks/store'
 import { Button } from '@/components/ui/button'
@@ -18,19 +17,12 @@ function Shell({ children }: { children: React.ReactNode }) {
 }
 
 export function OrganiseCard() {
-  const { state, patch, project } = useTars()
-  const { suggestions, loading, error, load, reset } = useOrganise()
-  const [idx, setIdx] = useState(0)
-  const [applied, setApplied] = useState(0)
+  const { phase, error, total, idx, applied, current, start, accept, skip, stop } = useOrganise()
+  const { project } = useTars()
 
-  const loose = state.tasks.filter(t => !t.done && (!t.projectId || !t.due)).length
-  const active = loading || error || suggestions !== null
-  if (!loose && !active) return null
+  if (phase === 'idle') return null
 
-  const start = () => { setIdx(0); setApplied(0); load() }
-  const stop = () => { reset(); setIdx(0); setApplied(0) }
-
-  if (loading) {
+  if (phase === 'loading') {
     return (
       <Shell>
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -41,7 +33,7 @@ export function OrganiseCard() {
     )
   }
 
-  if (error) {
+  if (phase === 'error') {
     return (
       <Shell>
         <div className="flex items-center justify-between gap-3">
@@ -52,27 +44,12 @@ export function OrganiseCard() {
     )
   }
 
-  if (!active) {
-    return (
-      <Shell>
-        <div className="flex items-center justify-between gap-3">
-          <div className="min-w-0">
-            <div className="text-sm font-semibold">Tidy up</div>
-            <div className="text-xs text-muted-foreground">{loose} without a list or date</div>
-          </div>
-          <Button size="sm" onClick={start} className="shrink-0 gap-1.5 [&_svg]:size-4"><WandSparklesIcon />Sort with Tars</Button>
-        </div>
-      </Shell>
-    )
-  }
-
-  const list = suggestions ?? []
-  if (idx >= list.length) {
+  if (phase === 'done') {
     return (
       <Shell>
         <div className="flex items-center justify-between gap-3">
           <span className="text-sm text-muted-foreground">
-            {list.length === 0 ? 'Nothing to tidy — your list is in good shape.' : `Sorted ${applied} of ${list.length}.`}
+            {total === 0 ? 'Nothing to tidy — your list is in good shape.' : `Sorted ${applied} of ${total}.`}
           </span>
           <Button size="sm" variant="secondary" onClick={stop}>Done</Button>
         </div>
@@ -80,16 +57,14 @@ export function OrganiseCard() {
     )
   }
 
-  const s = list[idx]
+  const s = current!
   const p = s.change.projectId ? project(s.change.projectId) : null
-  const accept = async () => { setIdx(i => i + 1); setApplied(a => a + 1); await patch(s.id, s.change) }
-  const skip = () => setIdx(i => i + 1)
 
   return (
     <Shell>
       <div className="flex items-center justify-between">
         <span className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">Tars suggests</span>
-        <span className="text-xs tabular-nums text-muted-foreground">{idx + 1} / {list.length}</span>
+        <span className="text-xs tabular-nums text-muted-foreground">{idx + 1} / {total}</span>
       </div>
       <div className="mt-2 text-base font-semibold break-words">{s.title}</div>
       <div className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
