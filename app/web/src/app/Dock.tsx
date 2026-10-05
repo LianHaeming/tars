@@ -14,7 +14,9 @@ export function Dock() {
 
   const tab = hidden ? -1 : 0
   const onSchedule = pathname === '/'
-  const seg = (on: boolean) => cn('relative z-10 grid h-10 w-14 place-items-center rounded-full transition-colors duration-200 before:absolute before:inset-x-0 before:-inset-y-0.5 before:content-[""] [&_svg]:size-5', on ? 'text-background' : 'text-muted-foreground')
+  const nav = onSchedule
+    ? { to: '/apps', label: 'Apps', Icon: LayoutGridIcon }
+    : { to: '/', label: 'Schedule', Icon: CircleCheckIcon }
 
   let center: ReactNode = null
   if (flash) {
@@ -48,15 +50,15 @@ export function Dock() {
       <div aria-hidden className="h-12 flex-1" />
       <div className="flex shrink-0 justify-center">{center}</div>
       <div className="flex flex-1 justify-end">
-        <div className={cn('dock relative flex items-center gap-1 rounded-full p-1', !hidden && 'pointer-events-auto')}>
-          <span
-            aria-hidden
-            className="absolute left-1 top-1 h-10 w-14 rounded-full bg-foreground shadow-sm transition-transform duration-300 ease-spring"
-            style={{ transform: onSchedule ? 'translateX(0)' : 'translateX(calc(100% + 0.25rem))' }}
-          />
-          <Link to="/" onClick={exitDay} aria-label="Schedule" aria-current={onSchedule ? 'page' : undefined} tabIndex={tab} className={seg(onSchedule)}><CircleCheckIcon /></Link>
-          <Link to="/apps" onClick={exitDay} aria-label="Apps" aria-current={onSchedule ? undefined : 'page'} tabIndex={tab} className={seg(!onSchedule)}><LayoutGridIcon /></Link>
-        </div>
+        <Link
+          to={nav.to}
+          onClick={exitDay}
+          aria-label={nav.label}
+          tabIndex={tab}
+          className={cn('dock grid size-12 place-items-center rounded-full text-foreground transition-transform active:scale-98 [&_svg]:size-5', !hidden && 'pointer-events-auto')}
+        >
+          <nav.Icon />
+        </Link>
       </div>
     </nav>
   )

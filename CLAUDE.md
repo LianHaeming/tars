@@ -36,8 +36,9 @@ bin/             sync, up, backup, gmail, monzo, burmese (rebuilds the deck — 
   line, "goes out automatically every month" total split by group, Claude's "Tars noticed" insights, the repeating
   payments by group with logos, next 30 days). Each app's `*Section.tsx` is still bare content; a thin `*Page.tsx`
   wraps it in `Page`. Dock (on Schedule, Apps and app pages): a **page-specific primary action in the centre** (Schedule
-  = one-tap **Add task**; other apps none yet — `Dock.tsx` chooses it by path) and the Schedule | Apps nav pill on the
-  **right** (Apps stays lit on every non-Schedule page); the undo flash borrows the centre slot. Safari's status strip
+  = one-tap **Add task**; other apps none yet — `Dock.tsx` chooses it by path) and a single context **nav button on the
+  right** that flips by path (on Schedule it opens Apps; anywhere else it returns to Schedule); the undo flash borrows
+  the centre slot. Safari's status strip
   is `theme-color` = `--chrome` (#15263a) — keep them equal so the top reads as one navy surface; added to the Home
   Screen it runs standalone (manifest) under the Dynamic Island. Everything else is a **page** with its own URL and a
   back button — Lian doesn't want pop-up windows: `/inbox`, `/food/:id`, `/food/list` (these two back to
