@@ -9,6 +9,7 @@ import { CalendarPanel } from '@/features/tasks/calendar'
 import { Empty, FilterBar, FilterLabel, Section, SectionHead } from '@/components/common'
 import { PaymentRow, useExpected, type Expected } from '@/features/money/expected'
 import { Button } from '@/components/ui/button'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { MainEvent } from './MainEvent'
 
 type Entry = { day: string; task?: Task; pay?: Expected }
@@ -29,39 +30,84 @@ function groupByDay(entries: Entry[]) {
 
 const BIRTH = new Date(1998, 1, 10)
 const SPAN = 100
+const LIKELY = 87
 const MARKS = [
   { at: 81, label: 'today’s rates' },
   { at: 87, label: 'likely', main: true },
   { at: 90, label: '≈1 in 4' },
 ]
 const QUIPS = ['make today count', 'go make a memory', 'carpe that diem', 'you can’t bank the unused days', 'spend it well', 'the days don’t come back']
+const DAY = 864e5
+const YEAR = 365.25 * DAY
+
+type Parent = { name: string; born: number; to: number }
+const PARENTS: Parent[] = []
+
+const num = (n: number) => n.toLocaleString()
+
+function quirkyStats(age: number) {
+  const now = Date.now()
+  const left = Math.max(0, LIKELY - age)
+  const daysLived = Math.floor((now - +BIRTH) / DAY)
+  const halfway = new Date(+BIRTH + (LIKELY / 2) * YEAR)
+  const halfwayPassed = now >= +halfway
+  const ageAt = (year: number) => year - BIRTH.getFullYear()
+  const stats: { n: string; l: string }[] = [
+    { n: num(daysLived), l: 'days lived' },
+    { n: num(Math.round(left)), l: 'summers left' },
+    { n: num(Math.round(left * 52)), l: 'weekends left' },
+    { n: num(Math.round(left * 12.368)), l: 'full moons left' },
+    { n: halfwayPassed ? 'passed' : shortDate(halfway), l: halfwayPassed ? 'past halfway (43½)' : 'you hit halfway (43½)' },
+    { n: String(ageAt(2045)), l: 'your age at the singularity, 2045' },
+    { n: String(ageAt(2029)), l: 'your age when AGI’s tipped to land' },
+  ]
+  for (const p of PARENTS) {
+    const pAge = (now - new Date(p.born, 0, 1).getTime()) / YEAR
+    stats.push({ n: num(Math.max(0, Math.round((p.to - pAge) * 52))), l: `weekends with ${p.name} left` })
+  }
+  return stats
+}
 
 function LifeStrip() {
-  const age = (Date.now() - +BIRTH) / (365.25 * 864e5)
+  const [open, setOpen] = useState(false)
+  const age = (Date.now() - +BIRTH) / YEAR
   const pct = (age / SPAN) * 100
-  const toAvg = Math.round((age / 87) * 100)
-  const quip = QUIPS[Math.floor(+today() / 864e5) % QUIPS.length]
+  const toAvg = Math.round((age / LIKELY) * 100)
+  const quip = QUIPS[Math.floor(+today() / DAY) % QUIPS.length]
+  const stats = quirkyStats(age)
   return (
-    <div className="px-1 pt-1 pb-3">
-      <div className="flex items-baseline justify-between">
-        <span className="text-sm font-semibold">Life, so far — you’re {Math.floor(age)}</span>
-        <span className="text-xs text-muted-foreground">{toAvg}% to the average</span>
-      </div>
-      <div className="mt-3 flex items-center gap-3">
-        <div className="relative h-2 flex-1 overflow-hidden rounded-full bg-secondary">
-          <div className="absolute inset-y-0 left-0 overflow-hidden rounded-full" style={{ width: `${pct}%` }}>
-            <div className="h-full" style={{ width: `${10000 / pct}%`, background: 'linear-gradient(90deg, var(--today), var(--tomorrow), var(--overdue))' }} />
+    <Collapsible open={open} onOpenChange={setOpen} className="px-1 pt-1 pb-3">
+      <CollapsibleTrigger className="w-full text-left">
+        <div className="flex items-baseline justify-between">
+          <span className="text-sm font-semibold">Life, so far — you’re {Math.floor(age)}</span>
+          <span className="text-xs text-muted-foreground">{toAvg}% to the average</span>
+        </div>
+        <div className="mt-3 flex items-center gap-3">
+          <div className="relative h-2 flex-1 overflow-hidden rounded-full bg-secondary">
+            <div className="absolute inset-y-0 left-0 overflow-hidden rounded-full" style={{ width: `${pct}%` }}>
+              <div className="h-full" style={{ width: `${10000 / pct}%`, background: 'linear-gradient(90deg, var(--today), var(--tomorrow), var(--overdue))' }} />
+            </div>
+            {MARKS.map(m => (
+              <div key={m.at} className={cn('absolute inset-y-0 w-px', m.main ? 'bg-primary' : 'bg-foreground/50')} style={{ left: `${(m.at / SPAN) * 100}%` }} title={`${m.at} — ${m.label}`} />
+            ))}
           </div>
-          {MARKS.map(m => (
-            <div key={m.at} className={cn('absolute inset-y-0 w-px', m.main ? 'bg-primary' : 'bg-foreground/50')} style={{ left: `${(m.at / SPAN) * 100}%` }} title={`${m.at} — ${m.label}`} />
+          <span className="text-xs font-semibold tabular-nums text-muted-foreground" title="100 — about 1 in 9 men">100</span>
+        </div>
+        <p className="mt-2 text-xs text-muted-foreground">
+          81 today’s rates · <span className="text-primary">87 likely</span> · 90 ≈ 1 in 4 · 100 ≈ 1 in 9 · {open ? quip : 'tap for more'}
+        </p>
+      </CollapsibleTrigger>
+      <CollapsibleContent>
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          {stats.map(s => (
+            <div key={s.l} className="glass rounded-lg px-3 py-2">
+              <div className="text-lg font-semibold tabular-nums">{s.n}</div>
+              <div className="text-xs text-muted-foreground">{s.l}</div>
+            </div>
           ))}
         </div>
-        <span className="text-xs font-semibold tabular-nums text-muted-foreground" title="100 — about 1 in 9 men">100</span>
-      </div>
-      <p className="mt-2 text-xs text-muted-foreground">
-        81 today’s rates · <span className="text-primary">87 likely</span> · 90 ≈ 1 in 4 · 100 ≈ 1 in 9 · {quip}
-      </p>
-    </div>
+      </CollapsibleContent>
+    </Collapsible>
   )
 }
 
