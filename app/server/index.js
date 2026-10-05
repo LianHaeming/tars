@@ -211,6 +211,18 @@ async function api(req, res, parts) {
 const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.json': 'application/json',
   '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.webp': 'image/webp', '.woff2': 'font/woff2', '.webmanifest': 'application/manifest+json' };
 
+const KILL_SW = `self.addEventListener('install', () => self.skipWaiting());
+self.addEventListener('activate', (e) => e.waitUntil((async () => {
+  try {
+    const keys = await caches.keys();
+    await Promise.all(keys.map((k) => caches.delete(k)));
+    await self.registration.unregister();
+    const clients = await self.clients.matchAll({ type: 'window' });
+    for (const c of clients) c.navigate(c.url);
+  } catch (err) {}
+})()));
+`;
+
 function serve(res, file, cache) {
   fs.readFile(file, (err, buf) => {
     if (err) return send(res, 404, { error: 'not found' });
@@ -239,6 +251,10 @@ http.createServer(async (req, res) => {
   if (rel.startsWith('/data/food/')) {
     const file = inside(FOOD, rel.slice('/data/food'.length));
     return file ? serve(res, file, 'public, max-age=3600') : send(res, 403, { error: 'forbidden' });
+  }
+  if (rel === '/sw.js') {
+    res.writeHead(200, { 'content-type': 'text/javascript', 'cache-control': 'no-cache', 'service-worker-allowed': '/' });
+    return res.end(KILL_SW);
   }
   const file = inside(DIST, rel);
   if (file && path.extname(rel)) return serve(res, file, rel.startsWith('/assets/') ? 'public, max-age=31536000, immutable' : 'no-cache');
