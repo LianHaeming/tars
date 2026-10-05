@@ -159,11 +159,11 @@ export function Home() {
     <main className="mx-auto max-w-page px-4 pt-safe-3 pb-safe-40">
       <LifeStrip />
       <FilterBar value={active} onValueChange={pick}>
-        <FilterLabel value="all" color="var(--foreground)">All</FilterLabel>
+        <FilterLabel value="all">All</FilterLabel>
         {state.projects.map(p => (
-          <FilterLabel key={p.id} value={p.id} color={dim(p.color)}>{p.name}</FilterLabel>
+          <FilterLabel key={p.id} value={p.id} dot={dim(p.color)}>{p.name}</FilterLabel>
         ))}
-        <FilterLabel value="completed" color="var(--muted-foreground)">Completed</FilterLabel>
+        <FilterLabel value="completed">Completed</FilterLabel>
       </FilterBar>
 
       {completed ? (

@@ -46,13 +46,13 @@ export function FilterBar({ value, onValueChange, children }: { value: string; o
   )
 }
 
-export function FilterLabel({ value, color, children }: { value: string; color: string; children: ReactNode }) {
+export function FilterLabel({ value, dot, children }: { value: string; dot?: string; children: ReactNode }) {
   return (
     <ToggleGroupItem
       value={value}
-      style={{ color }}
-      className="h-auto shrink-0 rounded-full px-3 py-2.5 text-base font-semibold whitespace-nowrap hover:bg-transparent data-[state=on]:bg-foreground data-[state=on]:!text-background"
+      className="h-auto shrink-0 gap-2 rounded-full px-3 py-2.5 text-base font-semibold whitespace-nowrap text-muted-foreground hover:bg-transparent data-[state=on]:bg-foreground data-[state=on]:text-background"
     >
+      {dot && <Dot color={dot} />}
       {children}
     </ToggleGroupItem>
   )
