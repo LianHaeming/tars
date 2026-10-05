@@ -70,21 +70,15 @@ function quirkyStats(age: number) {
   return stats
 }
 
-function LifeRow({ name, age, to, marks }: { name: string; age: number; to: number; marks: { at: number; label: string; main?: boolean }[] }) {
+function LifeRow({ age, marks }: { age: number; marks: { at: number; label: string; main?: boolean }[] }) {
   return (
-    <div>
-      <div className="flex items-baseline justify-between">
-        <span className="text-sm font-semibold">{name} — {Math.floor(age)}</span>
-        <span className="text-xs font-semibold tabular-nums text-muted-foreground">{Math.round((age / to) * 100)}%</span>
+    <div className="relative h-1 overflow-hidden rounded-full bg-secondary">
+      <div className="absolute inset-y-0 left-0 overflow-hidden rounded-full" style={{ width: `${(age / SPAN) * 100}%` }}>
+        <div className="h-full" style={{ width: `${(SPAN / age) * 100}%`, background: 'linear-gradient(90deg, var(--today), var(--tomorrow), var(--overdue))' }} />
       </div>
-      <div className="mt-2 relative h-2 overflow-hidden rounded-full bg-secondary">
-        <div className="absolute inset-y-0 left-0 overflow-hidden rounded-full" style={{ width: `${(age / SPAN) * 100}%` }}>
-          <div className="h-full" style={{ width: `${(SPAN / age) * 100}%`, background: 'linear-gradient(90deg, var(--today), var(--tomorrow), var(--overdue))' }} />
-        </div>
-        {marks.map(m => (
-          <div key={m.at} className={cn('absolute inset-y-0 w-px', m.main ? 'bg-primary' : 'bg-foreground/50')} style={{ left: `${(m.at / SPAN) * 100}%` }} title={`${m.at} — ${m.label}`} />
-        ))}
-      </div>
+      {marks.map(m => (
+        <div key={m.at} className={cn('absolute inset-y-0 w-px', m.main ? 'bg-primary' : 'bg-foreground/50')} style={{ left: `${(m.at / SPAN) * 100}%` }} title={`${m.at} — ${m.label}`} />
+      ))}
     </div>
   )
 }
@@ -95,10 +89,10 @@ function LifeStrip() {
   const stats = quirkyStats(age)
   return (
     <Collapsible open={open} onOpenChange={setOpen} className="px-1 pt-1 pb-3">
-      <CollapsibleTrigger className="w-full space-y-3 text-left">
-        <LifeRow name="You" age={age} to={LIKELY} marks={MARKS} />
+      <CollapsibleTrigger className="w-full space-y-2 py-2 text-left">
+        <LifeRow age={age} marks={MARKS} />
         {PARENTS.map(p => (
-          <LifeRow key={p.name} name={p.name} age={(Date.now() - +new Date(p.born)) / YEAR} to={p.to} marks={[{ at: p.to, label: 'likely', main: true }, ...(p.marks ?? [])]} />
+          <LifeRow key={p.name} age={(Date.now() - +new Date(p.born)) / YEAR} marks={[{ at: p.to, label: 'likely', main: true }, ...(p.marks ?? [])]} />
         ))}
       </CollapsibleTrigger>
       <CollapsibleContent>
