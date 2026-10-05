@@ -17,6 +17,7 @@ const SESSION = path.join(os.homedir(), '.config', 'tars', 'whatsapp');
 
 const KEEP = 150;                  // messages kept per chat
 const mode = process.argv[2] || 'run';
+let relinks = 0;                   // guard self-heal loops when the saved session is stale
 const log = (...a) => console.log(new Date().toISOString(), ...a);
 const numberOf = jid => (jid || '').split('@')[0].split(':')[0];
 function tsMs(t) {
@@ -169,8 +170,17 @@ async function start() {
       save(true);
       if (code === DisconnectReason.loggedOut) {
         setStatus('needs-login');
+        // While linking, a logged-out close means the saved keys are stale (expired/aborted QR):
+        // wipe them and come back with a fresh QR instead of giving up.
+        if (mode === 'login' && relinks < 3) {
+          relinks++;
+          log('clearing a stale session and showing a fresh QR…');
+          try { sock.ev.removeAllListeners(); sock.end?.(undefined); } catch {}
+          fs.rmSync(SESSION, { recursive: true, force: true });
+          return start().catch(e => { log('restart failed:', e.message); process.exit(1); });
+        }
         log('logged out — run `bin/whatsapp login` to re-link');
-        process.exit(0);           // don't hot-loop; wait for a manual re-link
+        return process.exit(0);    // in service mode, wait for a manual re-link
       }
       log('connection closed, reconnecting…', code || '');
       setStatus('connecting');
