@@ -94,9 +94,7 @@ bin/             sync, up, backup, gmail, monzo, burmese (rebuilds the deck — 
   my-menu.json, run `python3 export_tars.py` there (writes data/food/ here), commit, push, then `bin/sync` on the PC.
   Recipes/photos are HelloFresh's copyrighted content: personal use only, never publish.
 - `bin/sync` — pull, build, restart. `bin/up <dir>` — build (`build` in app.json) and (re)start `tars-<dir>` as a user
-  service on the tailnet (`https` field, else its port). `bin/backup` — snapshot data/state to `data/backups/`
-  (gitignored; daily timer via `bin/backup install`, 30 days kept); the Mac pulls that folder daily (launchd
-  `com.tars.backup`).
+  service on the tailnet (`https` field, else its port). data/state has no backups (Lian's call).
 
 ## Tools
 - `bin/gmail` — read-only Gmail for cottrelllian@gmail.com (the only Gmail path — the claude.ai Gmail and Todoist

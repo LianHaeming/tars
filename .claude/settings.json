@@ -22,7 +22,6 @@
       "Bash(npm run lint:*)",
       "Bash(bin/up:*)",
       "Bash(bin/sync:*)",
-      "Bash(bin/backup:*)",
       "Bash(bin/gmail:*)",
       "Bash(bin/monzo:*)",
       "Bash(systemctl --user status:*)",
