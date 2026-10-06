@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+# Obsidian vault sync for tars. The vault (Lian's "youtube-digest" Obsidian Sync vault) lives at ~/tars/vault, kept in
+# step with Obsidian Sync by obsidian-headless (`ob`, npm i -g obsidian-headless), so notes tars writes there reach the
+# Obsidian app on Lian's phone within seconds.
+# Usage: bin/obsidian install   run `ob sync --continuous` as the tars-obsidian-sync user service
+#        bin/obsidian status    login, vault config and service state
+#        bin/obsidian sync      one-off sync now (stops the service while it runs)
+# One-time sign-in is Lian's to do (it prompts for secrets): `ob login`, then
+#   ob sync-setup --vault youtube-digest --path ~/tars/vault --device-name tars-omarchy
+# The session and the vault's encryption key live in ~/.config/obsidian-headless (outside the repo).
+set -euo pipefail
+export PATH="$HOME/.local/share/mise/shims:$HOME/.local/bin:$PATH"
+VAULT="${TARS_VAULT:-$HOME/tars/vault}"
+UNIT=tars-obsidian-sync.service
+
+case "${1:-}" in
+  install)
+    unit="$HOME/.config/systemd/user/$UNIT"
+    mkdir -p "$(dirname "$unit")"
+    cat > "$unit" <<UNIT
+[Unit]
+Description=tars: Obsidian Sync for ~/tars/vault
+After=network-online.target
+
+[Service]
+Environment=PATH=%h/.local/share/mise/shims:%h/.local/bin:/usr/local/bin:/usr/bin
+ExecStart=/bin/sh -c 'exec ob sync --continuous --path $VAULT'
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=default.target
+UNIT
+    systemctl --user daemon-reload
+    systemctl --user enable --quiet "$UNIT"
+    systemctl --user restart "$UNIT"
+    sleep 2
+    systemctl --user --no-pager --lines=0 status "$UNIT" | head -3 || true
+    ;;
+  status)
+    ob login </dev/null
+    ob sync-status --path "$VAULT"
+    systemctl --user --no-pager --lines=5 status "$UNIT" || true
+    ;;
+  sync)
+    was_active="$(systemctl --user is-active "$UNIT" 2>/dev/null || true)"
+    systemctl --user stop "$UNIT" 2>/dev/null || true
+    ob sync --path "$VAULT"
+    [ "$was_active" = active ] && systemctl --user start "$UNIT" || true
+    ;;
+  *)
+    sed -n '2,10p' "$0" | sed 's/^# \{0,1\}//'
+    exit 1
+    ;;
+esac
