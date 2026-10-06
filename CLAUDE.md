@@ -1,6 +1,6 @@
 # tars
 
-Lian's personal assistant app on the Omarchy PC (`~/tars`). Lian starts Claude here and usually drives it with
+Lian's personal assistant app on the Omarchy PC (`~/dev/robin/repos/tars`; `~/tars` is a symlink to it). Lian starts Claude here and usually drives it with
 Remote Control from their phone or iPad, and uses the app on their phone over Tailscale at
 **https://omarchy.tail0bf266.ts.net/**. One private repo: github.com/LianHaeming/tars (Mac clone: `~/dev/tars`).
 
@@ -117,10 +117,12 @@ bin/             sync, up, backup, gmail, monzo, burmese (rebuilds the deck — 
 
 ## Working rules
 - Pull before starting work; commit and push when a change is done.
-- `~/tars` on `main` is the one live checkout (the running service reads its `data/state/`). Parallel or risky work goes
-  in a **git worktree**, not a second edit of `~/tars`: `git -C ~/tars worktree add -b <branch> ~/tars-wt/<branch> main`,
-  edit/build/commit there, then merge and `git -C ~/tars worktree remove ~/tars-wt/<branch>`. Worktrees have no
-  `data/state/` (it's gitignored and lives only in `~/tars`), so they're for code; the live service always runs from `~/tars`.
+- `~/dev/robin/repos/tars` on `main` is the one live checkout (the running service reads its `data/state/`). Parallel or
+  risky work goes in a **git worktree**, not a second edit of the live checkout:
+  `git -C ~/dev/robin/repos/tars worktree add -b <branch> ~/dev/robin/worktrees/tars/<branch> main`, edit/build/commit
+  there, then merge and `git -C ~/dev/robin/repos/tars worktree remove ~/dev/robin/worktrees/tars/<branch>`. Worktrees
+  have no `data/state/` (it's gitignored and lives only in the live checkout), so they're for code; the live service always
+  runs from `~/dev/robin/repos/tars`.
 - After a change: `bin/up app` (builds the UI and restarts), then give Lian the link to check on their phone.
   `bin/up` reinstalls deps only when `package-lock.json` changed, so repeat deploys are fast.
 - Quick check mid-work: `cd app/web && npm run typecheck` (`tsc -b`, no bundle). Before committing UI changes,
