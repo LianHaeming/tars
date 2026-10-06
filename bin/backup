@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
-# Usage: bin/backup           snapshot data/state/ to ~/tars-backups/state-<date>.tgz, keeping the last 30 days
+# Usage: bin/backup           snapshot data/state/ to data/backups/state-<date>.tgz, keeping the last 30 days
 #        bin/backup install   run it daily (systemd user timer, catches up after the PC was off)
-# The Mac pulls ~/tars-backups too (launchd agent com.tars.backup), so a copy survives the PC's disk.
+# The Mac pulls data/backups too (launchd agent com.tars.backup), so a copy survives the PC's disk.
+# data/backups/ is gitignored like data/state/: personal data never goes to GitHub.
 set -euo pipefail
 TARS="$(cd "$(dirname "$0")/.." && pwd)"
-DEST="$HOME/tars-backups"
+DEST="$TARS/data/backups"
 
 if [ "${1:-}" = install ]; then
   dir="$HOME/.config/systemd/user"

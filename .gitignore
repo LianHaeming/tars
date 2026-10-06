@@ -3,6 +3,7 @@ __pycache__/
 node_modules/
 .env
 data/state/
+data/backups/
 data/food/*.zip
 
 .claude/worktrees/
