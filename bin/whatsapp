@@ -2,6 +2,7 @@
 # Read-only WhatsApp capture for tars. It reads your messages into data/state/whatsapp.json; it never sends.
 # Usage: bin/whatsapp login     link this PC to WhatsApp (scan the QR with your phone, once)
 #        bin/whatsapp install   run the capture bridge as a background user service (tars-whatsapp)
+#        bin/whatsapp more [N]  pull older history on demand (N rounds of 50/chat, default 8), then resume
 #        bin/whatsapp status     show whether it's linked and how much was captured
 #        bin/whatsapp run        the service entrypoint (used by the unit; stays in the foreground)
 # Talks the WhatsApp protocol directly (Baileys — no browser). The session lives in ~/.config/tars/whatsapp
@@ -51,6 +52,14 @@ UNIT
     sleep 1
     systemctl --user --no-pager --lines=0 status tars-whatsapp.service | head -4 || true
     echo "capturing in the background. Check the WhatsApp tile in the app, or: bin/whatsapp status"
+    ;;
+  more)
+    ensure_deps
+    was_active="$(systemctl --user is-active tars-whatsapp.service 2>/dev/null || true)"
+    systemctl --user stop tars-whatsapp.service 2>/dev/null || true
+    node "$DIR/bridge.js" more "${2:-}"
+    [ "$was_active" = active ] && systemctl --user start tars-whatsapp.service || true
+    node "$DIR/bridge.js" status
     ;;
   status)
     node "$DIR/bridge.js" status

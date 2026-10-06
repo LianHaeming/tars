@@ -1,9 +1,10 @@
 // tars WhatsApp bridge — READ-ONLY. Speaks the WhatsApp multi-device protocol directly (Baileys, no browser)
 // and writes every message it sees into data/state/whatsapp.json. It has no send path on purpose.
 //
-//   node bridge.js login    print a QR to link the PC (run from bin/whatsapp login)
-//   node bridge.js run       service mode: reconnect the saved session, capture forever
-//   node bridge.js status    print what's in whatsapp.json (no connection)
+//   node bridge.js login     print a QR to link the PC (run from bin/whatsapp login)
+//   node bridge.js run        service mode: reconnect the saved session, capture forever
+//   node bridge.js more [N]   pull older history on demand — N rounds of 50/chat (default 8), then exit
+//   node bridge.js status     print what's in whatsapp.json (no connection)
 //
 // The session (Baileys multi-file auth) lives in ~/.config/tars/whatsapp. Only one process may use it at a time.
 const fs = require('fs');
@@ -15,8 +16,9 @@ const DATA = process.env.TARS_DATA || path.join(TARS, 'data');
 const FILE = path.join(DATA, 'state', 'whatsapp.json');
 const SESSION = path.join(os.homedir(), '.config', 'tars', 'whatsapp');
 
-const KEEP = 150;                  // messages kept per chat
+const KEEP = Number(process.env.WA_KEEP) || 1000;   // max messages kept per chat (raise to go deeper)
 const mode = process.argv[2] || 'run';
+const wait = ms => new Promise(r => setTimeout(r, ms));
 let relinks = 0;                   // guard self-heal loops when the saved session is stale
 const log = (...a) => console.log(new Date().toISOString(), ...a);
 const numberOf = jid => (jid || '').split('@')[0].split(':')[0];
@@ -137,6 +139,31 @@ async function resolveGroups(sock) {
   save();
 }
 
+// On-demand backfill: ask WhatsApp for messages older than each chat's current oldest, round by round.
+// Replies arrive on 'messaging-history.set' and flow through record(); a chat that returns nothing is retired.
+async function deepen(sock, rounds) {
+  const PER = 50;
+  const done = new Set();
+  const all = () => Object.values(store.chats);
+  const count = () => all().reduce((n, c) => n + c.messages.length, 0);
+  log(`deepening: ${all().length} chats, ${count()} messages now, up to ${rounds} rounds (cap ${KEEP}/chat)`);
+  for (let r = 1; r <= rounds; r++) {
+    let progressed = 0;
+    for (const c of all()) {
+      if (done.has(c.id) || !c.messages.length || c.messages.length >= KEEP) { done.add(c.id); continue; }
+      const oldest = c.messages[0];
+      try { await sock.fetchMessageHistory(PER, { remoteJid: c.id, id: oldest.id, fromMe: oldest.fromMe }, Math.floor(oldest.at / 1000)); }
+      catch { done.add(c.id); continue; }
+      await wait(3000);
+      if (c.messages[0].at < oldest.at) progressed++; else done.add(c.id);
+    }
+    save(true);
+    log(`round ${r}: ${count()} messages, ${done.size}/${all().length} chats exhausted`);
+    if (!progressed || done.size >= all().length) break;
+  }
+  log(`deepen done: ${count()} messages total`);
+}
+
 async function start() {
   const { state, saveCreds } = await useMultiFileAuthState(SESSION);
   const { version } = await fetchLatestBaileysVersion();
@@ -163,12 +190,20 @@ async function start() {
       store.me = { name: sock.user?.name || sock.user?.verifiedName || '', number: numberOf(sock.user?.id) };
       setStatus('ready');
       log('connected as', store.me.name || store.me.number);
+      if (mode === 'more') {
+        try { await resolveGroups(sock); } catch {}
+        const rounds = Number(process.argv[3]) || 8;
+        try { await deepen(sock, rounds); } catch (e) { log('deepen error:', e.message); }
+        save(true);
+        return process.exit(0);
+      }
       setTimeout(() => resolveGroups(sock).catch(() => {}), 8000);
     }
     if (connection === 'close') {
       const code = lastDisconnect?.error?.output?.statusCode;
       save(true);
       try { sock.ev.removeAllListeners(); sock.end?.(undefined); } catch {}   // drop the old socket before reconnecting
+      if (mode === 'more') return process.exit(0);   // one-shot; don't reconnect mid-backfill
       const again = () => setTimeout(() => start().catch(e => { log('reconnect failed:', e.message); process.exit(1); }), 1000);
       if (code === DisconnectReason.loggedOut) {
         setStatus('needs-login');
