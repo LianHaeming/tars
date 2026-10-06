@@ -1,0 +1,7 @@
+{
+  "name": "discover",
+  "port": 8405,
+  "https": 8445,
+  "start": "node server",
+  "build": "cd web && npm run build"
+}

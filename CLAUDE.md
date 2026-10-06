@@ -29,12 +29,12 @@ bin/             up, sync, icon, gmail, monzo, burmese, email-tasks, whatsapp (+
 
 | App | Internal port | URL (tailnet) | Owns |
 |---|---|---|---|
-| tasks (`tars-tasks`) | 8400 | https://omarchy.tail0bf266.ts.net/ | tasks, inbox, food, money, discover (until each is split out) |
+| tasks (`tars-tasks`) | 8400 | https://omarchy.tail0bf266.ts.net/ | tasks, inbox, food, money (until each is split out) |
 | burmese (`tars-burmese`) | 8404 | https://omarchy.tail0bf266.ts.net:8444/ | burmese |
-| whatsapp bridge (`tars-whatsapp`) | — | — | whatsapp (apps/whatsapp/state; the tasks app reads it read-only) |
+| discover (`tars-discover`) | 8405 | https://omarchy.tail0bf266.ts.net:8445/ | discover |
+| whatsapp (`tars-whatsapp`) | 8406 | https://omarchy.tail0bf266.ts.net:8446/ | whatsapp (written by the bridge, `tars-whatsapp-bridge`; the viewer only reads) |
 
-Planned splits, in order (each gets the next port pair: internal 840x, public 844x): discover, whatsapp viewer, money,
-food. Then the Apps launcher goes away — the iPhone home screen is the launcher.
+Planned splits, in order (each gets the next port pair: internal 840x, public 844x): money (8407/8447), food (8408/8448). Then the Apps launcher goes away — the iPhone home screen is the launcher.
 
 **Rules of the split** (they keep it robust):
 - **One owner per data file.** `docs()` keeps each JSON file in memory and rewrites it whole, so two processes writing
@@ -75,14 +75,18 @@ food. Then the Apps launcher goes away — the iPhone home screen is the launche
   add a sentence to the deck. API: `GET /api/burmese` · `POST /api/burmese/{learn,review,unlearn,save,translate}` ·
   `GET /api/burmese/phrases` · `POST /api/burmese/phrase` · `DELETE /api/burmese/history` (translate = `claude -p --model opus`, ~12 s).
   The tasks app's `/burmese` redirects there.
+- **Discover app** (`apps/discover`): one root page — a daily "cool GitHub repos" feed: real repos from the GitHub search
+  API, curated by `claude -p` once a London day into state/discover.json. API: `GET /api/discover[/fresh]`.
+- **WhatsApp app** (`apps/whatsapp`): the conversation list (`/`) and one chat's thread (`/chat/:id`, back to `/`).
+  API: `GET /api/whatsapp` (newest first, each with a last-message preview) · `GET /api/whatsapp/:id` — read-only;
+  `server/whatsapp.js` re-reads state/whatsapp.json when its mtime changes. The file is written by the capture bridge
+  in `apps/whatsapp/bridge` (its own package.json, outside the workspaces, and its own service `tars-whatsapp-bridge`).
 - **Tasks API** (`apps/tasks/server/index.js`): `GET /api/state` · `POST|PATCH|DELETE /api/tasks[/id]` · `/api/projects[/id]` (a project PATCH with `subs` sets its sub-categories; tasks carry an optional `subId`) ·
   `POST /api/shopping {items}` (replaces the Shopping list's unticked items) · `GET|PATCH /api/food {basket, shop, servings}` (servings per recipe id, base 2) ·
   `GET /api/money[/fresh]` (runs `bin/monzo json` via `server/money.js`, cached 2 min; 503 with the message if sign-in is needed) ·
   `GET /api/money/summary[-fresh]` (repeating payments as monthly costs + `claude -p` once a London day for clean names, groups,
   logo domains and 3–5 insights, kept in state/money.json) · `GET /api/expected` (repeating payments/income predicted from the last 89 days — monthly or weekly, split by amount when a
   payee has several, stopped ones dropped, late ones shown today; next 90 days; Monzo data reused up to 1 h).
-  `GET /api/whatsapp` (conversation list, newest first, each with a last-message preview) · `GET /api/whatsapp/:id` (one chat's full thread) —
-  read-only; `apps/tasks/server/whatsapp.js` re-reads apps/whatsapp/state/whatsapp.json (written by the separate `tars-whatsapp` bridge) when its mtime changes.
   Static: `/data/food/*` from data/food; anything else is the built app (page URLs fall back to index.html).
 - **Tasks frontend** (`apps/tasks/web/src/`), grouped by feature:
   - `app/` — App.tsx (routes), Layout.tsx (AppShell + dock, quick-add), Dock.tsx. `lib/types.ts` — Task, Project, State, Candidate.
@@ -143,7 +147,7 @@ food. Then the Apps launcher goes away — the iPhone home screen is the launche
 - `bin/whatsapp` — **read-only** WhatsApp capture (reads your messages into apps/whatsapp/state/whatsapp.json; never sends). It links
   the PC as a WhatsApp multi-device companion via **Baileys** (protocol over a WebSocket — no browser); the session lives in
   `~/.config/tars/whatsapp` (Baileys multi-file auth, outside the repo). `bin/whatsapp login` (scan the QR on your phone,
-  once — stops the service while you do), `bin/whatsapp install` (runs the bridge as the `tars-whatsapp` user service),
+  once — stops the service while you do), `bin/whatsapp install` (runs the bridge as the `tars-whatsapp-bridge` user service),
   `bin/whatsapp status`. History is whatever WhatsApp's on-link sync sends plus everything from link-time onward. Only one
   process can hold the session at a time. No send path by design. (whatsapp-web.js was tried first but is currently broken
   against live WhatsApp Web — its injected accessors throw against the 2.3000.1044+ builds.)

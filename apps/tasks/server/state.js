@@ -6,5 +6,4 @@ module.exports = docs(__dirname + '/..', {
   food: () => ({ basket: [], shop: '', servings: {} }),
   inbox: () => ({ candidates: [], seen: [] }),
   money: () => ({ labels: {}, insights: [], day: null, at: null, error: null }),
-  discover: () => ({ day: null, at: null, repos: [], error: null }),
 });

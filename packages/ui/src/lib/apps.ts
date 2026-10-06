@@ -1,6 +1,8 @@
 export const APP_PORTS = {
   tasks: 443,
   burmese: 8444,
+  discover: 8445,
+  whatsapp: 8446,
 } as const
 
 export type AppName = keyof typeof APP_PORTS

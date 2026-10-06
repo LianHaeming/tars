@@ -7,9 +7,6 @@ import { Layout } from './Layout'
 
 const AppsPage = lazy(() => import('@/features/apps/AppsPage').then(m => ({ default: m.AppsPage })))
 const MoneyPage = lazy(() => import('@/features/money/MoneyPage').then(m => ({ default: m.MoneyPage })))
-const DiscoverPage = lazy(() => import('@/features/discover/DiscoverPage').then(m => ({ default: m.DiscoverPage })))
-const WhatsappPage = lazy(() => import('@/features/whatsapp/WhatsappPage').then(m => ({ default: m.WhatsappPage })))
-const ChatPage = lazy(() => import('@/features/whatsapp/ChatPage').then(m => ({ default: m.ChatPage })))
 const FoodPage = lazy(() => import('@/features/food/FoodPage').then(m => ({ default: m.FoodPage })))
 const InboxPage = lazy(() => import('@/features/inbox/InboxPage').then(m => ({ default: m.InboxPage })))
 const ListPage = lazy(() => import('@/features/food/ListPage').then(m => ({ default: m.ListPage })))
@@ -28,9 +25,8 @@ const router = createBrowserRouter([
       { path: '/apps', element: <AppsPage /> },
       { path: '/burmese', element: <ToApp app="burmese" /> },
       { path: '/money', element: <MoneyPage /> },
-      { path: '/discover', element: <DiscoverPage /> },
-      { path: '/whatsapp', element: <WhatsappPage /> },
-      { path: '/whatsapp/:id', element: <ChatPage /> },
+      { path: '/discover', element: <ToApp app="discover" /> },
+      { path: '/whatsapp/*', element: <ToApp app="whatsapp" /> },
       { path: '/food', element: <FoodPage /> },
       { path: '/inbox', element: <InboxPage /> },
       { path: '/month', element: <Navigate to="/" replace /> },

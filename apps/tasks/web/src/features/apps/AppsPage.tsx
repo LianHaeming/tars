@@ -44,8 +44,8 @@ const APPS: { to: string; title: string; subtitle: string; Icon: ComponentType<{
   { to: appUrl('burmese'), title: 'Burmese', subtitle: 'Practice · phrase of the day · translate', Icon: LanguagesIcon, color: 'var(--week)' },
   { to: '/money', title: 'Money', subtitle: 'Balance · spending · what’s coming', Icon: WalletIcon, color: 'var(--money)' },
   { to: '/food', title: 'Food', subtitle: 'Menu · recipes · shopping list', Icon: UtensilsCrossedIcon, color: 'var(--today)' },
-  { to: '/discover', title: 'Discover', subtitle: 'Cool GitHub repos, picked daily', Icon: CompassIcon, color: 'var(--chart-2)' },
-  { to: '/whatsapp', title: 'WhatsApp', subtitle: 'Your messages, captured', Icon: MessageCircleIcon, color: 'var(--chat)' },
+  { to: appUrl('discover'), title: 'Discover', subtitle: 'Cool GitHub repos, picked daily', Icon: CompassIcon, color: 'var(--chart-2)' },
+  { to: appUrl('whatsapp'), title: 'WhatsApp', subtitle: 'Your messages, captured', Icon: MessageCircleIcon, color: 'var(--chat)' },
 ]
 
 function AppTile({ to, title, subtitle, Icon, color }: (typeof APPS)[number]) {

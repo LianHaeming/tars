@@ -29,7 +29,7 @@ function ChatRow({ chat }: { chat: WaChat }) {
   const preview = label(chat.last)
   const mine = chat.last?.fromMe
   return (
-    <Link to={`/whatsapp/${encodeURIComponent(chat.id)}`} className="hairline-b flex items-center gap-3 px-1 py-3 transition-opacity active:opacity-70">
+    <Link to={`/chat/${encodeURIComponent(chat.id)}`} className="hairline-b flex items-center gap-3 px-1 py-3 transition-opacity active:opacity-70">
       <Avatar chat={chat} />
       <span className="min-w-0 flex-1">
         <span className="flex items-baseline justify-between gap-2">

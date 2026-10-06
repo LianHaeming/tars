@@ -5,9 +5,7 @@ const crypto = require('crypto');
 const { TARS, send, start } = require('@tars/server');
 const store = require('./state');
 const { money, expected, summary } = require('./money');
-const whatsapp = require('./whatsapp');
 const { organise } = require('./organise');
-const { discover } = require('./discover');
 const { suggest } = require('./recipe');
 
 const PORT = process.env.PORT || 8400;
@@ -158,17 +156,6 @@ async function api(req, res, parts, body) {
   if (resource === 'organise' && req.method === 'GET') {
     try { return send(res, 200, await organise()); }
     catch (e) { return send(res, 503, { error: e.message }); }
-  }
-
-  if (resource === 'discover' && req.method === 'GET') {
-    try { return send(res, 200, await discover(rid === 'fresh')); }
-    catch (e) { return send(res, 503, { error: e.message }); }
-  }
-
-  if (resource === 'whatsapp' && req.method === 'GET') {
-    if (!rid) return send(res, 200, whatsapp.list());
-    const t = whatsapp.thread(rid);
-    return t ? send(res, 200, t) : send(res, 404, { error: 'not found' });
   }
 
   if (resource === 'inbox') {

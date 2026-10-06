@@ -37,7 +37,7 @@ export function ChatPage() {
   const { data, error, loading } = useThread(id)
 
   return (
-    <Page title={data?.name || 'Chat'} back="/whatsapp">
+    <Page title={data?.name || 'Chat'} back="/">
       {error ? (
         <Empty>{error}</Empty>
       ) : !data && loading ? (

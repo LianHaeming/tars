@@ -1,10 +1,9 @@
-// Read-only view over apps/whatsapp/state/whatsapp.json (written by apps/whatsapp/bridge, a separate service).
+// Read-only view over state/whatsapp.json (written by apps/whatsapp/bridge, a separate service).
 // The bridge owns the file; the server only reads it, re-reading when its mtime changes.
 const fs = require('fs');
 const path = require('path');
-const { TARS } = require('@tars/server');
 
-const FILE = path.join(TARS, 'apps', 'whatsapp', 'state', 'whatsapp.json');
+const FILE = path.join(process.env.TARS_STATE || path.join(__dirname, '..', 'state'), 'whatsapp.json');
 let cache = null, mtime = 0;
 
 function raw() {

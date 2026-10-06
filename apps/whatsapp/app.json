@@ -1,0 +1,7 @@
+{
+  "name": "whatsapp",
+  "port": 8406,
+  "https": 8446,
+  "start": "node server",
+  "build": "cd web && npm run build"
+}
