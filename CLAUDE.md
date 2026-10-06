@@ -161,11 +161,12 @@ reads the owner's port from its app.json; `TARS_PORT_<APP>` overrides it for sid
   `bin/whatsapp status`. History is whatever WhatsApp's on-link sync sends plus everything from link-time onward. Only one
   process can hold the session at a time. No send path by design. (whatsapp-web.js was tried first but is currently broken
   against live WhatsApp Web — its injected accessors throw against the 2.3000.1044+ builds.)
-- `bin/obsidian` — keeps **~/tars/vault** (Lian's Obsidian Sync vault, "youtube-digest") in sync both ways via
-  obsidian-headless (`ob`), so notes written there reach the Obsidian app on Lian's phone in seconds:
-  `bin/obsidian install` (the `tars-obsidian-sync` user service, `ob sync --continuous`), `bin/obsidian status`,
-  `bin/obsidian sync` (one-off). Sign-in is Lian's: `ob login`, then `ob sync-setup …` (both prompt for secrets; the
-  session lives in `~/.config/obsidian-headless`). Where and how to write notes: `~/tars/CLAUDE.md`.
+- `bin/obsidian` — keeps Lian's Obsidian Sync vaults in `~/tars/vaults/<name>` in sync both ways via obsidian-headless
+  (`ob`): **tars** (tars's own vault — notes written there reach the Obsidian app on Lian's phone in seconds) and
+  **youtube-digest** (Lian's, also used by their youtube-digest VM agent; read for grounding). `bin/obsidian install`
+  (one `tars-obsidian-<name>` user service per vault, `ob sync --continuous`), `bin/obsidian status`,
+  `bin/obsidian sync [name]`. Sign-in is Lian's: `ob login`, then `ob sync-setup …` per vault (both prompt for secrets;
+  the session and keys live in `~/.config/obsidian-headless`). Where and how to write notes: `~/tars/CLAUDE.md`.
 
 ## Working rules
 - Pull before starting work; commit and push when a change is done.
