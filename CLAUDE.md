@@ -1,6 +1,7 @@
 # tars
 
-Lian's personal assistant app on the Omarchy PC (`~/dev/robin/repos/tars`; `~/tars` is a symlink to it). Lian starts Claude here and usually drives it with
+Lian's personal assistant app on the Omarchy PC (`~/tars/repos/github/LianHaeming/tars`, inside the `~/tars` workspace — see
+`~/tars/CLAUDE.md` for workspace rules). Lian starts Claude in `~/tars` and usually drives it with
 Remote Control from their phone or iPad, and uses the app on their phone over Tailscale at
 **https://omarchy.tail0bf266.ts.net/**. One private repo: github.com/LianHaeming/tars (Mac clone: `~/dev/tars`).
 
@@ -12,7 +13,7 @@ One data folder, one server, one React frontend.
 ```
 data/            all data — only the server reads or writes it
   food/          Food content: menu.json, r/<id>.json, sainsburys/ocado.json, photos/ (in git; published from the Mac)
-  state/         live data (PC only, gitignored): tasks.json (lists + tasks), food.json (basket, shop, servings), money.json (AI labels + insights), whatsapp.json (captured messages — private, never backed up)
+  state/         live data (PC only, gitignored; a symlink to ~/tars/apps/tars/state): tasks.json (lists + tasks), food.json (basket, shop, servings), money.json (AI labels + insights), whatsapp.json (captured messages — private, never backed up)
 app/
   server/        Node, no dependencies: index.js (routes + static), store.js (data/state docs), money.js (Monzo), claude.js (shared `claude` CLI runner for burmese/money), burmese.js (deck, progress, translator), whatsapp.js (read-only view over whatsapp.json)
   whatsapp/      isolated WhatsApp capture bridge — its OWN package.json (Baileys, no browser), kept out of the no-dependency server; writes data/state/whatsapp.json, never sends
@@ -116,12 +117,9 @@ bin/             sync, up, backup, gmail, monzo, burmese (rebuilds the deck — 
 
 ## Working rules
 - Pull before starting work; commit and push when a change is done.
-- `~/dev/robin/repos/tars` on `main` is the one live checkout (the running service reads its `data/state/`). Parallel or
-  risky work goes in a **git worktree**, not a second edit of the live checkout:
-  `git -C ~/dev/robin/repos/tars worktree add -b <branch> ~/dev/robin/worktrees/tars/<branch> main`, edit/build/commit
-  there, then merge and `git -C ~/dev/robin/repos/tars worktree remove ~/dev/robin/worktrees/tars/<branch>`. Worktrees
-  have no `data/state/` (it's gitignored and lives only in the live checkout), so they're for code; the live service always
-  runs from `~/dev/robin/repos/tars`.
+- This checkout on `main` is the one live checkout: the services run from it, and its `data/state` is a symlink to
+  `~/tars/apps/tars/state` (the live data, outside git). Parallel or risky work goes in a **git worktree** (see
+  `~/tars/CLAUDE.md`); a worktree has no symlink, so its server gets its own empty `data/state` — never point it at the live data.
 - After a change: `bin/up app` (builds the UI and restarts), then give Lian the link to check on their phone.
   `bin/up` reinstalls deps only when `package-lock.json` changed, so repeat deploys are fast.
 - Quick check mid-work: `cd app/web && npm run typecheck` (`tsc -b`, no bundle). Before committing UI changes,

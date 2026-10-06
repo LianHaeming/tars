@@ -2,7 +2,7 @@ __pycache__/
 .DS_Store
 node_modules/
 .env
-data/state/
+data/state
 data/food/*.zip
 
 .claude/worktrees/
