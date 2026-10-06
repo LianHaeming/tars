@@ -1,0 +1,7 @@
+{
+  "name": "tars",
+  "port": 8400,
+  "https": 443,
+  "start": "node server",
+  "build": "cd web && npm run build"
+}

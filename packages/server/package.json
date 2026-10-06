@@ -1,0 +1,7 @@
+{
+  "name": "@tars/server",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Shared server kit for the tars apps: JSON state docs, the claude CLI runner, HTTP + static serving. No dependencies.",
+  "main": "index.js"
+}

@@ -1,0 +1,10 @@
+{
+  "name": "tars-whatsapp",
+  "private": true,
+  "description": "Read-only WhatsApp capture bridge for tars (Baileys, no browser). Logs incoming + outgoing messages into apps/whatsapp/state/whatsapp.json. Never sends anything.",
+  "dependencies": {
+    "@whiskeysockets/baileys": "^7.0.0-rc.14",
+    "pino": "^10.4.0",
+    "qrcode-terminal": "^0.12.0"
+  }
+}

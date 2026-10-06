@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Read-only WhatsApp capture for tars. It reads your messages into data/state/whatsapp.json; it never sends.
+# Read-only WhatsApp capture for tars. It reads your messages into apps/whatsapp/state/whatsapp.json; it never sends.
 # Usage: bin/whatsapp login     link this PC to WhatsApp (scan the QR with your phone, once)
 #        bin/whatsapp install   run the capture bridge as a background user service (tars-whatsapp)
 #        bin/whatsapp more [N]  pull older history on demand (N rounds of 50/chat, default 8), then resume
@@ -9,7 +9,8 @@
 # (outside the repo). Only one of these can hold it at a time.
 set -euo pipefail
 TARS="$(cd "$(dirname "$0")/.." && pwd)"
-DIR="$TARS/app/whatsapp"
+DIR="$TARS/apps/whatsapp/bridge"
+. "$TARS/bin/lib/state.sh"
 export PATH="$HOME/.local/share/mise/shims:$HOME/.local/bin:$PATH"
 
 ensure_deps() {
@@ -29,6 +30,8 @@ case "${1:-}" in
     exec node "$DIR/bridge.js" login
     ;;
   install)
+    live_only
+    link_state whatsapp
     ensure_deps
     unit="$HOME/.config/systemd/user/tars-whatsapp.service"
     mkdir -p "$(dirname "$unit")"
@@ -48,7 +51,8 @@ RestartSec=10
 WantedBy=default.target
 UNIT
     systemctl --user daemon-reload
-    systemctl --user enable --now tars-whatsapp.service
+    systemctl --user enable --quiet tars-whatsapp.service
+    systemctl --user restart tars-whatsapp.service
     sleep 1
     systemctl --user --no-pager --lines=0 status tars-whatsapp.service | head -4 || true
     echo "capturing in the background. Check the WhatsApp tile in the app, or: bin/whatsapp status"

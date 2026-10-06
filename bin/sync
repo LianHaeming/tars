@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
-# Usage: bin/sync   pull from GitHub, then rebuild and restart the tars app.
+# Usage: bin/sync [app…]   pull from GitHub, then rebuild and restart the given apps (default: every app with an app.json).
 set -euo pipefail
 TARS="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$TARS"
 if git remote get-url origin >/dev/null 2>&1; then git pull --ff-only; fi
-bin/up app
+apps=("$@")
+[ ${#apps[@]} -gt 0 ] || for f in apps/*/app.json; do apps+=("$(basename "$(dirname "$f")")"); done
+for a in "${apps[@]}"; do bin/up "$a"; done

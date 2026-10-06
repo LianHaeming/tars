@@ -1,0 +1,81 @@
+import { CheckIcon, Loader2Icon, XIcon } from 'lucide-react'
+import { dueLabel } from '@tars/ui/lib/dates'
+import { useTars } from '@/features/tasks/store'
+import { Button } from '@tars/ui/components/ui/button'
+import { Dot } from '@tars/ui/components/common'
+import { useOrganise, type Suggestion } from './organise'
+
+const changeLine = (s: Suggestion) => {
+  const parts: string[] = []
+  if (s.change.projectId) parts.push(`move to ${s.listName}`)
+  if (s.change.due) parts.push(`do ${dueLabel(s.change.due).toLowerCase()}`)
+  return parts.join(' · ')
+}
+
+function Shell({ children }: { children: React.ReactNode }) {
+  return <div className="glass mb-3 rounded-2xl px-4 py-3">{children}</div>
+}
+
+export function OrganiseCard() {
+  const { phase, error, total, idx, applied, current, start, accept, skip, stop } = useOrganise()
+  const { project } = useTars()
+
+  if (phase === 'idle') return null
+
+  if (phase === 'loading') {
+    return (
+      <Shell>
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Loader2Icon className="size-4 animate-spin" />
+          Tars is sorting your list…
+        </div>
+      </Shell>
+    )
+  }
+
+  if (phase === 'error') {
+    return (
+      <Shell>
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-sm text-muted-foreground">Couldn’t reach Tars — {error}</span>
+          <Button size="sm" variant="secondary" onClick={start}>Retry</Button>
+        </div>
+      </Shell>
+    )
+  }
+
+  if (phase === 'done') {
+    return (
+      <Shell>
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-sm text-muted-foreground">
+            {total === 0 ? 'Nothing to tidy — your list is in good shape.' : `Sorted ${applied} of ${total}.`}
+          </span>
+          <Button size="sm" variant="secondary" onClick={stop}>Done</Button>
+        </div>
+      </Shell>
+    )
+  }
+
+  const s = current!
+  const p = s.change.projectId ? project(s.change.projectId) : null
+
+  return (
+    <Shell>
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">Tars suggests</span>
+        <span className="text-xs tabular-nums text-muted-foreground">{idx + 1} / {total}</span>
+      </div>
+      <div className="mt-2 text-base font-semibold break-words">{s.title}</div>
+      <div className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
+        {p && <Dot color={p.color} />}
+        <span>{changeLine(s)}</span>
+      </div>
+      {s.reason && <div className="mt-0.5 text-xs text-muted-foreground/80">{s.reason}</div>}
+      <div className="mt-3 flex gap-2">
+        <Button size="sm" variant="secondary" onClick={skip} className="flex-1 gap-1.5 [&_svg]:size-4"><XIcon />Skip</Button>
+        <Button size="sm" onClick={accept} className="flex-1 gap-1.5 [&_svg]:size-4"><CheckIcon />Apply</Button>
+      </div>
+    </Shell>
+  )
+}

@@ -3,9 +3,9 @@
 //        bin/burmese phrases [N]  top up the phrase-of-the-day bank to N phrases (default 365).
 //        bin/burmese count       how many sentences are in the deck and how many are learned.
 // Stop the service first (systemctl --user stop tars-app) — it keeps burmese.json in memory — and start it again after.
-const { build } = require('../app/server/burmese');
-const phrases = require('../app/server/phrases');
-const { burmese } = require('../app/server/store');
+const { build } = require('../apps/tasks/server/burmese');
+const phrases = require('../apps/tasks/server/phrases');
+const { burmese } = require('../apps/tasks/server/state');
 
 const [cmd, arg] = process.argv.slice(2);
 
