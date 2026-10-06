@@ -1,6 +1,6 @@
-import { Suspense, useEffect } from 'react'
-import { Outlet, ScrollRestoration, useLocation } from 'react-router'
-import { Toaster } from '@tars/ui/components/ui/sonner'
+import { useEffect } from 'react'
+import { Outlet, useLocation } from 'react-router'
+import { AppShell } from '@tars/ui/components/AppShell'
 import { useQuickAdd, useTars } from '@/features/tasks/store'
 import { TaskSheet } from '@/features/tasks/TaskSheet'
 import { OrganiseProvider } from '@/features/home/organise'
@@ -28,15 +28,12 @@ export function Layout() {
 
   return (
     <OrganiseProvider>
-      <div aria-hidden className="island-scrim" />
-      <Suspense fallback={<div className="pt-safe-16 text-center text-sm text-muted-foreground">Loading…</div>}>
+      <AppShell>
         <Outlet />
-      </Suspense>
+      </AppShell>
       <TaskSheet />
       <Dock />
       <div role="status" aria-live="polite" className="sr-only">{flash?.label ?? ''}</div>
-      <Toaster position="bottom-center" offset={{ bottom: 'calc(96px + env(safe-area-inset-bottom))' }} mobileOffset={{ bottom: 'calc(96px + env(safe-area-inset-bottom))' }} />
-      <ScrollRestoration />
     </OrganiseProvider>
   )
 }

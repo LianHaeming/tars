@@ -5,7 +5,7 @@ import { cn } from '@tars/ui/lib/utils'
 import { useQuickAdd, useTars } from '@/features/tasks/store'
 import { useOrganise } from '@/features/home/organise'
 
-export const showsDock = (path: string) => path === '/' || /^\/(apps|food|burmese|money)(\/|$)/.test(path)
+export const showsDock = (path: string) => path === '/' || /^\/(apps|food|money)(\/|$)/.test(path)
 
 export function Dock() {
   const { flash, exitDay } = useTars()

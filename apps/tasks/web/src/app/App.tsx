@@ -1,11 +1,11 @@
-import { lazy } from 'react'
+import { lazy, useEffect } from 'react'
 import { Navigate, RouterProvider, createBrowserRouter } from 'react-router'
+import { appUrl, type AppName } from '@tars/ui/lib/apps'
 import { Home } from '@/features/home/Home'
 import { StoreProvider } from '@/features/tasks/store'
 import { Layout } from './Layout'
 
 const AppsPage = lazy(() => import('@/features/apps/AppsPage').then(m => ({ default: m.AppsPage })))
-const BurmesePage = lazy(() => import('@/features/burmese/BurmesePage').then(m => ({ default: m.BurmesePage })))
 const MoneyPage = lazy(() => import('@/features/money/MoneyPage').then(m => ({ default: m.MoneyPage })))
 const DiscoverPage = lazy(() => import('@/features/discover/DiscoverPage').then(m => ({ default: m.DiscoverPage })))
 const WhatsappPage = lazy(() => import('@/features/whatsapp/WhatsappPage').then(m => ({ default: m.WhatsappPage })))
@@ -15,13 +15,18 @@ const InboxPage = lazy(() => import('@/features/inbox/InboxPage').then(m => ({ d
 const ListPage = lazy(() => import('@/features/food/ListPage').then(m => ({ default: m.ListPage })))
 const RecipePage = lazy(() => import('@/features/food/RecipePage').then(m => ({ default: m.RecipePage })))
 
+function ToApp({ app }: { app: AppName }) {
+  useEffect(() => location.replace(appUrl(app)), [app])
+  return null
+}
+
 const router = createBrowserRouter([
   {
     element: <Layout />,
     children: [
       { path: '/', element: <Home /> },
       { path: '/apps', element: <AppsPage /> },
-      { path: '/burmese', element: <BurmesePage /> },
+      { path: '/burmese', element: <ToApp app="burmese" /> },
       { path: '/money', element: <MoneyPage /> },
       { path: '/discover', element: <DiscoverPage /> },
       { path: '/whatsapp', element: <WhatsappPage /> },

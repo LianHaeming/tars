@@ -6,7 +6,7 @@ import { Button } from '@tars/ui/components/ui/button'
 
 type Props = {
   title: ReactNode
-  back?: string
+  back?: string | false
   actions?: ReactNode
   wide?: boolean
   bare?: boolean
@@ -19,15 +19,17 @@ export const pageWidth = (wide?: boolean) => (wide ? 'max-w-5xl' : 'max-w-page')
 export function Page({ title, back = '/', actions, wide, bare, className, children }: Props) {
   const navigate = useNavigate()
   const location = useLocation()
-  const goBack = () => (location.key !== 'default' ? navigate(-1) : navigate(back))
+  const goBack = (to: string) => (location.key !== 'default' ? navigate(-1) : navigate(to))
 
   return (
-    <div className="min-h-dvh animate-in duration-200 fade-in slide-in-from-right-3">
+    <div className={cn('min-h-dvh animate-in duration-200 fade-in', back !== false && 'slide-in-from-right-3')}>
       <header className="chrome-bar hairline-b sticky top-0 z-20 pt-safe-0">
-        <div className={cn('mx-auto flex h-14 items-center gap-1 px-2', pageWidth(wide))}>
-          <Button variant="ghost" size="icon-lg" onClick={goBack} aria-label="Back" className="text-primary">
-            <ChevronLeftIcon className="size-6" />
-          </Button>
+        <div className={cn('mx-auto flex h-14 items-center gap-1', back === false ? 'px-4' : 'px-2', pageWidth(wide))}>
+          {back !== false && (
+            <Button variant="ghost" size="icon-lg" onClick={() => goBack(back)} aria-label="Back" className="text-primary">
+              <ChevronLeftIcon className="size-6" />
+            </Button>
+          )}
           <h1 className="min-w-0 flex-1 truncate text-lg font-bold tracking-tight">{title}</h1>
           {actions && <div className="flex items-center gap-1 pr-2">{actions}</div>}
         </div>

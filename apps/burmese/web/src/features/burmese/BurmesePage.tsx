@@ -3,7 +3,7 @@ import { BurmeseSection } from './BurmeseSection'
 
 export function BurmesePage() {
   return (
-    <Page title="Burmese" back="/apps">
+    <Page title="Burmese" back={false}>
       <BurmeseSection />
     </Page>
   )
