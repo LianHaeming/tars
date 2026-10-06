@@ -157,7 +157,7 @@ function useStoreValue() {
   return {
     loaded, state, open, project, shoppingList, load,
     openId, setOpenId, calSel, setCalSel: (ds: string) => { setCalSel(ds); setOpenId(null) }, pickDay: (ds: string) => setCalSel(ds),
-    dayView, enterDay: (ds: string) => { setCalSel(ds); setDayView(true) }, exitDay: () => { setDayView(false); setOpenId(null) }, closeDay: () => setDayView(false),
+    dayView, enterDay: (ds: string) => { setCalSel(ds); setDayView(true) }, closeDay: () => setDayView(false),
     calMonth, setCalMonth,
     pendingAdd, setPendingAdd, flash, clearFlash,
     patch, addDraft, discardIfEmpty, toggleDone, deleteTask, rescheduleOverdue,

@@ -62,7 +62,7 @@ export function BasketButton({ id, size = 'default' }: { id: string; size?: 'def
 
 export function RecipeTile({ r }: { r: Recipe }) {
   return (
-    <Link to={`/food/${r.id}`} className="group block w-60 shrink-0 snap-start">
+    <Link to={`/recipe/${r.id}`} className="group block w-60 shrink-0 snap-start">
       <Card className="h-full gap-0 overflow-hidden py-0 transition-transform group-active:scale-98">
         <div className="relative aspect-4/3 bg-secondary">
           <img loading="lazy" src={r.img} alt="" className="size-full object-cover" />

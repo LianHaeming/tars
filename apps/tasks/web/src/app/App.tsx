@@ -5,12 +5,7 @@ import { Home } from '@/features/home/Home'
 import { StoreProvider } from '@/features/tasks/store'
 import { Layout } from './Layout'
 
-const AppsPage = lazy(() => import('@/features/apps/AppsPage').then(m => ({ default: m.AppsPage })))
-const MoneyPage = lazy(() => import('@/features/money/MoneyPage').then(m => ({ default: m.MoneyPage })))
-const FoodPage = lazy(() => import('@/features/food/FoodPage').then(m => ({ default: m.FoodPage })))
 const InboxPage = lazy(() => import('@/features/inbox/InboxPage').then(m => ({ default: m.InboxPage })))
-const ListPage = lazy(() => import('@/features/food/ListPage').then(m => ({ default: m.ListPage })))
-const RecipePage = lazy(() => import('@/features/food/RecipePage').then(m => ({ default: m.RecipePage })))
 
 function ToApp({ app }: { app: AppName }) {
   useEffect(() => location.replace(appUrl(app)), [app])
@@ -22,16 +17,14 @@ const router = createBrowserRouter([
     element: <Layout />,
     children: [
       { path: '/', element: <Home /> },
-      { path: '/apps', element: <AppsPage /> },
+      { path: '/apps', element: <Navigate to="/" replace /> },
       { path: '/burmese', element: <ToApp app="burmese" /> },
-      { path: '/money', element: <MoneyPage /> },
+      { path: '/money', element: <ToApp app="money" /> },
       { path: '/discover', element: <ToApp app="discover" /> },
       { path: '/whatsapp/*', element: <ToApp app="whatsapp" /> },
-      { path: '/food', element: <FoodPage /> },
+      { path: '/food/*', element: <ToApp app="food" /> },
       { path: '/inbox', element: <InboxPage /> },
       { path: '/month', element: <Navigate to="/" replace /> },
-      { path: '/food/list', element: <ListPage /> },
-      { path: '/food/:id', element: <RecipePage /> },
       { path: '*', element: <Home /> },
     ],
   },

@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router'
+import { Link } from 'react-router'
 import { toast } from 'sonner'
 import { SendIcon, XIcon } from 'lucide-react'
 import { api } from '@tars/ui/lib/api'
-import { useTars } from '@/features/tasks/store'
+import { appUrl } from '@tars/ui/lib/apps'
 import { Page } from '@tars/ui/components/Page'
 import { Empty, SectionHead } from '@tars/ui/components/common'
 import { Button } from '@tars/ui/components/ui/button'
@@ -14,8 +14,6 @@ export function ListPage() {
   const { food, error } = useFood()
   const basket = useBasket()
   const { shop } = useShop(food?.shops ?? [])
-  const { load, shoppingList } = useTars()
-  const navigate = useNavigate()
   const [lines, setLines] = useState<Line[] | null>(null)
   const [sending, setSending] = useState(false)
   const servings = useServings()
@@ -35,9 +33,8 @@ export function ListPage() {
       description: 'For: ' + l.dishIds.map(id => food.byId.get(id)?.n).filter(Boolean).join(', '),
     }))
     try {
-      await api('POST', 'shopping', { items })
-      await load()
-      toast(`Sent ${items.length} items to Shopping`, { action: { label: 'Open', onClick: () => navigate(shoppingList ? `/?filter=${shoppingList.id}` : '/') } })
+      const { projectId } = await api<{ projectId: string }>('POST', 'shopping', { items })
+      toast(`Sent ${items.length} items to Shopping`, { action: { label: 'Open', onClick: () => location.assign(appUrl('tasks', `/?filter=${projectId}`)) } })
     } catch {
       toast("Couldn't send, try again")
     }
@@ -53,11 +50,11 @@ export function ListPage() {
   })
 
   return (
-    <Page title="Shopping list" back="/food">
+    <Page title="Shopping list" back="/">
       {!food ? <Loading error={error} /> : !basket.ids.length ? (
         <Empty>
           No dishes added yet.
-          <div className="mt-4"><Button asChild><Link to="/food">Pick dishes</Link></Button></div>
+          <div className="mt-4"><Button asChild><Link to="/">Pick dishes</Link></Button></div>
         </Empty>
       ) : (
         <>
@@ -66,7 +63,7 @@ export function ListPage() {
             {basket.ids.map(id => food.byId.get(id)).filter(r => !!r).map(r => (
               <li key={r.id} className="flex items-center gap-3 hairline-b py-3">
                 <img src={r.img} alt="" className="h-10 w-13 shrink-0 rounded-md object-cover" />
-                <Link to={`/food/${r.id}`} className="min-w-0 flex-1">
+                <Link to={`/recipe/${r.id}`} className="min-w-0 flex-1">
                   <span className="block truncate">{r.n}</span>
                   <span className="text-xs text-muted-foreground">{servings.of(r.id).toFixed(1).replace(/\.0$/, '')} servings</span>
                 </Link>

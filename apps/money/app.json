@@ -1,0 +1,7 @@
+{
+  "name": "money",
+  "port": 8407,
+  "https": 8447,
+  "start": "node server",
+  "build": "cd web && npm run build"
+}

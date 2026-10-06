@@ -3,7 +3,7 @@ import { MoneySection } from './MoneySection'
 
 export function MoneyPage() {
   return (
-    <Page title="Money" back="/apps">
+    <Page title="Money" back={false}>
       <MoneySection />
     </Page>
   )

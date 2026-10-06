@@ -8,10 +8,10 @@ export function FoodPage() {
   return (
     <Page
       title="Food"
-      back="/apps"
+      back={false}
       actions={
         <Button asChild variant="ghost" size="icon-lg" className="text-primary">
-          <Link to="/food/list" aria-label="Shopping list"><ShoppingBasketIcon className="size-5" /></Link>
+          <Link to="/list" aria-label="Shopping list"><ShoppingBasketIcon className="size-5" /></Link>
         </Button>
       }
     >

@@ -1,16 +1,13 @@
-// tars tasks server: the only code that reads or writes this app's state/. Serves /api/*, the food content under
-// /data/food/, and the built React app (web → dist/). Run: node server  (port 8400)
+// tars tasks server: the only code that reads or writes this app's state/ (tasks, inbox). Serves /api/* and the
+// built React app (web → dist/). Run: node server  (port 8400)
 const path = require('path');
 const crypto = require('crypto');
-const { TARS, send, start } = require('@tars/server');
+const { callApp, send, start } = require('@tars/server');
 const store = require('./state');
-const { money, expected, summary } = require('./money');
 const { organise } = require('./organise');
-const { suggest } = require('./recipe');
 
 const PORT = process.env.PORT || 8400;
 const DIST = path.join(__dirname, '..', 'dist');
-const FOOD = path.join(TARS, 'data', 'food');
 const db = store.tasks.get();
 
 const id = () => crypto.randomBytes(6).toString('hex');
@@ -124,32 +121,8 @@ async function api(req, res, parts, body) {
     return send(res, 200, { projectId: list.id, added: items.length });
   }
 
-  if (resource === 'food') {
-    if (req.method === 'POST' && rid === 'suggest') {
-      try { return send(res, 200, await suggest(body.id, body.dislike)); }
-      catch (e) { return send(res, 502, { error: e.message }); }
-    }
-    const food = store.food.get();
-    if (req.method === 'GET') return send(res, 200, food);
-    if (req.method === 'PATCH') {
-      if (Array.isArray(body.basket)) food.basket = [...new Set(body.basket.filter(x => typeof x === 'string'))];
-      if (typeof body.shop === 'string') food.shop = body.shop;
-      if (body.servings && typeof body.servings === 'object') {
-        food.servings = Object.fromEntries(Object.entries({ ...food.servings, ...body.servings })
-          .filter(([, v]) => typeof v === 'number' && v > 0 && v <= 20 && v !== 2));
-      }
-      store.food.save();
-      return send(res, 200, food);
-    }
-  }
-
-  if (resource === 'money' && req.method === 'GET') {
-    try { return send(res, 200, rid === 'summary' ? await summary(false) : rid === 'summary-fresh' ? await summary(true) : await money(rid === 'fresh')); }
-    catch (e) { return send(res, 503, { error: e.message }); }
-  }
-
   if (resource === 'expected' && req.method === 'GET') {
-    try { return send(res, 200, await expected()); }
+    try { return send(res, 200, await callApp('money', 'GET', 'expected')); }
     catch (e) { return send(res, 503, { error: e.message }); }
   }
 
@@ -194,4 +167,4 @@ async function api(req, res, parts, body) {
   send(res, 404, { error: 'not found' });
 }
 
-start({ port: PORT, dist: DIST, api, statics: [{ prefix: '/data/food/', dir: FOOD }] });
+start({ port: PORT, dist: DIST, api });

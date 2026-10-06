@@ -1,0 +1,7 @@
+{
+  "name": "food",
+  "port": 8408,
+  "https": 8448,
+  "start": "node server",
+  "build": "cd web && npm run build"
+}

@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router'
 import { cn } from '@tars/ui/lib/utils'
 import { api } from '@tars/ui/lib/api'
 import { parseYmd } from '@tars/ui/lib/dates'
 import { Avatar, AvatarFallback, AvatarImage } from '@tars/ui/components/ui/avatar'
 import { Badge } from '@tars/ui/components/ui/badge'
-import { fmt } from './data'
+import { fmt } from '@tars/ui/lib/money'
 
 export type Expected = {
   id: string; key: string; date: string; expectedOn: string; late: boolean; name: string; amount: number
@@ -34,12 +33,13 @@ export function Logo({ src, name, className }: { src: string | null; name: strin
 
 export const amountLabel = (p: { amount: number; varies: boolean }, value = p.amount) => `${value > 0 ? '+' : ''}${p.varies ? '~' : ''}${fmt(Math.abs(value))}`
 
-export function PaymentRow({ p, tag, dated }: { p: Expected; tag?: boolean; dated?: boolean }) {
+export function PaymentRow({ p, tag, dated, href }: { p: Expected; tag?: boolean; dated?: boolean; href?: string }) {
   const when = p.late
     ? `Due ${parseYmd(p.expectedOn).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })} · not taken yet`
     : `${dated ? parseYmd(p.date).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' }) : 'Expected'} · ${p.kind}${p.cadence === 'weekly' ? ' · weekly' : ''}`
+  const Row = href ? 'a' : 'div'
   return (
-    <Link to="/money" className="flex items-start gap-3 hairline-b py-3">
+    <Row href={href} className="flex items-start gap-3 hairline-b py-3">
       <Logo src={p.logo} name={p.name} className="mt-px size-5 text-micro" />
       <span className="min-w-0 flex-1">
         <span className="block truncate">{p.name}</span>
@@ -49,6 +49,6 @@ export function PaymentRow({ p, tag, dated }: { p: Expected; tag?: boolean; date
         </span>
       </span>
       <span className="font-semibold tabular-nums">{amountLabel(p)}</span>
-    </Link>
+    </Row>
   )
 }

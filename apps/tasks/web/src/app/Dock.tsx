@@ -1,14 +1,14 @@
 import type { ReactNode } from 'react'
-import { Link, useLocation } from 'react-router'
-import { CircleCheckIcon, LayoutGridIcon, PlusIcon, WandSparklesIcon } from 'lucide-react'
+import { useLocation } from 'react-router'
+import { PlusIcon, WandSparklesIcon } from 'lucide-react'
 import { cn } from '@tars/ui/lib/utils'
 import { useQuickAdd, useTars } from '@/features/tasks/store'
 import { useOrganise } from '@/features/home/organise'
 
-export const showsDock = (path: string) => path === '/' || /^\/(apps|food|money)(\/|$)/.test(path)
+export const showsDock = (path: string) => path === '/'
 
 export function Dock() {
-  const { flash, exitDay } = useTars()
+  const { flash } = useTars()
   const quickAdd = useQuickAdd()
   const { loose, phase, start } = useOrganise()
   const { pathname } = useLocation()
@@ -17,9 +17,6 @@ export function Dock() {
   const tab = hidden ? -1 : 0
   const onSchedule = pathname === '/'
   const showSort = onSchedule && !flash && phase === 'idle' && loose > 0
-  const nav = onSchedule
-    ? { to: '/apps', label: 'Apps', Icon: LayoutGridIcon }
-    : { to: '/', label: 'Schedule', Icon: CircleCheckIcon }
 
   let center: ReactNode = null
   if (flash) {
@@ -64,17 +61,7 @@ export function Dock() {
         )}
       </div>
       <div className="flex shrink-0 justify-center">{center}</div>
-      <div className="flex flex-1 justify-end">
-        <Link
-          to={nav.to}
-          onClick={exitDay}
-          aria-label={nav.label}
-          tabIndex={tab}
-          className={cn('dock grid size-12 place-items-center rounded-full text-foreground transition-transform active:scale-98 [&_svg]:size-5', !hidden && 'pointer-events-auto')}
-        >
-          <nav.Icon />
-        </Link>
-      </div>
+      <div className="flex flex-1 justify-end" />
     </nav>
   )
 }

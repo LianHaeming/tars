@@ -223,7 +223,7 @@ export function RecipePage() {
   const r = food?.byId.get(id!)
 
   return (
-    <Page title={r?.n ?? 'Recipe'} back="/food">
+    <Page title={r?.n ?? 'Recipe'} back="/">
       {!r || !d ? <Loading error={error || detailError || (!!food && !r)} /> : (
         <>
           <img src={d.photo} onError={e => { e.currentTarget.src = r.img }} alt="" className="mt-3 aspect-video w-full rounded-2xl bg-secondary object-cover" />

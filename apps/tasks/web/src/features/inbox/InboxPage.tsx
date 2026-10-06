@@ -56,7 +56,7 @@ export function InboxPage() {
   }
 
   return (
-    <Page title="From email" back="/apps">
+    <Page title="From email" back="/">
       {error && !candidates.length ? (
         <Empty>Couldn't load the review queue — {error}.</Empty>
       ) : loaded && !candidates.length ? (

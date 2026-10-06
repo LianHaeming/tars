@@ -8,10 +8,12 @@ import { byCreated, byWhen, useTars } from '@/features/tasks/store'
 import { TaskRow } from '@/features/tasks/TaskRow'
 import { CalendarPanel } from '@/features/tasks/calendar'
 import { Empty, FilterBar, FilterLabel, Section, SectionHead } from '@tars/ui/components/common'
-import { PaymentRow, useExpected, type Expected } from '@/features/money/expected'
+import { appUrl } from '@tars/ui/lib/apps'
+import { PaymentRow, useExpected, type Expected } from '@tars/ui/components/payments'
 import { Button } from '@tars/ui/components/ui/button'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@tars/ui/components/ui/collapsible'
 import { MainEvent } from './MainEvent'
+import { EmailCard } from '@/features/inbox/EmailCard'
 import { OrganiseCard } from './OrganiseCard'
 
 type Entry = { day: string; task?: Task; pay?: Expected }
@@ -211,6 +213,7 @@ export function Home() {
         <FilterLabel value="completed">Completed</FilterLabel>
       </FilterBar>
 
+      <EmailCard />
       <OrganiseCard />
 
       {completed ? (
@@ -231,7 +234,7 @@ export function Home() {
                   {day === t && main && <MainEvent task={main} />}
                   {list.map(e => e.task
                     ? e.task !== main && <TaskRow key={e.task.id} task={e.task} compact tag={tag} hideDue />
-                    : <PaymentRow key={e.pay!.id} p={e.pay!} tag={tag} />)}
+                    : <PaymentRow key={e.pay!.id} p={e.pay!} tag={tag} href={appUrl('money')} />)}
                 </div>
               )
             })}
