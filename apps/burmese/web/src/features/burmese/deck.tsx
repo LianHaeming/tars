@@ -88,13 +88,17 @@ function usePlaying() {
   return p
 }
 
-function play(e: MouseEvent, id: string, speed: 'normal' | 'slow') {
-  e.preventDefault(); e.stopPropagation()
+export function playClip(id: string, speed: 'normal' | 'slow' = 'normal') {
   if (!player) return
-  if (playing?.id === id && playing.speed === speed) { player.pause(); return set(null) }
   set({ id, speed, loading: true })
   player.src = `/api/burmese/audio/${encodeURIComponent(id)}${speed === 'slow' ? '?speed=slow' : ''}`
   player.play().catch(() => {})
+}
+
+function play(e: MouseEvent, id: string, speed: 'normal' | 'slow') {
+  e.preventDefault(); e.stopPropagation()
+  if (playing?.id === id && playing.speed === speed) { player?.pause(); return set(null) }
+  playClip(id, speed)
 }
 
 // Listen + Slow buttons for a sentence's spoken Burmese. `compact` is the icon-only pair for list rows.

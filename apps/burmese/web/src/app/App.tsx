@@ -3,6 +3,7 @@ import { AppShell } from '@tars/ui/components/AppShell'
 import { Tabs } from './Tabs'
 import { ExercisesPage } from '@/features/burmese/ExercisesPage'
 import { UnitPage } from '@/features/burmese/UnitPage'
+import { PractisePage } from '@/features/burmese/PractisePage'
 import { StatsPage } from '@/features/burmese/StatsPage'
 import { AskPage } from '@/features/burmese/AskPage'
 import { SentencesPage } from '@/features/burmese/SentencesPage'
@@ -22,6 +23,7 @@ const router = createBrowserRouter([
       },
       { path: '/sentences/:cat', element: <CategoryPage /> },
       { path: '/unit', element: <UnitPage /> },
+      { path: '/practise', element: <PractisePage /> },
       { path: '/stats', element: <StatsPage /> },
       { path: '*', element: <Navigate to="/" replace /> },
     ],

@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router'
-import { ChartColumnIcon, PlayIcon } from 'lucide-react'
+import { ChartColumnIcon, MessageCircleIcon, PlayIcon, Volume2Icon } from 'lucide-react'
 import { Button } from '@tars/ui/components/ui/button'
 import { useResource } from '@tars/ui/lib/use-resource'
 import { cn } from '@tars/ui/lib/utils'
@@ -73,6 +73,19 @@ export function ExercisesPage() {
           <Tile n={data.slipping} label="Slipping" className={data.slipping ? 'text-overdue' : undefined} />
           <Tile n={data.newReady} label="New ready" />
           <Tile n={data.pool - data.left} label={`of ${data.pool} started`} />
+        </div>
+      )}
+
+      {data && data.pool - data.left > 0 && (
+        <div className="glass mt-6 rounded-3xl p-5">
+          <p className="font-semibold">Practise what you've learned</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Go over the sentences you've started, weakest first, as many times as you like. Nothing is scored.
+          </p>
+          <div className="mt-4 grid grid-cols-2 gap-3">
+            <PillButton quiet onClick={() => navigate('/practise')}><MessageCircleIcon />Say it</PillButton>
+            <PillButton quiet onClick={() => navigate('/practise?from=burmese')}><Volume2Icon />Hear it</PillButton>
+          </div>
         </div>
       )}
     </>

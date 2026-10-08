@@ -28,6 +28,8 @@ export const postAnswer = (body: { unit: number; id: string; kind: Kind; answer:
 export const getStats = () => api<Stats>('GET', 'burmese/stats')
 export const getSentences = () => api<Category[]>('GET', 'burmese/sentences')
 export const getAsked = () => api<Asked[]>('GET', 'burmese/asked')
+export type Practise = { started: number; cards: Card[] }
+export const getPractise = (skip = 0) => api<Practise>('GET', `burmese/practise?skip=${skip}`)
 export const ask = (text: string) => api<Asked>('POST', 'burmese/ask', { text })
 
 export const scoreTone = (score: number | null) =>
