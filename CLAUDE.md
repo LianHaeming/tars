@@ -157,9 +157,9 @@ reads the owner's port from its app.json; `TARS_PORT_<APP>` overrides it for sid
 - `bin/icon <app> <glyph> [font]` — the app's home-screen icons (navy gradient + one white glyph, same family for all).
 
 ## Tools
-- `bin/gmail` — read-only Gmail for cottrelllian@gmail.com (the only Gmail path — the claude.ai Gmail connector is
-  denied in `.claude/settings.json`; the claude.ai Todoist connector is allowed since 2026-10-06 — Lian wants tars to
-  manage their Todoist): `bin/gmail search '<gmail query>' [-n N]`, `bin/gmail read <id>`.
+- `bin/gmail` — read-only Gmail for cottrelllian@gmail.com (the only Gmail path — the claude.ai Gmail and Todoist
+  connectors are denied in `.claude/settings.json`; the tars to-do app is Lian's only task list — Todoist was tried
+  6–8 Oct 2026 and dropped): `bin/gmail search '<gmail query>' [-n N]`, `bin/gmail read <id>`.
   OAuth client + token live in `~/.config/tars/` (outside the repo — never copy them into it or print them).
   If it says sign-in expired: `bin/gmail login`, give Lian the link, then `bin/gmail login '<localhost address they paste back>'`.
 - `bin/monzo` — read-only Monzo (balance, pots, transactions; never moves money): `bin/monzo status|balance`,

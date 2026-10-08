@@ -29,7 +29,8 @@
       "Bash(journalctl --user:*)"
     ],
     "deny": [
-      "mcp__claude_ai_Gmail"
+      "mcp__claude_ai_Gmail",
+      "mcp__claude_ai_Todoist"
     ]
   }
 }
