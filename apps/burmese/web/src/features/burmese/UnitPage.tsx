@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router'
+import { useLocation, useNavigate } from 'react-router'
 import { toast } from 'sonner'
-import { Page } from '@tars/ui/components/Page'
+import { ArrowUpIcon } from 'lucide-react'
 import { Button } from '@tars/ui/components/ui/button'
-import { Progress } from '@tars/ui/components/ui/progress'
 import { Textarea } from '@tars/ui/components/ui/textarea'
 import { cn } from '@tars/ui/lib/utils'
-import { getUnit, postAnswer, scoreTone, type Card, type Kind, type Result, type Unit, type Word } from './data'
+import { getUnit, postAnswer, scoreTone, type Card, type Kind, type Result, type Unit } from './data'
+import { BottomBar, DeckTop, PillButton, Tint, WordRow } from './deck'
 
 type Step =
   | { type: 'teach'; card: Card; n: number; of: number }
@@ -24,36 +24,32 @@ function plan(u: Unit): Step[] {
   ]
 }
 
-const label = (s: Step) => s.type === 'teach' ? 'New' : s.phase === 'review' ? 'Last time' : 'Quick check'
+const tone = (score: number | null) => score == null || score < 60 ? 'bad' : score < 85 ? 'ok' : 'good'
+const toneColor = { bad: 'overdue', ok: 'tomorrow', good: 'today' } as const
 
-function Phonetic({ children, small, className = '' }: { children: string; small?: boolean; className?: string }) {
-  return <p className={`font-bold text-primary ${small ? 'text-xl' : 'text-2xl'} ${className}`}>{children}</p>
+function StepTag({ step }: { step: Step }) {
+  if (step.type === 'teach') return <Tint color="primary">New · {step.n} of {step.of}</Tint>
+  return step.phase === 'review' ? <Tint color="overdue">Last time</Tint> : <Tint color="primary">Quick check</Tint>
 }
 
-function Words({ words }: { words: Word[] }) {
-  if (!words.length) return null
-  return (
-    <div className="mt-6 flex flex-wrap justify-center gap-2">
-      {words.map((w, i) => (
-        <div key={i} className="glass rounded-lg px-3 py-2 text-center">
-          <div className="text-base font-semibold">{w.p}</div>
-          <div className="text-xs text-muted-foreground">{w.e}</div>
-        </div>
-      ))}
-    </div>
-  )
+function Phonetic({ children }: { children: string }) {
+  return <p className="text-phonetic font-bold text-primary">{children}</p>
 }
 
 function Teach({ step, onNext }: { step: Extract<Step, { type: 'teach' }>; onNext: () => void }) {
   return (
-    <div className="flex flex-col items-center pt-10 text-center">
-      <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">New sentence {step.n} of {step.of}</p>
-      <Phonetic className="mt-6">{step.card.phonetic}</Phonetic>
-      <p className="mt-3 text-xl">{step.card.english}</p>
-      <Words words={step.card.words} />
-      <p className="mt-8 text-sm text-muted-foreground">Say it out loud a couple of times.</p>
-      <Button size="lg" className="mt-8 w-full" onClick={onNext}>Next</Button>
-    </div>
+    <>
+      <div className="deck-card mt-5 flex min-h-96 flex-col rounded-3xl p-5 animate-in duration-200 fade-in">
+        <div><StepTag step={step} /></div>
+        <div className="my-auto py-8 text-center">
+          <Phonetic>{step.card.phonetic}</Phonetic>
+          <p className="mt-3 text-xl">{step.card.english}</p>
+        </div>
+        <WordRow words={step.card.words} />
+      </div>
+      <p className="mt-4 text-center text-sm text-muted-foreground">Say it out loud a couple of times.</p>
+      <BottomBar><PillButton onClick={onNext}>Got it</PillButton></BottomBar>
+    </>
   )
 }
 
@@ -75,39 +71,54 @@ function Question({ step, unit, onDone }: { step: Extract<Step, { type: 'q' }>; 
       .finally(() => setBusy(false))
   }
 
-  return (
-    <div className="flex flex-col items-center pt-8 text-center">
-      <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
-        {read ? 'What does it mean?' : 'Say it out loud, then type it'}
-      </p>
-      {read ? <Phonetic className="mt-5">{step.card.phonetic}</Phonetic> : <p className="mt-5 text-2xl font-bold">{step.card.english}</p>}
-
-      {!result ? (
-        <form className="mt-8 w-full" onSubmit={e => { e.preventDefault(); if (text.trim()) submit(text) }}>
-          <Textarea ref={ref} value={text} onChange={e => setText(e.target.value)} rows={2}
-            placeholder={read ? 'Type the English' : 'Type the phonetic'}
-            autoCapitalize="off" autoCorrect="off" spellCheck={false} enterKeyHint="done"
-            onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if (text.trim()) submit(text) } }} />
-          <div className="mt-4 grid grid-cols-2 gap-3">
-            <Button type="button" variant="secondary" size="lg" disabled={busy} onClick={() => submit(null)}>Don't know</Button>
-            <Button type="submit" size="lg" disabled={busy || !text.trim()}>{busy ? 'Scoring…' : 'Submit'}</Button>
+  if (result) {
+    const t = tone(result.score)
+    return (
+      <>
+        <div data-tone={t} className="deck-card mt-5 flex min-h-96 flex-col rounded-3xl p-5 animate-in duration-200 fade-in">
+          <div className="flex items-center justify-between">
+            <StepTag step={step} />
+            <Tint color={toneColor[t]}><span className="tabular-nums">{result.score == null ? "—" : `${result.score}%`}</span></Tint>
           </div>
-        </form>
-      ) : (
-        <div className="mt-8 w-full animate-in duration-200 fade-in">
-          <p className={`text-hero font-bold tabular-nums ${scoreTone(result.score)}`}>
-            {result.score == null ? '—' : `${result.score}%`}
-          </p>
-          {text.trim() && result.score != null && <p className="mt-2 text-sm text-muted-foreground">You wrote: {text.trim()}</p>}
-          <div className="glass mt-6 rounded-lg px-4 py-5">
-            <Phonetic small>{result.phonetic}</Phonetic>
-            <p className="mt-2 text-lg">{result.english}</p>
+          <div className="my-auto py-8 text-center">
+            <Phonetic>{result.phonetic}</Phonetic>
+            <p className="mt-3 text-xl">{result.english}</p>
+            {text.trim() && result.score != null && <p className="mt-4 text-sm text-muted-foreground">You wrote <span className="text-foreground">“{text.trim()}”</span></p>}
           </div>
-          {retry && <p className="mt-4 text-sm text-tomorrow">This one comes back in a moment.</p>}
-          <Button size="lg" className="mt-6 w-full" autoFocus onClick={() => onDone(result, retry)}>Next</Button>
+          <WordRow words={result.words} />
         </div>
-      )}
-    </div>
+        {retry && <p className="mt-4 text-center text-sm text-tomorrow">This one comes back in a moment.</p>}
+        <BottomBar><PillButton autoFocus onClick={() => onDone(result, retry)}>Next</PillButton></BottomBar>
+      </>
+    )
+  }
+
+  return (
+    <>
+      <div className="deck-card mt-5 flex min-h-72 flex-col rounded-3xl p-5 animate-in duration-200 fade-in">
+        <div><StepTag step={step} /></div>
+        <div className="my-auto py-6 text-center">
+          <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
+            {read ? 'What does it mean?' : 'Say it out loud, then type it'}
+          </p>
+          <div className="mt-3">{read ? <Phonetic>{step.card.phonetic}</Phonetic> : <p className="text-2xl font-bold">{step.card.english}</p>}</div>
+        </div>
+        <div className="text-center">
+          <Button variant="link" size="inline" disabled={busy} onClick={() => submit(null)}>I don't know</Button>
+        </div>
+      </div>
+      <form className="mt-4 flex items-end gap-2" onSubmit={e => { e.preventDefault(); if (text.trim()) submit(text) }}>
+        <Textarea ref={ref} value={text} onChange={e => setText(e.target.value)} rows={1}
+          placeholder={busy ? 'Scoring…' : read ? 'Type the English' : 'Type the phonetic'}
+          className="min-h-12 min-w-0 flex-1 resize-none rounded-3xl px-4 py-3"
+          autoCapitalize="off" autoCorrect="off" spellCheck={false} enterKeyHint="send"
+          onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if (text.trim()) submit(text) } }} />
+        <Button type="submit" size="icon-lg" aria-label="Check" disabled={busy || !text.trim()} className="size-12 rounded-full [&_svg:not([class*='size-'])]:size-5">
+          <ArrowUpIcon />
+        </Button>
+      </form>
+      {busy && <p className="mt-3 text-center text-sm text-muted-foreground">Scoring…</p>}
+    </>
   )
 }
 
@@ -115,13 +126,13 @@ function Summary({ done, onAgain }: { done: Done[]; onAgain: () => void }) {
   const navigate = useNavigate()
   const avg = done.length ? Math.round(done.reduce((a, d) => a + (d.score ?? 0), 0) / done.length) : null
   return (
-    <div className="pt-8">
-      <div className="text-center">
+    <div className="pt-6">
+      <div data-tone={tone(avg)} className="deck-card rounded-3xl px-5 py-8 text-center">
         <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">Unit done</p>
         <p className={`mt-2 text-hero font-bold tabular-nums ${scoreTone(avg)}`}>{avg == null ? '—' : `${avg}%`}</p>
         <p className="text-sm text-muted-foreground">average over {done.length} answer{done.length === 1 ? '' : 's'}</p>
       </div>
-      <div className="mt-6">
+      <div className="mt-4">
         {done.map((d, i) => (
           <div key={i} className="hairline-b flex items-center gap-3 py-3">
             <div className="min-w-0 flex-1">
@@ -133,15 +144,17 @@ function Summary({ done, onAgain }: { done: Done[]; onAgain: () => void }) {
           </div>
         ))}
       </div>
-      <div className="mt-8 grid grid-cols-2 gap-3">
-        <Button variant="secondary" size="lg" onClick={() => navigate('/')}>Done</Button>
-        <Button size="lg" onClick={onAgain}>Play another</Button>
-      </div>
+      <BottomBar cols={2}>
+        <PillButton quiet onClick={() => navigate('/')}>Done</PillButton>
+        <PillButton onClick={onAgain}>Play another</PillButton>
+      </BottomBar>
     </div>
   )
 }
 
 export function UnitPage() {
+  const navigate = useNavigate()
+  const location = useLocation()
   const [round, setRound] = useState(0)
   const [unit, setUnit] = useState<Unit | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -158,6 +171,7 @@ export function UnitPage() {
 
   const step = steps[i]
   const finished = unit && i >= steps.length
+  const close = () => location.key !== 'default' ? navigate(-1) : navigate('/')
 
   const next = () => { setI(n => n + 1); window.scrollTo(0, 0) }
   const answered = (s: Extract<Step, { type: 'q' }>, r: Result, retry: boolean) => {
@@ -167,9 +181,8 @@ export function UnitPage() {
   }
 
   return (
-    <Page title={finished ? 'Summary' : step ? label(step) : 'Unit'} back="/"
-      actions={step && <span className="text-sm font-semibold text-muted-foreground tabular-nums">{i + 1}/{steps.length}</span>}>
-      {step && <Progress value={(i / steps.length) * 100} className="mt-3" />}
+    <main className="mx-auto max-w-page px-4 pt-safe-3 pb-safe-32 animate-in duration-200 fade-in">
+      <DeckTop i={i} total={finished ? 0 : steps.length} onClose={close} />
       {error ? <p className="pt-8 text-sm text-muted-foreground">Couldn't start a unit — {error}</p>
         : !unit ? <p className="pt-8 text-sm text-muted-foreground">Loading…</p>
         : !steps.length ? (
@@ -181,6 +194,6 @@ export function UnitPage() {
         : finished ? <Summary done={done} onAgain={() => setRound(r => r + 1)} />
         : step.type === 'teach' ? <Teach key={i} step={step} onNext={next} />
         : <Question key={i} step={step} unit={unit.unit} onDone={(r, retry) => answered(step, r, retry)} />}
-    </Page>
+    </main>
   )
 }

@@ -1,16 +1,17 @@
-import { useNavigate } from 'react-router'
-import { PlayIcon } from 'lucide-react'
-import { SectionHead } from '@tars/ui/components/common'
+import { Link, useNavigate } from 'react-router'
+import { ChartColumnIcon, PlayIcon } from 'lucide-react'
 import { Button } from '@tars/ui/components/ui/button'
 import { useResource } from '@tars/ui/lib/use-resource'
+import { cn } from '@tars/ui/lib/utils'
 import { getStatus, type Status } from './data'
+import { LargeTitle, PillButton, Tint } from './deck'
 
 const cache: { current: Status | null } = { current: null }
 
-function Tile({ n, label }: { n: string | number; label: string }) {
+function Tile({ n, label, className }: { n: string | number; label: string; className?: string }) {
   return (
     <div className="glass rounded-lg px-3 py-2">
-      <div className="text-lg font-semibold tabular-nums">{n}</div>
+      <div className={cn('text-lg font-semibold tabular-nums', className)}>{n}</div>
       <div className="text-xs text-muted-foreground">{label}</div>
     </div>
   )
@@ -20,10 +21,26 @@ function line(s: Status) {
   if (!s.pool) return 'The sentences are still being written — check back soon.'
   if (!s.slipping && !s.newReady) return 'Nothing to do — every sentence is started and nothing is slipping. Ask tars for more sentences.'
   const parts = []
-  if (s.slipping) parts.push(`${Math.min(s.slipping, 8)} from last time`)
-  if (s.newReady) parts.push(`${s.newReady} new sentence${s.newReady === 1 ? '' : 's'}`)
-  else if (s.left) parts.push('no new ones until the slipping ones are back')
-  return `Next unit: ${parts.join(' · ')}.`
+  if (s.slipping) parts.push(<span key="s"><b className="font-semibold text-overdue">{Math.min(s.slipping, 8)} back</b> from last time</span>)
+  if (s.newReady) parts.push(<span key="n"><b className="font-semibold text-primary">{s.newReady} new</b> sentence{s.newReady === 1 ? '' : 's'}</span>)
+  else if (s.left) parts.push(<span key="l">no new ones until the slipping ones are back</span>)
+  return parts.flatMap((p, i) => i ? [' · ', p] : [p])
+}
+
+function Stack({ s }: { s: Status }) {
+  const back = Math.min(s.slipping, 8)
+  const fresh = Math.min(s.newReady, 8)
+  if (!back && !fresh) return null
+  return (
+    <div className="mt-5 flex flex-wrap gap-2" aria-hidden>
+      {Array.from({ length: back }, (_, i) => <span key={`b${i}`} className="h-8 w-6 rounded-sm bg-overdue/30" />)}
+      {Array.from({ length: fresh }, (_, i) => <span key={`n${i}`} className="h-8 w-6 rounded-sm bg-primary/35" />)}
+    </div>
+  )
+}
+
+function PlayButton(props: { disabled: boolean; onClick: () => void }) {
+  return <div className="mt-auto pt-6"><PillButton {...props}><PlayIcon />Play</PillButton></div>
 }
 
 export function ExercisesPage() {
@@ -32,25 +49,32 @@ export function ExercisesPage() {
 
   return (
     <>
-      <SectionHead title="Memorisation" link="Stats" to="/stats" />
+      <LargeTitle title="Learn" sub={data && data.pool > 0 && `${data.pool - data.left} of ${data.pool} started`}
+        action={
+          <Button asChild variant="ghost" size="icon-lg" className="glass rounded-full" aria-label="Stats">
+            <Link to="/stats"><ChartColumnIcon /></Link>
+          </Button>
+        } />
       {error && <p className="pt-3 text-sm text-muted-foreground">Couldn't load — {error}</p>}
-      {data && (
-        <>
-          <div className="mt-3 grid grid-cols-3 gap-2">
-            <Tile n={data.slipping} label="Slipping" />
-            <Tile n={data.newReady} label="New ready" />
-            <Tile n={data.pool - data.left} label={`of ${data.pool} started`} />
-          </div>
-          <p className="mt-3 text-sm text-muted-foreground">{line(data)}</p>
-        </>
-      )}
 
-      <nav className="pointer-events-none fixed inset-x-4 bottom-safe-2 z-30 mx-auto flex max-w-page justify-center">
-        <Button onClick={() => navigate('/unit')} disabled={data?.pool === 0}
-          className="pointer-events-auto h-12 gap-2 rounded-full bg-foreground px-6 text-background shadow-lg hover:bg-foreground/90 active:scale-98 [&_svg:not([class*='size-'])]:size-5">
-          <PlayIcon />Play a unit
-        </Button>
-      </nav>
+      <div className="relative mx-2 mt-8">
+        <div aria-hidden className="glass absolute inset-0 -translate-y-6 scale-88 rounded-3xl opacity-30" />
+        <div aria-hidden className="glass absolute inset-0 -translate-y-3 scale-94 rounded-3xl opacity-55" />
+        <div className="deck-card relative flex min-h-72 flex-col rounded-3xl p-5">
+          <div><Tint color="foreground">Next unit</Tint></div>
+          {data && <Stack s={data} />}
+          <p className="mt-3 text-sm text-muted-foreground">{data ? line(data) : 'Loading…'}</p>
+          <PlayButton disabled={!data || data.pool === 0} onClick={() => navigate('/unit')} />
+        </div>
+      </div>
+
+      {data && (
+        <div className="mt-6 grid grid-cols-3 gap-2">
+          <Tile n={data.slipping} label="Slipping" className={data.slipping ? 'text-overdue' : undefined} />
+          <Tile n={data.newReady} label="New ready" />
+          <Tile n={data.pool - data.left} label={`of ${data.pool} started`} />
+        </div>
+      )}
     </>
   )
 }

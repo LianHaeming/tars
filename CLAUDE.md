@@ -85,8 +85,11 @@ reads the owner's port from its app.json; `TARS_PORT_<APP>` overrides it for sid
   "I don't like X" swaps). Both back to `/`. API: `GET|PATCH /api/food {basket, shop, servings}` (servings per recipe
   id, base 2) · `POST /api/food/suggest` · `POST /api/shopping {items}` (passed to tasks). Static: `/data/food/*` from
   the repo's data/food.
-- **Burmese app** (`apps/burmese`, its own icon — scope: tars vault `language-app-scope.md`): three tabs in a sticky
-  FilterBar like the Schedule's. **Exercises** (`/`, tiles + a "Play a unit" dock pill like Add task; Stats at `/stats`) runs **units** at `/unit`:
+- **Burmese app** (`apps/burmese`, its own icon — scope: tars vault `language-app-scope.md`): the "deck" look (option B of
+  the 2026-10-08 redesign; `features/burmese/deck.tsx` + the `deck-card` utility): three tabs in a floating icon dock at
+  the bottom (Learn · Phrases · Ask), iOS-style large titles. **Learn** (`/`, the next unit as a stack of cards with
+  Play, tiles below; Stats at `/stats` from the round button) runs **units** at `/unit` (close button, step dots, one
+  large card per step, answer box under the card, scored card gets a coloured edge, actions pinned to the bottom):
   "Last time" (up to 8 memories predicted below 90% recall, most at risk first, one per sentence), then "New" (the next
   3 sentences in usefulness order — skipped while > 15 memories are at risk): teach (phonetic, English, word chips),
   then a quick check where misses come back 2 cards later (max 4 tries), then a summary. Not tied to days: no streaks,
@@ -94,9 +97,9 @@ reads the owner's port from its app.json; `TARS_PORT_<APP>` overrides it for sid
   typed English) from its first answer, `say` (English → typed phonetic) once read scores ≥ 85%. Answers are scored
   locally in `server/score.js`: meaning = cosine of `Xenova/bge-small-en-v1.5` embeddings (transformers.js, a root
   dependency; model cached in `~/.cache/tars/models`) stretched 0.5→0, 0.95→100; phonetic = edit-distance closeness
-  ignoring case/spaces/hyphens. % → grade: Don't know/<60 Again, <85 Hard, <95 Good, else Easy. **Ask Claude**
-  (`/ask`): one translation per ask (`claude -p --model opus`, ~10 s), every answer saved to the "Custom" category,
-  never in the game. **Sentences** (`/sentences`, `/sentences/:cat`): plain lists per category + Custom. Content:
+  ignoring case/spaces/hyphens. % → grade: Don't know/<60 Again, <85 Hard, <95 Good, else Easy. **Ask**
+  (`/ask`, answer box pinned above the dock): one translation per ask (`claude -p --model opus`, ~10 s), every answer saved to the "Custom" category,
+  never in the game. **Phrases** (`/sentences`, a 2-column grid of categories; `/sentences/:cat` a plain list) + Custom. Content:
   `state/sentences.json` (9 categories × ~40, ranked most-useful-first, phonetics per `server/phonetics.md`), written by
   `bin/burmese build [category…] [-n N]` and re-read by the server when it changes (safe while it runs); progress in
   `state/burmese.json` (`memories`, `custom`, `units`), every answer in `state/reviews.jsonl`. Phonetic only, no

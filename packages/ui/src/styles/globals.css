@@ -24,6 +24,10 @@
     --text-xl--line-height: 1.625rem;
     --text-2xl: 1.5rem;
     --text-2xl--line-height: 1.875rem;
+    --text-phonetic: 1.875rem;
+    --text-phonetic--line-height: 2.25rem;
+    --text-title: 2rem;
+    --text-title--line-height: 2.375rem;
     --text-hero: 3rem;
     --text-hero--line-height: 3.25rem;
     --radius-mark: 4px;
@@ -165,6 +169,19 @@
   background: rgb(255 255 255 / 7%);
   border: 0.5px solid rgb(255 255 255 / 18%);
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 8%);
+}
+
+@utility deck-card {
+  background: linear-gradient(165deg, #1b2f47 0%, var(--chrome) 60%, #10161f 100%);
+  border: 0.5px solid rgb(255 255 255 / 20%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 12%), 0 24px 48px rgb(0 0 0 / 55%);
+  &[data-tone] {
+    border: 1px solid color-mix(in srgb, var(--tone) 55%, transparent);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 12%), 0 0 0 4px color-mix(in srgb, var(--tone) 10%, transparent), 0 24px 48px rgb(0 0 0 / 55%);
+  }
+  &[data-tone="good"] { --tone: var(--today); }
+  &[data-tone="ok"] { --tone: var(--tomorrow); }
+  &[data-tone="bad"] { --tone: var(--overdue); }
 }
 
 @utility chrome-bar {
