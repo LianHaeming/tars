@@ -85,12 +85,24 @@ reads the owner's port from its app.json; `TARS_PORT_<APP>` overrides it for sid
   "I don't like X" swaps). Both back to `/`. API: `GET|PATCH /api/food {basket, shop, servings}` (servings per recipe
   id, base 2) · `POST /api/food/suggest` · `POST /api/shopping {items}` (passed to tasks). Static: `/data/food/*` from
   the repo's data/food.
-- **Burmese app** (`apps/burmese`, its own icon): one root page (no back button) with tabs: Practice, a 100-sentence
-  deck in both directions with spaced repetition — 3 new a day, phonetic first; learned list with unlearn, extra practice
-  rounds; Phrase of the day — the original phrase bank (server/phrases.js); Translate — quick English → Burmese that can
-  add a sentence to the deck. API: `GET /api/burmese` · `POST /api/burmese/{learn,review,unlearn,save,translate}` ·
-  `GET /api/burmese/phrases` · `POST /api/burmese/phrase` · `DELETE /api/burmese/history` (translate = `claude -p --model opus`, ~12 s).
-  The tasks app's `/burmese` redirects there.
+- **Burmese app** (`apps/burmese`, its own icon): one root page (no back button) with tabs: **Practice** — an Anki-style
+  deck scheduled with FSRS-6 (`server/fsrs.js`, a dependency-free port checked against ts-fsrs). Each sentence has up to
+  three memories with their own schedule: `read` (phonetic → meaning) opens on learning, `say` (English → Burmese out loud)
+  after the first correct read, `hear` (audio → meaning) once an audio file exists. Grades Again/Hard/Good/Easy with the
+  next gap on each button; new sentences start with a guess-first card and stay in the session until correct 3× (misses
+  come back 3 cards later; a confident miss gets one extra re-ask). The exercise rotates by strength (`session.ts`):
+  pick-the-meaning for new/shaky read+hear, flip for the rest; strong say memories also get build-it tiles, fill-the-gap
+  and swap-a-slot (one-slot variations Opus writes in the background into `card.swaps` once say stability ≥ 7d).
+  Leeches (4+ lapses) get a 🐌 and an Opus memory hook (`card.hook`). Game layer: XP/levels, combo, streak with one
+  forgiven day a week, "owned" = say stability ≥ 21d, boss rounds per topic, shadowing + hands-free audio loop (only
+  when audio exists). Limits (new/day, max reviews/day) live in state and are set on the **Stats** tab (tiles, heatmap,
+  14-day upcoming, topics, most-missed). Every answer is appended to `state/reviews.jsonl`. **Audio is vendor-agnostic**:
+  drop `state/audio/<card id>.(mp3|m4a|aac|wav|ogg)` from any TTS or recording and that sentence gets audio + a hear card.
+  Then Phrase of the day (server/phrases.js) and Translate (English → Burmese, can add a sentence to the deck). API:
+  `GET /api/burmese` · `GET /api/burmese/stats` · `GET /api/burmese/audio/<id>` ·
+  `POST /api/burmese/{learn,review {id,kind,grade,ms,sure,ex},unlearn,save,settings,boss,hook,translate}` ·
+  `GET /api/burmese/phrases` · `POST /api/burmese/phrase` · `DELETE /api/burmese/history` (translate/hook =
+  `claude -p --model opus`, ~10 s). The tasks app's `/burmese` redirects there.
 - **Discover app** (`apps/discover`): one root page — a daily "cool GitHub repos" feed: real repos from the GitHub search
   API, curated by `claude -p` once a London day into state/discover.json. API: `GET /api/discover[/fresh]`.
 - **WhatsApp app** (`apps/whatsapp`): the conversation list (`/`) and one chat's thread (`/chat/:id`, back to `/`).
