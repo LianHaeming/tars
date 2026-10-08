@@ -4,5 +4,8 @@
   "workspaces": [
     "packages/*",
     "apps/*/web"
-  ]
+  ],
+  "dependencies": {
+    "@huggingface/transformers": "^4.3.1"
+  }
 }

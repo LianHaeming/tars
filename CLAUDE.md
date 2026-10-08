@@ -15,7 +15,7 @@ each other's APIs.
 ```
 apps/<app>/
   app.json       service config for bin/up: {name, port, https, start, build}
-  server/        Node, no dependencies beyond @tars/server: index.js (routes), state.js (this app's JSON docs), …
+  server/        Node, no dependencies beyond @tars/server (Burmese also uses @huggingface/transformers, a root dependency): index.js (routes), state.js, …
   web/           React + TypeScript + Vite + Tailwind v4 + shadcn/ui — display only, everything via its own /api
   state/         live data (gitignored): a symlink to ~/tars/apps/<app>/state on the live checkout, empty in a worktree
   dist/          the built web app (gitignored)
@@ -85,24 +85,24 @@ reads the owner's port from its app.json; `TARS_PORT_<APP>` overrides it for sid
   "I don't like X" swaps). Both back to `/`. API: `GET|PATCH /api/food {basket, shop, servings}` (servings per recipe
   id, base 2) · `POST /api/food/suggest` · `POST /api/shopping {items}` (passed to tasks). Static: `/data/food/*` from
   the repo's data/food.
-- **Burmese app** (`apps/burmese`, its own icon): one root page (no back button) with tabs: **Practice** — an Anki-style
-  deck scheduled with FSRS-6 (`server/fsrs.js`, a dependency-free port checked against ts-fsrs). Each sentence has up to
-  three memories with their own schedule: `read` (phonetic → meaning) opens on learning, `say` (English → Burmese out loud)
-  after the first correct read, `hear` (audio → meaning) once an audio file exists. Grades Again/Hard/Good/Easy with the
-  next gap on each button; new sentences start with a guess-first card and stay in the session until correct 3× (misses
-  come back 3 cards later; a confident miss gets one extra re-ask). The exercise rotates by strength (`session.ts`):
-  pick-the-meaning for new/shaky read+hear, flip for the rest; strong say memories also get build-it tiles, fill-the-gap
-  and swap-a-slot (one-slot variations Opus writes in the background into `card.swaps` once say stability ≥ 7d).
-  Leeches (4+ lapses) get a 🐌 and an Opus memory hook (`card.hook`). Game layer: XP/levels, combo, streak with one
-  forgiven day a week, "owned" = say stability ≥ 21d, boss rounds per topic, shadowing + hands-free audio loop (only
-  when audio exists). Limits (new/day, max reviews/day) live in state and are set on the **Stats** tab (tiles, heatmap,
-  14-day upcoming, topics, most-missed). Every answer is appended to `state/reviews.jsonl`. **Audio is vendor-agnostic**:
-  drop `state/audio/<card id>.(mp3|m4a|aac|wav|ogg)` from any TTS or recording and that sentence gets audio + a hear card.
-  Then Phrase of the day (server/phrases.js) and Translate (English → Burmese, can add a sentence to the deck). API:
-  `GET /api/burmese` · `GET /api/burmese/stats` · `GET /api/burmese/audio/<id>` ·
-  `POST /api/burmese/{learn,review {id,kind,grade,ms,sure,ex},unlearn,save,settings,boss,hook,translate}` ·
-  `GET /api/burmese/phrases` · `POST /api/burmese/phrase` · `DELETE /api/burmese/history` (translate/hook =
-  `claude -p --model opus`, ~10 s). The tasks app's `/burmese` redirects there.
+- **Burmese app** (`apps/burmese`, its own look and icon — scope: tars vault `language-app-scope.md`): three tabs.
+  **Exercises** (`/`, a big Play button + "N slipping · N new ready" + Stats at `/stats`) runs **units** at `/unit`:
+  "Last time" (up to 8 memories predicted below 90% recall, most at risk first, one per sentence), then "New" (the next
+  3 sentences in usefulness order — skipped while > 15 memories are at risk): teach (phonetic, English, word chips),
+  then a quick check where misses come back 2 cards later (max 4 tries), then a summary. Not tied to days: no streaks,
+  limits or reminders. Each sentence has two FSRS memories (`server/fsrs.js`, fractional days): `read` (phonetic →
+  typed English) from its first answer, `say` (English → typed phonetic) once read scores ≥ 85%. Answers are scored
+  locally in `server/score.js`: meaning = cosine of `Xenova/bge-small-en-v1.5` embeddings (transformers.js, a root
+  dependency; model cached in `~/.cache/tars/models`) stretched 0.5→0, 0.95→100; phonetic = edit-distance closeness
+  ignoring case/spaces/hyphens. % → grade: Don't know/<60 Again, <85 Hard, <95 Good, else Easy. **Ask Claude**
+  (`/ask`): one translation per ask (`claude -p --model opus`, ~10 s), every answer saved to the "Custom" category,
+  never in the game. **Sentences** (`/sentences`, `/sentences/:cat`): plain lists per category + Custom. Content:
+  `state/sentences.json` (9 categories × ~40, ranked most-useful-first, phonetics per `server/phonetics.md`), written by
+  `bin/burmese build [category…] [-n N]` and re-read by the server when it changes (safe while it runs); progress in
+  `state/burmese.json` (`memories`, `custom`, `units`), every answer in `state/reviews.jsonl`. Phonetic only, no
+  script shown, no audio yet. API: `GET /api/burmese` (status) · `GET /api/burmese/{unit,stats,sentences,asked}` ·
+  `POST /api/burmese/answer {unit,id,kind,answer|null,phase}` · `POST /api/burmese/ask {text}`. The old deck app's
+  data is in `state/old-app-2026-10-08/`. The tasks app's `/burmese` redirects there.
 - **Discover app** (`apps/discover`): one root page — a daily "cool GitHub repos" feed: real repos from the GitHub search
   API, curated by `claude -p` once a London day into state/discover.json. API: `GET /api/discover[/fresh]`.
 - **WhatsApp app** (`apps/whatsapp`): the conversation list (`/`) and one chat's thread (`/chat/:id`, back to `/`).
@@ -129,7 +129,11 @@ reads the owner's port from its app.json; `TARS_PORT_<APP>` overrides it for sid
     utils.ts, money.ts (`fmt`, `fmt0`), use-resource.ts (shared `{data,error,loading,reload}` fetch hook for read-mostly
     features); `components/payments.tsx` (Expected, useExpected, Logo, PaymentRow — used by tasks and money). `styles/globals.css` — the tokens.
   - **One look everywhere**: shadcn components + the shared pieces above; never hard-code colours — use the tokens in
-    `packages/ui/src/styles/globals.css` (dark only, blue `primary`, due/priority colours). No second theme or CSS file.
+    `packages/ui/src/styles/globals.css` (dark only, blue `primary`, due/priority colours). No second theme or CSS file —
+    except Burmese, which Lian asked to have its own look: `apps/burmese/web/src/app/theme.css` imports globals.css and
+    overrides the tokens (plum + gold, Fredoka display font, `theme-color` #1c1426).
+  - `cn` drops a custom `text-<size>` token (e.g. `text-hero`, `text-phonetic`) when it's merged with a `text-<colour>`
+    class — it reads both as colours. Pass custom sizes in a plain className (or a wrapper), not through `cn`.
   - **shadcn, in-grain** (the house rule — follow it religiously): every interactive control is a shadcn/Radix
     primitive (`Button`, `Checkbox`, `Badge`, `Avatar`, `ToggleGroup`, `Collapsible`, `Dialog`, …), added via
     `npx shadcn@latest add <name>` — don't hand-roll a `<button>`/`<input>` when a primitive exists. **Appearance that
@@ -154,7 +158,8 @@ reads the owner's port from its app.json; `TARS_PORT_<APP>` overrides it for sid
 - `bin/sync [app…]` — pull, then `bin/up` every app (or the ones named). `bin/up <app>` — `npm ci` at the root when the
   lockfile changed, link `apps/<app>/state`, build (`build` in app.json) and (re)start `tars-<app>` as a user service on
   the tailnet (`https` field, else its port). Refuses to run from a worktree. State has no backups (Lian's call).
-- `bin/icon <app> <glyph> [font]` — the app's home-screen icons (navy gradient + one white glyph, same family for all).
+- `bin/icon <app> <glyph> [font]` — the app's home-screen icons (navy gradient + one white glyph, same family for all;
+  Burmese has its own plum + gold speech-bubble icon, drawn by hand).
 
 ## Tools
 - `bin/gmail` — read-only Gmail for cottrelllian@gmail.com (the only Gmail path — the claude.ai Gmail and Todoist

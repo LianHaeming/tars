@@ -2,5 +2,5 @@
 const { docs } = require('@tars/server');
 
 module.exports = docs(__dirname + '/..', {
-  burmese: () => ({ deck: [], progress: {}, days: {}, history: [] }),
+  burmese: () => ({ memories: {}, custom: [], units: 0 }),
 });

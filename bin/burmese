@@ -1,25 +1,27 @@
 #!/usr/bin/env node
-// Usage: bin/burmese build [N]   (re)write the deck of N everyday sentences (default 100) via `claude -p`; resets their progress.
-//        bin/burmese phrases [N]  top up the phrase-of-the-day bank to N phrases (default 365).
-//        bin/burmese count       how many sentences are in the deck and how many are learned.
-// Stop the service first (systemctl --user stop tars-burmese) — it keeps burmese.json in memory — and start it again after.
-const { build } = require('../apps/burmese/server/burmese');
-const phrases = require('../apps/burmese/server/phrases');
-const { burmese } = require('../apps/burmese/server/state');
+// Usage: bin/burmese build [category…] [-n N]   (re)write the sentence pool via `claude -p` (all categories by default, N=40 each)
+//        bin/burmese count                      sentences per category
+// Safe while the service runs: it only writes state/sentences.json, which the server reloads on change.
+const { build, pool, CATEGORIES } = require('../apps/burmese/server/content');
 
-const [cmd, arg] = process.argv.slice(2);
+const args = process.argv.slice(2);
+const cmd = args.shift();
+const ni = args.indexOf('-n');
+const n = ni >= 0 ? Number(args.splice(ni, 2)[1]) || 40 : 40;
 
 if (cmd === 'count') {
-  const d = burmese.get();
-  console.log(`${(d.deck || []).length} sentences, ${Object.keys(d.progress || {}).length} learned`);
-} else if (cmd === 'phrases') {
-  phrases.build(Number(arg) || 365, 40, msg => console.log(msg)).then(() => process.exit(0), e => { console.error(e.message); process.exit(1); });
+  const { sentences } = pool();
+  for (const c of CATEGORIES) console.log(`${c.name}: ${sentences.filter(s => s.cat === c.key).length}`);
+  console.log(`total: ${sentences.length}`);
 } else if (cmd === 'build') {
-  build(Number(arg) || 100, msg => console.log(msg)).then(
-    () => process.exit(0),
+  const keys = args.length ? args : CATEGORIES.map(c => c.key);
+  const bad = keys.filter(k => !CATEGORIES.some(c => c.key === k));
+  if (bad.length) { console.error(`unknown category: ${bad.join(', ')} (have ${CATEGORIES.map(c => c.key).join(', ')})`); process.exit(1); }
+  build(keys, n, msg => console.log(msg)).then(
+    total => { console.log(`pool: ${total} sentences`); process.exit(0); },
     e => { console.error('build failed:', e.message); process.exit(1); },
   );
 } else {
-  console.error('usage: bin/burmese build [N] | phrases [N] | count');
+  console.error('usage: bin/burmese build [category…] [-n N] | count');
   process.exit(1);
 }
