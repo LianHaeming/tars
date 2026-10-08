@@ -4,6 +4,7 @@ import { Empty } from '@tars/ui/components/common'
 import { useResource } from '@tars/ui/lib/use-resource'
 import { getSentences } from './data'
 import { sentencesCache } from './SentencesPage'
+import { Speak } from './deck'
 
 export function CategoryPage() {
   const { cat } = useParams()
@@ -14,9 +15,12 @@ export function CategoryPage() {
       {error && <p className="pt-6 text-sm text-muted-foreground">Couldn't load — {error}</p>}
       {c && !c.sentences.length && <Empty>{cat === 'custom' ? 'Anything you ask Claude shows up here.' : 'No sentences yet.'}</Empty>}
       {c?.sentences.map(s => (
-        <div key={s.id} className="hairline-b py-3">
-          <div className="font-semibold text-primary">{s.phonetic}</div>
-          <div className="text-sm text-muted-foreground">{s.english}</div>
+        <div key={s.id} className="hairline-b flex items-center gap-3 py-3">
+          <div className="min-w-0 flex-1">
+            <div className="font-semibold text-primary">{s.phonetic}</div>
+            <div className="text-sm text-muted-foreground">{s.english}</div>
+          </div>
+          <Speak id={s.id} compact />
         </div>
       ))}
     </Page>

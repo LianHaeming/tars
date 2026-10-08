@@ -5,7 +5,7 @@ import { Button } from '@tars/ui/components/ui/button'
 import { Textarea } from '@tars/ui/components/ui/textarea'
 import { useResource } from '@tars/ui/lib/use-resource'
 import { ask, getAsked, type Asked } from './data'
-import { LargeTitle } from './deck'
+import { LargeTitle, Speak } from './deck'
 
 const cache: { current: Asked[] | null } = { current: null }
 
@@ -32,6 +32,7 @@ export function AskPage() {
           <p className="text-sm text-muted-foreground">“{latest.asked}”</p>
           <p className="mt-2 text-2xl font-bold text-primary">{latest.phonetic}</p>
           <p className="mt-1">{latest.english}</p>
+          <Speak id={latest.id} className="mt-4 justify-start" />
         </div>
       )}
       {error && <p className="pt-6 text-sm text-muted-foreground">Couldn't load previous answers — {error}</p>}
@@ -40,9 +41,12 @@ export function AskPage() {
           <p className="px-1 pt-6 pb-2 text-sm font-semibold tracking-wider text-muted-foreground uppercase">Earlier</p>
           <div className="space-y-2">
             {previous.map(a => (
-              <div key={a.id} className="glass rounded-2xl px-4 py-3">
-                <div className="font-semibold text-primary">{a.phonetic}</div>
-                <div className="text-sm text-muted-foreground">{a.english}</div>
+              <div key={a.id} className="glass flex items-center gap-3 rounded-2xl px-4 py-3">
+                <div className="min-w-0 flex-1">
+                  <div className="font-semibold text-primary">{a.phonetic}</div>
+                  <div className="text-sm text-muted-foreground">{a.english}</div>
+                </div>
+                <Speak id={a.id} compact />
               </div>
             ))}
           </div>

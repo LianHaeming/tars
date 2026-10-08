@@ -1,7 +1,10 @@
 #!/usr/bin/env node
 // Usage: bin/burmese build [category…] [-n N]   (re)write the sentence pool via `claude -p` (all categories by default, N=40 each)
 //        bin/burmese count                      sentences per category
+//        bin/burmese tts-install                (re)make the venv for the spoken Burmese (Meta MMS-TTS, CPU) and fetch the model
 // Safe while the service runs: it only writes state/sentences.json, which the server reloads on change.
+const { execFileSync } = require('child_process');
+const path = require('path');
 const { build, pool, CATEGORIES } = require('../apps/burmese/server/content');
 
 const args = process.argv.slice(2);
@@ -13,6 +16,15 @@ if (cmd === 'count') {
   const { sentences } = pool();
   for (const c of CATEGORIES) console.log(`${c.name}: ${sentences.filter(s => s.cat === c.key).length}`);
   console.log(`total: ${sentences.length}`);
+} else if (cmd === 'tts-install') {
+  const venv = path.join(process.env.HOME, '.local/share/tars/mms-tts');
+  const pip = path.join(venv, 'bin/pip');
+  const run = (c, a) => execFileSync(c, a, { stdio: 'inherit' });
+  run('python3', ['-m', 'venv', venv]);
+  run(pip, ['install', '-q', '--index-url', 'https://download.pytorch.org/whl/cpu', 'torch']);
+  run(pip, ['install', '-q', 'transformers']);
+  run(path.join(venv, 'bin/python'), ['-c', "from transformers import AutoTokenizer, VitsModel as V; m='facebook/mms-tts-mya'; AutoTokenizer.from_pretrained(m); V.from_pretrained(m)"]);
+  console.log('Burmese voice installed; restart the app: bin/up burmese');
 } else if (cmd === 'build') {
   const keys = args.length ? args : CATEGORIES.map(c => c.key);
   const bad = keys.filter(k => !CATEGORIES.some(c => c.key === k));
@@ -22,6 +34,6 @@ if (cmd === 'count') {
     e => { console.error('build failed:', e.message); process.exit(1); },
   );
 } else {
-  console.error('usage: bin/burmese build [category…] [-n N] | count');
+  console.error('usage: bin/burmese build [category…] [-n N] | count | tts-install');
   process.exit(1);
 }

@@ -6,7 +6,7 @@ import { Button } from '@tars/ui/components/ui/button'
 import { Textarea } from '@tars/ui/components/ui/textarea'
 import { cn } from '@tars/ui/lib/utils'
 import { getUnit, postAnswer, scoreTone, type Card, type Kind, type Result, type Unit } from './data'
-import { BottomBar, DeckTop, PillButton, Tint, WordRow } from './deck'
+import { BottomBar, DeckTop, PillButton, Speak, Tint, WordRow } from './deck'
 
 type Step =
   | { type: 'teach'; card: Card; n: number; of: number }
@@ -44,6 +44,7 @@ function Teach({ step, onNext }: { step: Extract<Step, { type: 'teach' }>; onNex
         <div className="my-auto py-8 text-center">
           <Phonetic>{step.card.phonetic}</Phonetic>
           <p className="mt-3 text-xl">{step.card.english}</p>
+          <Speak id={step.card.id} className="mt-5" />
         </div>
         <WordRow words={step.card.words} />
       </div>
@@ -83,6 +84,7 @@ function Question({ step, unit, onDone }: { step: Extract<Step, { type: 'q' }>; 
           <div className="my-auto py-8 text-center">
             <Phonetic>{result.phonetic}</Phonetic>
             <p className="mt-3 text-xl">{result.english}</p>
+            <Speak id={step.card.id} className="mt-5" />
             {text.trim() && result.score != null && <p className="mt-4 text-sm text-muted-foreground">You wrote <span className="text-foreground">“{text.trim()}”</span></p>}
           </div>
           <WordRow words={result.words} />
@@ -102,6 +104,7 @@ function Question({ step, unit, onDone }: { step: Extract<Step, { type: 'q' }>; 
             {read ? 'What does it mean?' : 'Say it out loud, then type it'}
           </p>
           <div className="mt-3">{read ? <Phonetic>{step.card.phonetic}</Phonetic> : <p className="text-2xl font-bold">{step.card.english}</p>}</div>
+          {read && <Speak id={step.card.id} className="mt-5" />}
         </div>
         <div className="text-center">
           <Button variant="link" size="inline" disabled={busy} onClick={() => submit(null)}>I don't know</Button>

@@ -150,4 +150,7 @@ async function ask(text) {
 
 const asked = () => doc().custom;
 
-module.exports = { status, unit, answer, stats, sentences, ask, asked };
+// The Burmese script for a pool sentence or an Ask translation, for its audio.
+const scriptOf = id => (content.sentence(id) || doc().custom.find(c => c.id === id))?.burmese;
+
+module.exports = { status, unit, answer, stats, sentences, ask, asked, scriptOf };
