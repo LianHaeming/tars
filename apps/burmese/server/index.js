@@ -36,10 +36,7 @@ async function api(req, res, [resource, rid, ...rest], body) {
     if (rid === 'stats') return send(res, 200, game.stats());
     if (rid === 'sentences') return send(res, 200, game.sentences());
     if (rid === 'asked') return send(res, 200, game.asked());
-    if (rid === 'practise') {
-      const q = new URL(req.url, 'http://x').searchParams;
-      return send(res, 200, game.practise(Number(q.get('n')) || 10, Number(q.get('skip')) || 0));
-    }
+    if (rid === 'cards') return send(res, 200, game.cards());
     if (rid === 'audio') return audio(req, res, rest[0]);
   }
   if (req.method === 'POST') {

@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router'
-import { ChartColumnIcon, MessageCircleIcon, PlayIcon, Volume2Icon } from 'lucide-react'
+import { ChartColumnIcon, ChevronRightIcon, PlayIcon } from 'lucide-react'
 import { Button } from '@tars/ui/components/ui/button'
 import { useResource } from '@tars/ui/lib/use-resource'
 import { cn } from '@tars/ui/lib/utils'
@@ -77,16 +77,15 @@ export function ExercisesPage() {
       )}
 
       {data && data.pool - data.left > 0 && (
-        <div className="glass mt-6 rounded-3xl p-5">
-          <p className="font-semibold">Practise what you've learned</p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Go over the sentences you've started, weakest first, as many times as you like. Nothing is scored.
-          </p>
-          <div className="mt-4 grid grid-cols-2 gap-3">
-            <PillButton quiet onClick={() => navigate('/practise')}><MessageCircleIcon />Say it</PillButton>
-            <PillButton quiet onClick={() => navigate('/practise?from=burmese')}><Volume2Icon />Hear it</PillButton>
+        <Link to="/cards" className="glass mt-6 flex items-center gap-4 rounded-3xl p-5 active:scale-98">
+          <div className="min-w-0 flex-1">
+            <p className="font-semibold">Your cards</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              All {data.pool - data.left} sentence{data.pool - data.left === 1 ? '' : 's'} you've learned, to look back over and listen to.
+            </p>
           </div>
-        </div>
+          <ChevronRightIcon className="size-5 shrink-0 text-muted-foreground" />
+        </Link>
       )}
     </>
   )

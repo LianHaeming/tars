@@ -92,9 +92,9 @@ reads the owner's port from its app.json; `TARS_PORT_<APP>` overrides it for sid
   large card per step, answer box under the card, scored card gets a coloured edge, actions pinned to the bottom):
   "Last time" (up to 8 memories predicted below 90% recall, most at risk first, one per sentence), then "New" (the next
   3 sentences in usefulness order — skipped while > 15 memories are at risk): teach (phonetic, English, word chips),
-  then a quick check where misses come back 2 cards later (max 4 tries), then a summary. **Practise** (`/practise`, from the card under the tiles; `?from=burmese` for Hear it, else Say it):
-  unscored flashcards over the started sentences, 10 at a time weakest first (`GET /api/burmese/practise?skip=N`) —
-  recall, Show (Say it autoplays the audio), Again (back 3 cards later) or Got it; never touches the memories. Not tied to days: no streaks,
+  then a quick check where misses come back 2 cards later (max 4 tries), then a summary. **Your cards** (`/cards`, from the card under the tiles): every started
+  sentence as its full card (phonetic, English, Listen/Slow, word chips, how well it's held), newest first, in a swipe
+  rail — just for looking back, no testing (`GET /api/burmese/cards`). Not tied to days: no streaks,
   limits or reminders. Each sentence has two FSRS memories (`server/fsrs.js`, fractional days): `read` (phonetic →
   typed English) from its first answer, `say` (English → typed phonetic) once read scores ≥ 85%. Answers are scored
   locally in `server/score.js`: meaning = cosine of `Xenova/bge-small-en-v1.5` embeddings (transformers.js, a root

@@ -150,23 +150,23 @@ async function ask(text) {
 
 const asked = () => doc().custom;
 
-// practise(n, skip) — the started sentences to study again, weakest first (lowest predicted recall of their read/say memories,
-// then fewest answers). Unscored: studying never touches the memories, the units still do the testing.
-function practise(n = 10, skip = 0) {
+// cards() — every sentence started so far, newest first: the full card plus how well it's held (slipping = a memory
+// predicted below 90% recall, solid = both memories stable).
+function cards() {
   const now = Date.now();
   const { memories } = doc();
-  const weak = s => {
+  const first = new Map();
+  for (const e of log()) if (!first.has(e.id)) first.set(e.id, e.at);
+  const { sentences, categories } = content.pool();
+  return sentences.filter(s => memories[mkey(s.id, 'read')]).map(s => {
     const ms = ['read', 'say'].map(k => memories[mkey(s.id, k)]).filter(m => m && m.s != null);
-    return { s, r: ms.length ? Math.min(...ms.map(m => recallNow(m, now))) : 0, reps: ms.reduce((a, m) => a + m.reps, 0) };
-  };
-  const started = content.pool().sentences.filter(s => memories[mkey(s.id, 'read')]).map(weak);
-  const sorted = started.sort((a, b) => a.r - b.r || a.reps - b.reps);
-  const from = sorted.length > n ? skip % sorted.length : 0;
-  const cards = [...sorted.slice(from), ...sorted.slice(0, from)].slice(0, n);
-  return { started: sorted.length, cards: cards.map(x => card(x.s)) };
+    const held = ms.some(m => recallNow(m, now) < fsrs.RETENTION) ? 'slipping'
+      : ms.length === 2 && ms.every(m => m.s >= STABLE) ? 'solid' : 'learning';
+    return { ...card(s), catName: categories.find(c => c.key === s.cat)?.name ?? s.cat, held, learned: first.get(s.id) ?? memories[mkey(s.id, 'read')].last ?? 0 };
+  }).sort((a, b) => b.learned - a.learned);
 }
 
 // The Burmese script for a pool sentence or an Ask translation, for its audio.
 const scriptOf = id => (content.sentence(id) || doc().custom.find(c => c.id === id))?.burmese;
 
-module.exports = { status, unit, answer, stats, sentences, ask, asked, practise, scriptOf };
+module.exports = { status, unit, answer, stats, sentences, ask, asked, cards, scriptOf };
