@@ -1,21 +1,12 @@
 import { Navigate, Outlet, RouterProvider, createBrowserRouter } from 'react-router'
 import { AppShell } from '@tars/ui/components/AppShell'
-import { TabBar } from './TabBar'
+import { Tabs } from './Tabs'
 import { ExercisesPage } from '@/features/burmese/ExercisesPage'
 import { UnitPage } from '@/features/burmese/UnitPage'
 import { StatsPage } from '@/features/burmese/StatsPage'
 import { AskPage } from '@/features/burmese/AskPage'
 import { SentencesPage } from '@/features/burmese/SentencesPage'
 import { CategoryPage } from '@/features/burmese/CategoryPage'
-
-function Tabs() {
-  return (
-    <>
-      <Outlet />
-      <TabBar />
-    </>
-  )
-}
 
 const router = createBrowserRouter([
   {

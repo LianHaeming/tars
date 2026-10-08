@@ -31,4 +31,4 @@ export const getAsked = () => api<Asked[]>('GET', 'burmese/asked')
 export const ask = (text: string) => api<Asked>('POST', 'burmese/ask', { text })
 
 export const scoreTone = (score: number | null) =>
-  score == null || score < 60 ? 'text-miss' : score < 85 ? 'text-okay' : 'text-good'
+  score == null || score < 60 ? 'text-overdue' : score < 85 ? 'text-tomorrow' : 'text-today'

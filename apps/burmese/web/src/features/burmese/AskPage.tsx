@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { SendIcon } from 'lucide-react'
-import { Page } from '@tars/ui/components/Page'
 import { SectionHead } from '@tars/ui/components/common'
 import { Button } from '@tars/ui/components/ui/button'
 import { Textarea } from '@tars/ui/components/ui/textarea'
@@ -12,13 +11,13 @@ const cache: { current: Asked[] | null } = { current: null }
 
 function Answer({ a, big }: { a: Asked; big?: boolean }) {
   return big ? (
-    <div className="glass mt-5 rounded-2xl px-4 py-5 text-center animate-in duration-200 fade-in">
-      <p className="font-display text-phonetic font-semibold text-primary">{a.phonetic}</p>
-      <p className="mt-2 text-lg">{a.english}</p>
+    <div className="glass mt-4 rounded-lg px-4 py-4 animate-in duration-200 fade-in">
+      <p className="text-xl font-bold text-primary">{a.phonetic}</p>
+      <p className="mt-1 text-base">{a.english}</p>
     </div>
   ) : (
     <div className="hairline-b py-3">
-      <div className="font-display text-lg font-semibold text-primary">{a.phonetic}</div>
+      <div className="font-semibold text-primary">{a.phonetic}</div>
       <div className="text-sm text-muted-foreground">{a.english}</div>
     </div>
   )
@@ -39,11 +38,12 @@ export function AskPage() {
   const previous = (data || []).filter(a => a.id !== latest?.id)
 
   return (
-    <Page title="Ask Claude" back={false}>
-      <form className="mt-4" onSubmit={e => { e.preventDefault(); go() }}>
-        <Textarea value={text} onChange={e => setText(e.target.value)} rows={2} placeholder="How do I say…" enterKeyHint="send"
+    <>
+      <SectionHead title="How do I say…" />
+      <form className="mt-3" onSubmit={e => { e.preventDefault(); go() }}>
+        <Textarea value={text} onChange={e => setText(e.target.value)} rows={2} placeholder="e.g. can I have another beer?" enterKeyHint="send"
           onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); go() } }} />
-        <Button type="submit" size="block" className="mt-3 w-full" disabled={busy || !text.trim()}>
+        <Button type="submit" size="lg" className="mt-3 w-full" disabled={busy || !text.trim()}>
           <SendIcon />{busy ? 'Asking Claude…' : 'Ask'}
         </Button>
       </form>
@@ -55,6 +55,6 @@ export function AskPage() {
           {previous.map(a => <Answer key={a.id} a={a} />)}
         </>
       )}
-    </Page>
+    </>
   )
 }

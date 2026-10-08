@@ -1,7 +1,6 @@
 import { Link } from 'react-router'
 import { ChevronRightIcon } from 'lucide-react'
-import { Page } from '@tars/ui/components/Page'
-import { Button } from '@tars/ui/components/ui/button'
+import { SectionHead } from '@tars/ui/components/common'
 import { useResource } from '@tars/ui/lib/use-resource'
 import { getSentences, type Category } from './data'
 
@@ -10,18 +9,16 @@ export const sentencesCache: { current: Category[] | null } = { current: null }
 export function SentencesPage() {
   const { data, error } = useResource(getSentences, { cache: sentencesCache, reloadOnVisible: true })
   return (
-    <Page title="Sentences" back={false}>
-      {error && <p className="pt-6 text-sm text-muted-foreground">Couldn't load — {error}</p>}
-      <div className="mt-2">
-        {data?.map(c => (
-          <Button key={c.key} asChild variant="ghost" size="block" className="hairline-b w-full justify-between rounded-none px-0 py-4 text-lg hover:bg-transparent">
-            <Link to={`/sentences/${c.key}`}>
-              <span className="font-display font-semibold">{c.name}</span>
-              <span className="flex items-center gap-1 text-sm font-normal text-muted-foreground">{c.sentences.length}<ChevronRightIcon /></span>
-            </Link>
-          </Button>
-        ))}
-      </div>
-    </Page>
+    <>
+      <SectionHead title="Categories" count={data?.length} />
+      {error && <p className="pt-3 text-sm text-muted-foreground">Couldn't load — {error}</p>}
+      {data?.map(c => (
+        <Link key={c.key} to={`/sentences/${c.key}`} className="hairline-b flex items-center gap-3 py-3">
+          <span className="min-w-0 flex-1 font-semibold">{c.name}</span>
+          <span className="text-sm text-muted-foreground tabular-nums">{c.sentences.length}</span>
+          <ChevronRightIcon className="size-4 text-muted-foreground" />
+        </Link>
+      ))}
+    </>
   )
 }

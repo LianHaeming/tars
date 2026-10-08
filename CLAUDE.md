@@ -85,8 +85,8 @@ reads the owner's port from its app.json; `TARS_PORT_<APP>` overrides it for sid
   "I don't like X" swaps). Both back to `/`. API: `GET|PATCH /api/food {basket, shop, servings}` (servings per recipe
   id, base 2) · `POST /api/food/suggest` · `POST /api/shopping {items}` (passed to tasks). Static: `/data/food/*` from
   the repo's data/food.
-- **Burmese app** (`apps/burmese`, its own look and icon — scope: tars vault `language-app-scope.md`): three tabs.
-  **Exercises** (`/`, a big Play button + "N slipping · N new ready" + Stats at `/stats`) runs **units** at `/unit`:
+- **Burmese app** (`apps/burmese`, its own icon — scope: tars vault `language-app-scope.md`): three tabs in a sticky
+  FilterBar like the Schedule's. **Exercises** (`/`, tiles + a "Play a unit" dock pill like Add task; Stats at `/stats`) runs **units** at `/unit`:
   "Last time" (up to 8 memories predicted below 90% recall, most at risk first, one per sentence), then "New" (the next
   3 sentences in usefulness order — skipped while > 15 memories are at risk): teach (phonetic, English, word chips),
   then a quick check where misses come back 2 cards later (max 4 tries), then a summary. Not tied to days: no streaks,
@@ -129,9 +129,8 @@ reads the owner's port from its app.json; `TARS_PORT_<APP>` overrides it for sid
     utils.ts, money.ts (`fmt`, `fmt0`), use-resource.ts (shared `{data,error,loading,reload}` fetch hook for read-mostly
     features); `components/payments.tsx` (Expected, useExpected, Logo, PaymentRow — used by tasks and money). `styles/globals.css` — the tokens.
   - **One look everywhere**: shadcn components + the shared pieces above; never hard-code colours — use the tokens in
-    `packages/ui/src/styles/globals.css` (dark only, blue `primary`, due/priority colours). No second theme or CSS file —
-    except Burmese, which Lian asked to have its own look: `apps/burmese/web/src/app/theme.css` imports globals.css and
-    overrides the tokens (plum + gold, Fredoka display font, `theme-color` #1c1426).
+    `packages/ui/src/styles/globals.css` (dark only, blue `primary`, due/priority colours). No second theme or CSS file
+    (Burmese briefly had its own and Lian asked for the tars look back: keep every app on the one look).
   - `cn` drops a custom `text-<size>` token (e.g. `text-hero`, `text-phonetic`) when it's merged with a `text-<colour>`
     class — it reads both as colours. Pass custom sizes in a plain className (or a wrapper), not through `cn`.
   - **shadcn, in-grain** (the house rule — follow it religiously): every interactive control is a shadcn/Radix
@@ -158,8 +157,7 @@ reads the owner's port from its app.json; `TARS_PORT_<APP>` overrides it for sid
 - `bin/sync [app…]` — pull, then `bin/up` every app (or the ones named). `bin/up <app>` — `npm ci` at the root when the
   lockfile changed, link `apps/<app>/state`, build (`build` in app.json) and (re)start `tars-<app>` as a user service on
   the tailnet (`https` field, else its port). Refuses to run from a worktree. State has no backups (Lian's call).
-- `bin/icon <app> <glyph> [font]` — the app's home-screen icons (navy gradient + one white glyph, same family for all;
-  Burmese has its own plum + gold speech-bubble icon, drawn by hand).
+- `bin/icon <app> <glyph> [font]` — the app's home-screen icons (navy gradient + one white glyph, same family for all).
 
 ## Tools
 - `bin/gmail` — read-only Gmail for cottrelllian@gmail.com (the only Gmail path — the claude.ai Gmail and Todoist

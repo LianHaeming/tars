@@ -15,7 +15,7 @@ export function CategoryPage() {
       {c && !c.sentences.length && <Empty>{cat === 'custom' ? 'Anything you ask Claude shows up here.' : 'No sentences yet.'}</Empty>}
       {c?.sentences.map(s => (
         <div key={s.id} className="hairline-b py-3">
-          <div className="font-display text-lg font-semibold text-primary">{s.phonetic}</div>
+          <div className="font-semibold text-primary">{s.phonetic}</div>
           <div className="text-sm text-muted-foreground">{s.english}</div>
         </div>
       ))}

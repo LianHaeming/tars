@@ -27,7 +27,7 @@ function plan(u: Unit): Step[] {
 const label = (s: Step) => s.type === 'teach' ? 'New' : s.phase === 'review' ? 'Last time' : 'Quick check'
 
 function Phonetic({ children, small, className = '' }: { children: string; small?: boolean; className?: string }) {
-  return <p className={`font-display font-semibold text-primary ${small ? 'text-2xl' : 'text-phonetic'} ${className}`}>{children}</p>
+  return <p className={`font-bold text-primary ${small ? 'text-xl' : 'text-2xl'} ${className}`}>{children}</p>
 }
 
 function Words({ words }: { words: Word[] }) {
@@ -35,8 +35,8 @@ function Words({ words }: { words: Word[] }) {
   return (
     <div className="mt-6 flex flex-wrap justify-center gap-2">
       {words.map((w, i) => (
-        <div key={i} className="glass rounded-xl px-3 py-2 text-center">
-          <div className="font-display text-base font-semibold">{w.p}</div>
+        <div key={i} className="glass rounded-lg px-3 py-2 text-center">
+          <div className="text-base font-semibold">{w.p}</div>
           <div className="text-xs text-muted-foreground">{w.e}</div>
         </div>
       ))}
@@ -52,7 +52,7 @@ function Teach({ step, onNext }: { step: Extract<Step, { type: 'teach' }>; onNex
       <p className="mt-3 text-xl">{step.card.english}</p>
       <Words words={step.card.words} />
       <p className="mt-8 text-sm text-muted-foreground">Say it out loud a couple of times.</p>
-      <Button size="block" className="mt-8 w-full max-w-xs text-lg" onClick={onNext}>Next</Button>
+      <Button size="lg" className="mt-8 w-full" onClick={onNext}>Next</Button>
     </div>
   )
 }
@@ -80,7 +80,7 @@ function Question({ step, unit, onDone }: { step: Extract<Step, { type: 'q' }>; 
       <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
         {read ? 'What does it mean?' : 'Say it out loud, then type it'}
       </p>
-      {read ? <Phonetic className="mt-5">{step.card.phonetic}</Phonetic> : <p className="mt-5 font-display text-2xl font-semibold">{step.card.english}</p>}
+      {read ? <Phonetic className="mt-5">{step.card.phonetic}</Phonetic> : <p className="mt-5 text-2xl font-bold">{step.card.english}</p>}
 
       {!result ? (
         <form className="mt-8 w-full" onSubmit={e => { e.preventDefault(); if (text.trim()) submit(text) }}>
@@ -89,22 +89,22 @@ function Question({ step, unit, onDone }: { step: Extract<Step, { type: 'q' }>; 
             autoCapitalize="off" autoCorrect="off" spellCheck={false} enterKeyHint="done"
             onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if (text.trim()) submit(text) } }} />
           <div className="mt-4 grid grid-cols-2 gap-3">
-            <Button type="button" variant="secondary" size="block" disabled={busy} onClick={() => submit(null)}>Don't know</Button>
-            <Button type="submit" size="block" disabled={busy || !text.trim()}>{busy ? 'Scoring…' : 'Submit'}</Button>
+            <Button type="button" variant="secondary" size="lg" disabled={busy} onClick={() => submit(null)}>Don't know</Button>
+            <Button type="submit" size="lg" disabled={busy || !text.trim()}>{busy ? 'Scoring…' : 'Submit'}</Button>
           </div>
         </form>
       ) : (
         <div className="mt-8 w-full animate-in duration-200 fade-in">
-          <p className={`font-display text-hero font-semibold tabular-nums ${scoreTone(result.score)}`}>
+          <p className={`text-hero font-bold tabular-nums ${scoreTone(result.score)}`}>
             {result.score == null ? '—' : `${result.score}%`}
           </p>
           {text.trim() && result.score != null && <p className="mt-2 text-sm text-muted-foreground">You wrote: {text.trim()}</p>}
-          <div className="glass mt-6 rounded-2xl px-4 py-5">
+          <div className="glass mt-6 rounded-lg px-4 py-5">
             <Phonetic small>{result.phonetic}</Phonetic>
             <p className="mt-2 text-lg">{result.english}</p>
           </div>
-          {retry && <p className="mt-4 text-sm text-okay">This one comes back in a moment.</p>}
-          <Button size="block" className="mt-6 w-full text-lg" autoFocus onClick={() => onDone(result, retry)}>Next</Button>
+          {retry && <p className="mt-4 text-sm text-tomorrow">This one comes back in a moment.</p>}
+          <Button size="lg" className="mt-6 w-full" autoFocus onClick={() => onDone(result, retry)}>Next</Button>
         </div>
       )}
     </div>
@@ -118,14 +118,14 @@ function Summary({ done, onAgain }: { done: Done[]; onAgain: () => void }) {
     <div className="pt-8">
       <div className="text-center">
         <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">Unit done</p>
-        <p className={`mt-2 font-display text-hero font-semibold tabular-nums ${scoreTone(avg)}`}>{avg == null ? '—' : `${avg}%`}</p>
+        <p className={`mt-2 text-hero font-bold tabular-nums ${scoreTone(avg)}`}>{avg == null ? '—' : `${avg}%`}</p>
         <p className="text-sm text-muted-foreground">average over {done.length} answer{done.length === 1 ? '' : 's'}</p>
       </div>
       <div className="mt-6">
         {done.map((d, i) => (
           <div key={i} className="hairline-b flex items-center gap-3 py-3">
             <div className="min-w-0 flex-1">
-              <div className="truncate font-display font-semibold text-primary">{d.card.phonetic}</div>
+              <div className="truncate font-semibold text-primary">{d.card.phonetic}</div>
               <div className="truncate text-sm text-muted-foreground">{d.card.english}</div>
             </div>
             <span className="text-xs text-muted-foreground">{d.kind === 'read' ? 'meaning' : 'phonetic'}</span>
@@ -134,8 +134,8 @@ function Summary({ done, onAgain }: { done: Done[]; onAgain: () => void }) {
         ))}
       </div>
       <div className="mt-8 grid grid-cols-2 gap-3">
-        <Button variant="secondary" size="block" onClick={() => navigate('/')}>Done</Button>
-        <Button size="block" onClick={onAgain}>Play another</Button>
+        <Button variant="secondary" size="lg" onClick={() => navigate('/')}>Done</Button>
+        <Button size="lg" onClick={onAgain}>Play another</Button>
       </div>
     </div>
   )
@@ -174,7 +174,7 @@ export function UnitPage() {
         : !unit ? <p className="pt-8 text-sm text-muted-foreground">Loading…</p>
         : !steps.length ? (
           <div className="pt-16 text-center">
-            <p className="font-display text-2xl font-semibold">Nothing to do</p>
+            <p className="text-2xl font-semibold">Nothing to do</p>
             <p className="mt-2 text-sm text-muted-foreground">Nothing is slipping and every sentence is started. Ask tars for more sentences.</p>
           </div>
         )

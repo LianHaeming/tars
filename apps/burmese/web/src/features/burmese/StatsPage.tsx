@@ -20,9 +20,9 @@ const days = (s: number | null) => s == null ? '—' : s < 1 ? `${Math.round(s *
 
 function Tile({ label, value, hint }: { label: string; value: string | number; hint?: string }) {
   return (
-    <div className="glass rounded-2xl px-3 py-3">
-      <div className="font-display text-2xl font-semibold tabular-nums">{value}</div>
-      <div className="text-xs font-semibold text-muted-foreground">{label}</div>
+    <div className="glass rounded-lg px-3 py-2">
+      <div className="text-lg font-semibold tabular-nums">{value}</div>
+      <div className="text-xs text-muted-foreground">{label}</div>
       {hint && <div className="mt-1 text-xs text-muted-foreground">{hint}</div>}
     </div>
   )
@@ -41,7 +41,7 @@ function Trend({ trend }: { trend: Stats['trend'] }) {
         {trend.map(t => (
           <Button key={t.unit} variant="ghost" size="inline" aria-label={`Unit ${t.unit}: ${t.avg}%`}
             onClick={() => setSel(t.unit)} className="h-full min-w-0 flex-1 items-end rounded-none p-0 hover:bg-transparent">
-            <span className={cn('block w-full rounded-t-mark bg-gold', shown.unit !== t.unit && 'opacity-50')} style={{ height: `${Math.max(3, t.avg)}%` }} />
+            <span className={cn('block w-full rounded-t-mark bg-primary', shown.unit !== t.unit && 'opacity-50')} style={{ height: `${Math.max(3, t.avg)}%` }} />
           </Button>
         ))}
       </div>
@@ -91,8 +91,8 @@ export function StatsPage() {
           {rows.map(r => (
             <div key={r.id} className="hairline-b py-3">
               <div className="flex items-baseline gap-2">
-                <span className="min-w-0 flex-1 font-display font-semibold text-primary">{r.phonetic}</span>
-                <span className={cn('text-xs font-semibold', r.state === 'stable' ? 'text-good' : 'text-muted-foreground')}>{r.state}</span>
+                <span className="min-w-0 flex-1 font-semibold text-primary">{r.phonetic}</span>
+                <span className={cn('text-xs font-semibold', r.state === 'stable' ? 'text-today' : 'text-muted-foreground')}>{r.state}</span>
               </div>
               <div className="text-sm">{r.english} <span className="text-xs text-muted-foreground">· {cat(r.cat)}</span></div>
               <div className="mt-1 space-y-1">
