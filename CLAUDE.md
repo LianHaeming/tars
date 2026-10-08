@@ -103,8 +103,12 @@ reads the owner's port from its app.json; `TARS_PORT_<APP>` overrides it for sid
   `state/sentences.json` (9 categories × ~40, ranked most-useful-first, phonetics per `server/phonetics.md`), written by
   `bin/burmese build [category…] [-n N]` and re-read by the server when it changes (safe while it runs); progress in
   `state/burmese.json` (`memories`, `custom`, `units`), every answer in `state/reviews.jsonl`. Phonetic only, no
-  script shown, no audio yet. API: `GET /api/burmese` (status) · `GET /api/burmese/{unit,stats,sentences,asked}` ·
-  `POST /api/burmese/answer {unit,id,kind,answer|null,phase}` · `POST /api/burmese/ask {text}`. The old deck app's
+  script shown. **Audio**: Listen / Slow buttons on cards, the Phrases list and Ask — Meta's MMS-TTS Burmese voice
+  (`facebook/mms-tts-mya`) run locally by `server/tts_mms.py` in a Python venv at `~/.local/share/tars/mms-tts`
+  (`bin/burmese tts-install` makes it and fetches the model); `server/tts.js` makes each clip on first play into
+  `state/audio/` (keyed by Burmese text + speed) and stops the worker after 5 idle minutes. Hidden on English → phonetic
+  questions until answered. API: `GET /api/burmese` (status) · `GET /api/burmese/{unit,stats,sentences,asked}` ·
+  `POST /api/burmese/answer {unit,id,kind,answer|null,phase}` · `POST /api/burmese/ask {text}` · `GET /api/burmese/audio/<id>[?speed=slow]` (MP3, byte ranges). The old deck app's
   data is in `state/old-app-2026-10-08/`. The tasks app's `/burmese` redirects there.
 - **Discover app** (`apps/discover`): one root page — a daily "cool GitHub repos" feed: real repos from the GitHub search
   API, curated by `claude -p` once a London day into state/discover.json. API: `GET /api/discover[/fresh]`.

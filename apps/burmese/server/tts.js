@@ -1,6 +1,7 @@
 // Spoken Burmese: MP3s from Meta's open MMS-TTS Burmese voice, run locally by tts_mms.py in the venv that
 // `bin/burmese tts-install` makes. Each clip is made once, on first play, and kept in state/audio/ under a hash of its
-// text and speed, so editing a sentence's Burmese makes a fresh clip. One worker process, one job at a time.
+// text and speed, so editing a sentence's Burmese makes a fresh clip. One worker process, one job at a time; it
+// exits after 5 idle minutes (the model holds ~850 MB) and the next new clip restarts it.
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
@@ -13,8 +14,11 @@ const VENV = path.join(process.env.HOME, '.local/share/tars/mms-tts');
 const PY = path.join(VENV, 'bin/python');
 const RATES = { normal: 1.0, slow: 0.7 };
 
+const IDLE = 5 * 60e3;
+
 let worker = null;
 let queue = Promise.resolve();
+let idle = null;
 
 function startWorker() {
   if (!fs.existsSync(PY)) throw new Error('Burmese voice not installed (run bin/burmese tts-install)');
@@ -55,6 +59,8 @@ function clip(text, speed = 'normal') {
     const tmp = file.replace(/\.mp3$/, '.tmp.mp3');
     await w.run({ text, out: tmp, rate });
     fs.renameSync(tmp, file);
+    clearTimeout(idle);
+    idle = setTimeout(() => worker?.p.kill(), IDLE);
     return file;
   });
   queue = job.catch(() => {});
