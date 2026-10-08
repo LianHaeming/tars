@@ -19,6 +19,7 @@ const CATEGORIES = [
   { key: 'thanks', name: 'Thanks & goodbyes' },
   { key: 'family', name: 'With his family' },
   { key: 'market', name: 'At the market' },
+  { key: 'lovey', name: 'Lovey-dovey', hint: 'sweet, affectionate, flirty things Lian says to his boyfriend, and what he says back' },
 ];
 
 let cache = null;
@@ -54,7 +55,7 @@ async function generate(cat, n, exclude) {
 Burmese. Lian wants to say fun, natural things to his boyfriend and his friends at dinners, drinks and get-togethers,
 and to catch the odd thing they say to each other.
 
-Write the ${n} most commonly used, most useful Burmese sentences for this situation: "${cat.name}".
+Write the ${n} most commonly used, most useful Burmese sentences for this situation: "${cat.name}"${cat.hint ? ` (${cat.hint})` : ''}.
 Apply the 80/20 rule: the things people actually say most often in that moment, short and natural spoken Burmese,
 always casual, as Lian (a man) would say them. Mix things Lian would say with things he'd often hear.
 Don't repeat any of these sentences that already exist: ${JSON.stringify(exclude)}
