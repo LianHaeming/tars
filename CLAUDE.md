@@ -118,8 +118,8 @@ reads the owner's port from its app.json; `TARS_PORT_<APP>` overrides it for sid
   (phonetic → English) from its New-word card, say (English → phonetic) once read graduates. Anki-style learning steps
   counted in cards (back 2, 5, 12 cards later; a miss or "I don't know" resets to the first step), then FSRS (miss =
   Again, > 5 s = Hard, else Good). Next card: due learning step → slipping review → new word (while < 6 words in steps)
-  → earliest learning → weakest words, never the same card twice running. Right answers auto-advance; misses show the
-  answer until Next. API: `GET /api/burmese/words` · `GET /api/burmese/words/next` · `POST /api/burmese/words/seen {id}` ·
+  → earliest learning → weakest words, never the same card twice running. Silent and quick: right answers move on after 0.25 s,
+  misses show the answer for 1.2 s (or until Next). API: `GET /api/burmese/words` · `GET /api/burmese/words/next` · `POST /api/burmese/words/seen {id}` ·
   `POST /api/burmese/words/answer {key, choice|null, ms}` (→ `{right, next}`); audio by word id (`w1`…).
 - **Discover app** (`apps/discover`): one root page — a daily "cool GitHub repos" feed: real repos from the GitHub search
   API, curated by `claude -p` once a London day into state/discover.json. API: `GET /api/discover[/fresh]`.
