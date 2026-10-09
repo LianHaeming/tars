@@ -1,15 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
-import { useLocation, useNavigate } from 'react-router'
+import { useLocation, useNavigate, useSearchParams } from 'react-router'
 import { ArrowRightIcon, ArrowUpIcon, CheckIcon, XIcon } from 'lucide-react'
 import { Button } from '@tars/ui/components/ui/button'
 import { Input } from '@tars/ui/components/ui/input'
 import { cn } from '@tars/ui/lib/utils'
-import type { Given, WordCard } from '../../../../shared/words.ts'
+import { MODES, type Given, type Mode, type WordCard } from '../../../../shared/words.ts'
 import { getState, record, sync, words } from './wordsStore'
 import { BottomBar, DeckTop, PillButton, Tint } from './deck'
 
-// Endless quick-fire, silent, and offline-first (the engine runs here on the phone, see wordsStore). Multiple choice
-// moves on almost at once when right; typed cards (English → phonetic, once a word is past its first steps) keep one
+// Endless quick-fire, silent, and offline-first (the engine runs here on the phone, see wordsStore), in the mode from
+// ?mode= (recall / mixed / choice). Multiple choice moves on almost at once when right; typed cards keep one
 // input mounted from card to card so the iPhone keyboard stays up. A miss shows the answer briefly (or until Next).
 const MS = { right: 250, typedRight: 450, close: 1500, wrong: 1400, typedWrong: 2000 }
 const OPTION = 'glass h-auto min-h-14 w-full rounded-2xl px-4 py-3 text-lg whitespace-normal active:scale-98'
@@ -52,7 +52,9 @@ function Prompt({ card, result }: { card: WordCard; result: Result | null }) {
         {card.dir === 'read' ? <p className="text-phonetic font-bold text-primary">{card.prompt}</p> : <p className="text-2xl font-bold">{card.prompt}</p>}
         {result && card.format === 'type' && (
           <>
-            <p className={cn('mt-3 text-2xl font-bold', result.right ? (result.close ? 'text-tomorrow' : 'text-today') : 'text-primary')}>{card.phonetic}</p>
+            <p className={cn('mt-3 text-2xl font-bold', result.right ? (result.close ? 'text-tomorrow' : 'text-today') : 'text-primary')}>
+              {card.dir === 'say' ? card.phonetic : card.english}
+            </p>
             {!result.right && result.typed?.trim() && <p className="mt-1 text-sm text-muted-foreground">You wrote <span className="text-overdue">{result.typed.trim()}</span></p>}
             {result.close && <p className="mt-1 text-sm text-muted-foreground">Nearly — you wrote {result.typed?.trim()}</p>}
           </>
@@ -93,15 +95,15 @@ function Choices({ card, result, onPick }: { card: WordCard; result: Result | nu
   )
 }
 
-function TypeBox({ value, onChange, done, onSubmit, onDontKnow }: {
-  value: string; onChange: (v: string) => void; done: boolean; onSubmit: () => void; onDontKnow: () => void
+function TypeBox({ value, onChange, done, english, onSubmit, onDontKnow }: {
+  value: string; onChange: (v: string) => void; done: boolean; english: boolean; onSubmit: () => void; onDontKnow: () => void
 }) {
   const ref = useRef<HTMLInputElement>(null)
   useEffect(() => { ref.current?.focus() }, [])
   return (
     <form className="mt-4" onSubmit={e => { e.preventDefault(); onSubmit() }}>
       <div className="flex items-center gap-2">
-        <Input ref={ref} value={value} onChange={e => onChange(e.target.value)} readOnly={done} placeholder="Type the phonetic"
+        <Input ref={ref} value={value} onChange={e => onChange(e.target.value)} readOnly={done} placeholder={english ? 'Type the English' : 'Type the phonetic'}
           className="h-12 min-w-0 flex-1 rounded-full px-4"
           autoCapitalize="off" autoCorrect="off" autoComplete="off" spellCheck={false} enterKeyHint="go" />
         <Button type="submit" size="icon-lg" aria-label="Check" className="size-12 rounded-full [&_svg:not([class*='size-'])]:size-5">
@@ -120,7 +122,9 @@ function TypeBox({ value, onChange, done, onSubmit, onDontKnow }: {
 export function WordsPlayPage() {
   const navigate = useNavigate()
   const location = useLocation()
-  const [card, setCard] = useState<WordCard | null>(() => words.next(getState()))
+  const [params] = useSearchParams()
+  const mode: Mode = MODES.find(m => m === params.get('mode')) ?? 'mixed'
+  const [card, setCard] = useState<WordCard | null>(() => words.next(getState(), { mode }))
   const [result, setResult] = useState<Result | null>(null)
   const [typed, setTyped] = useState('')
   const [tally, setTally] = useState({ right: 0, wrong: 0 })
@@ -140,7 +144,7 @@ export function WordsPlayPage() {
     record(entry)
     setResult({ right: entry.right, close: entry.close, ...given })
     setTally(t => entry.right ? { ...t, right: t.right + 1 } : { ...t, wrong: t.wrong + 1 })
-    upcoming.current = words.next(getState(), card.key)
+    upcoming.current = words.next(getState(), { last: card.key, mode })
     const typing = 'typed' in given
     timer.current = setTimeout(advance, !entry.right ? (typing ? MS.typedWrong : MS.wrong) : entry.close ? MS.close : typing ? MS.typedRight : MS.right)
   }
@@ -149,7 +153,7 @@ export function WordsPlayPage() {
     if (!card) return
     words.seen(getState(), card.id)
     record()
-    show(words.next(getState(), card.key))
+    show(words.next(getState(), { last: card.key, mode }))
   }
   const close = () => location.key !== 'default' ? navigate(-1) : navigate('/words')
   const question = card && card.stage !== 'new'
@@ -167,7 +171,7 @@ export function WordsPlayPage() {
           </div>
         )}
       {question && card.format === 'type' && (
-        <TypeBox value={typed} onChange={setTyped} done={!!result}
+        <TypeBox value={typed} onChange={setTyped} done={!!result} english={card.dir === 'read'}
           onSubmit={() => result ? advance() : typed.trim() && answer({ typed })}
           onDontKnow={() => answer({ typed: '' })} />
       )}

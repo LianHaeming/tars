@@ -121,11 +121,17 @@ reads the owner's port from its app.json; `TARS_PORT_<APP>` overrides it for sid
   merged with the server's `state/words.json` by `POST /api/burmese/words/sync {state, log}` (per memory, the most
   recently answered wins; new answers appended to `state/words-log.jsonl`) on open, 3 s after answering and on hide.
   `public/app-sw.js` is the offline copy (pages network-first with a 3 s timeout, hashed assets cache-first, /api never
-  cached; not /sw.js, the shared tombstone). Two memories per word: read (phonetic → English) from its New-word card,
-  say (English → phonetic) once read graduates — multiple choice on its first step, **typed** after that and in
-  every review (marked on the phone by spelling, `shared/phonetic.ts`: exact = right, a typo allowed from 4 letters (two
-  from 9) = close/Hard, else wrong; one input stays mounted across typed cards so the iPhone keyboard stays up). Anki-style learning steps counted in cards (back 2, 5, 12 cards later; a
-  miss or "I don't know" resets to the first step), then FSRS (miss = Again, slow (5 s, 12 s typed) or a typo = Hard, else Good). Next card: due
+  cached; not /sw.js, the shared tombstone). Three **modes** (picked on the Words tab, kept in browser storage, passed as
+  `/words/play?mode=`): **recall** (default — every card typed: the phonetic for English → Burmese, the English for
+  Burmese → English, matched against any of the word's meanings + its `also` synonyms in words.json), **mixed** (say
+  cards multiple choice on their first step, typed after), **choice** (multiple choice only). Typed answers are marked on
+  the phone by spelling (`shared/phonetic.ts`, a swap of two letters = one typo): exact = right, a typo allowed from 4
+  letters (two from 9) = close/Hard, else wrong; one input stays mounted across typed cards so the iPhone keyboard stays
+  up. Two memories per word: read (phonetic → English) from its New-word card, say (English → phonetic) once read
+  graduates. A memory is `recalled` while its last typed answer was right; the tab's honest counts are Learning ·
+  Slipping · **Recognised** (graduated, never typed from memory) · **Recalled** (say recalled). Anki-style learning steps counted in cards (back 2, 5, 12 cards later; a
+  miss or "I don't know" resets to the first step), then FSRS (miss = Again; slow (5 s, 12 s typed), a typo, or a multiple-choice right answer in a review = Hard;
+  else Good). Next card: due
   learning step → slipping review → new word (while < 6 words in steps) → earliest learning → weakest words, never the
   same card twice running. Silent and quick: right answers move on after 0.25 s, misses show the answer for 1.2 s (or
   until Next). API: `GET /api/burmese/words` (the server's progress) · `POST /api/burmese/words/sync`; audio by word id
