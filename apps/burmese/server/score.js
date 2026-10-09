@@ -9,7 +9,7 @@ const LO = 0.5;
 const HI = 0.95;
 
 const normEnglish = s => String(s || '').toLowerCase().replace(/[^a-z0-9' ]/g, ' ').replace(/\s+/g, ' ').trim();
-const normPhonetic = s => String(s || '').toLowerCase().replace(/[^a-z]/g, '');
+const { normPhonetic, distance } = require('../shared/phonetic.ts');
 
 let embedder = null;
 function model() {
@@ -38,16 +38,6 @@ async function meaning(answer, english) {
   const [x, y] = await embed([a, b]);
   const cos = x.reduce((s, v, i) => s + v * y[i], 0);
   return Math.round(Math.max(0, Math.min(1, (cos - LO) / (HI - LO))) * 100);
-}
-
-function distance(a, b) {
-  let prev = Array.from({ length: b.length + 1 }, (_, j) => j);
-  for (let i = 1; i <= a.length; i++) {
-    const cur = [i];
-    for (let j = 1; j <= b.length; j++) cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
-    prev = cur;
-  }
-  return prev[b.length];
 }
 
 function phonetic(answer, target) {
