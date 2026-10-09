@@ -1,0 +1,738 @@
+{
+ "categories": [
+  {
+   "key": "phrases",
+   "name": "Phrase"
+  },
+  {
+   "key": "people",
+   "name": "People"
+  },
+  {
+   "key": "questions",
+   "name": "Question"
+  },
+  {
+   "key": "verbs",
+   "name": "Verb"
+  },
+  {
+   "key": "describing",
+   "name": "Describing"
+  },
+  {
+   "key": "place",
+   "name": "Time & place"
+  },
+  {
+   "key": "things",
+   "name": "Thing"
+  },
+  {
+   "key": "numbers",
+   "name": "Number"
+  }
+ ],
+ "words": [
+  {
+   "id": "w1",
+   "cat": "phrases",
+   "burmese": "မင်္ဂလာပါ",
+   "phonetic": "min-ga-la-ba",
+   "english": "hello"
+  },
+  {
+   "id": "w2",
+   "cat": "phrases",
+   "burmese": "ကျေးဇူးတင်ပါတယ်",
+   "phonetic": "chay-zu tin-ba-deh",
+   "english": "thank you"
+  },
+  {
+   "id": "w3",
+   "cat": "phrases",
+   "burmese": "ဟုတ်ကဲ့",
+   "phonetic": "houk-keh",
+   "english": "yes"
+  },
+  {
+   "id": "w4",
+   "cat": "phrases",
+   "burmese": "မဟုတ်ဘူး",
+   "phonetic": "ma-houk-bu",
+   "english": "no, it isn't"
+  },
+  {
+   "id": "w5",
+   "cat": "people",
+   "burmese": "ငါ",
+   "phonetic": "nga",
+   "english": "I (casual)"
+  },
+  {
+   "id": "w6",
+   "cat": "people",
+   "burmese": "မင်း",
+   "phonetic": "min",
+   "english": "you (casual)"
+  },
+  {
+   "id": "w7",
+   "cat": "verbs",
+   "burmese": "စား",
+   "phonetic": "sa",
+   "english": "eat"
+  },
+  {
+   "id": "w8",
+   "cat": "verbs",
+   "burmese": "သောက်",
+   "phonetic": "thauk",
+   "english": "drink"
+  },
+  {
+   "id": "w9",
+   "cat": "describing",
+   "burmese": "ကောင်း",
+   "phonetic": "kaung",
+   "english": "good"
+  },
+  {
+   "id": "w10",
+   "cat": "questions",
+   "burmese": "ဘာ",
+   "phonetic": "ba",
+   "english": "what"
+  },
+  {
+   "id": "w11",
+   "cat": "place",
+   "burmese": "ဒီ",
+   "phonetic": "di",
+   "english": "this"
+  },
+  {
+   "id": "w12",
+   "cat": "things",
+   "burmese": "ရေ",
+   "phonetic": "yay",
+   "english": "water"
+  },
+  {
+   "id": "w13",
+   "cat": "things",
+   "burmese": "ထမင်း",
+   "phonetic": "hta-min",
+   "english": "rice / a meal"
+  },
+  {
+   "id": "w14",
+   "cat": "things",
+   "burmese": "ဘီယာ",
+   "phonetic": "bi-ya",
+   "english": "beer"
+  },
+  {
+   "id": "w15",
+   "cat": "verbs",
+   "burmese": "သွား",
+   "phonetic": "thwa",
+   "english": "go"
+  },
+  {
+   "id": "w16",
+   "cat": "verbs",
+   "burmese": "လာ",
+   "phonetic": "la",
+   "english": "come"
+  },
+  {
+   "id": "w17",
+   "cat": "questions",
+   "burmese": "ဘယ်မှာ",
+   "phonetic": "beh-hma",
+   "english": "where"
+  },
+  {
+   "id": "w18",
+   "cat": "place",
+   "burmese": "အခု",
+   "phonetic": "a-khu",
+   "english": "now"
+  },
+  {
+   "id": "w19",
+   "cat": "numbers",
+   "burmese": "တစ်",
+   "phonetic": "tit",
+   "english": "one"
+  },
+  {
+   "id": "w20",
+   "cat": "numbers",
+   "burmese": "နှစ်",
+   "phonetic": "hnit",
+   "english": "two"
+  },
+  {
+   "id": "w21",
+   "cat": "numbers",
+   "burmese": "သုံး",
+   "phonetic": "thoun",
+   "english": "three"
+  },
+  {
+   "id": "w22",
+   "cat": "phrases",
+   "burmese": "ရတယ်",
+   "phonetic": "ya-deh",
+   "english": "it's fine / can do"
+  },
+  {
+   "id": "w23",
+   "cat": "phrases",
+   "burmese": "ရှိတယ်",
+   "phonetic": "shi-deh",
+   "english": "there is / I have"
+  },
+  {
+   "id": "w24",
+   "cat": "phrases",
+   "burmese": "မရှိဘူး",
+   "phonetic": "ma-shi-bu",
+   "english": "there isn't"
+  },
+  {
+   "id": "w25",
+   "cat": "verbs",
+   "burmese": "ချစ်",
+   "phonetic": "chit",
+   "english": "love"
+  },
+  {
+   "id": "w26",
+   "cat": "verbs",
+   "burmese": "ကြိုက်",
+   "phonetic": "chaik",
+   "english": "like"
+  },
+  {
+   "id": "w27",
+   "cat": "people",
+   "burmese": "သူ",
+   "phonetic": "thu",
+   "english": "he / she"
+  },
+  {
+   "id": "w28",
+   "cat": "people",
+   "burmese": "သူငယ်ချင်း",
+   "phonetic": "tha-ngeh-jin",
+   "english": "friend"
+  },
+  {
+   "id": "w29",
+   "cat": "describing",
+   "burmese": "အရမ်း",
+   "phonetic": "a-yan",
+   "english": "very"
+  },
+  {
+   "id": "w30",
+   "cat": "describing",
+   "burmese": "လှ",
+   "phonetic": "hla",
+   "english": "beautiful"
+  },
+  {
+   "id": "w31",
+   "cat": "describing",
+   "burmese": "ချော",
+   "phonetic": "chaw",
+   "english": "handsome"
+  },
+  {
+   "id": "w32",
+   "cat": "questions",
+   "burmese": "ဘယ်လောက်",
+   "phonetic": "beh-lauk",
+   "english": "how much"
+  },
+  {
+   "id": "w33",
+   "cat": "numbers",
+   "burmese": "လေး",
+   "phonetic": "lay",
+   "english": "four"
+  },
+  {
+   "id": "w34",
+   "cat": "numbers",
+   "burmese": "ငါး",
+   "phonetic": "nga",
+   "english": "five"
+  },
+  {
+   "id": "w35",
+   "cat": "describing",
+   "burmese": "ဗိုက်ဆာ",
+   "phonetic": "baik-sa",
+   "english": "hungry"
+  },
+  {
+   "id": "w36",
+   "cat": "describing",
+   "burmese": "စပ်",
+   "phonetic": "sat",
+   "english": "spicy"
+  },
+  {
+   "id": "w37",
+   "cat": "describing",
+   "burmese": "ချို",
+   "phonetic": "cho",
+   "english": "sweet"
+  },
+  {
+   "id": "w38",
+   "cat": "describing",
+   "burmese": "ပူ",
+   "phonetic": "pu",
+   "english": "hot"
+  },
+  {
+   "id": "w39",
+   "cat": "describing",
+   "burmese": "အေး",
+   "phonetic": "ay",
+   "english": "cold"
+  },
+  {
+   "id": "w40",
+   "cat": "verbs",
+   "burmese": "သိ",
+   "phonetic": "thi",
+   "english": "know"
+  },
+  {
+   "id": "w41",
+   "cat": "verbs",
+   "burmese": "နားလည်",
+   "phonetic": "na-leh",
+   "english": "understand"
+  },
+  {
+   "id": "w42",
+   "cat": "verbs",
+   "burmese": "ပြော",
+   "phonetic": "pyaw",
+   "english": "say / speak"
+  },
+  {
+   "id": "w43",
+   "cat": "phrases",
+   "burmese": "ဆောရီး",
+   "phonetic": "saw-ri",
+   "english": "sorry"
+  },
+  {
+   "id": "w44",
+   "cat": "questions",
+   "burmese": "ဘယ်သူ",
+   "phonetic": "beh-thu",
+   "english": "who"
+  },
+  {
+   "id": "w45",
+   "cat": "questions",
+   "burmese": "ဘယ်လို",
+   "phonetic": "beh-lo",
+   "english": "how"
+  },
+  {
+   "id": "w46",
+   "cat": "questions",
+   "burmese": "ဘာလို့",
+   "phonetic": "ba-lo",
+   "english": "why"
+  },
+  {
+   "id": "w47",
+   "cat": "questions",
+   "burmese": "ဘယ်တော့",
+   "phonetic": "beh-daw",
+   "english": "when"
+  },
+  {
+   "id": "w48",
+   "cat": "place",
+   "burmese": "ဒီနေ့",
+   "phonetic": "di-nay",
+   "english": "today"
+  },
+  {
+   "id": "w49",
+   "cat": "place",
+   "burmese": "မနက်ဖြန်",
+   "phonetic": "ma-net-pyan",
+   "english": "tomorrow"
+  },
+  {
+   "id": "w50",
+   "cat": "place",
+   "burmese": "မနေ့က",
+   "phonetic": "ma-nay-ga",
+   "english": "yesterday"
+  },
+  {
+   "id": "w51",
+   "cat": "numbers",
+   "burmese": "ခြောက်",
+   "phonetic": "chauk",
+   "english": "six"
+  },
+  {
+   "id": "w52",
+   "cat": "numbers",
+   "burmese": "ခုနစ်",
+   "phonetic": "khun-nit",
+   "english": "seven"
+  },
+  {
+   "id": "w53",
+   "cat": "numbers",
+   "burmese": "ရှစ်",
+   "phonetic": "shit",
+   "english": "eight"
+  },
+  {
+   "id": "w54",
+   "cat": "numbers",
+   "burmese": "ကိုး",
+   "phonetic": "ko",
+   "english": "nine"
+  },
+  {
+   "id": "w55",
+   "cat": "numbers",
+   "burmese": "တစ်ဆယ်",
+   "phonetic": "ta-seh",
+   "english": "ten"
+  },
+  {
+   "id": "w56",
+   "cat": "things",
+   "burmese": "အိမ်",
+   "phonetic": "ein",
+   "english": "home"
+  },
+  {
+   "id": "w57",
+   "cat": "things",
+   "burmese": "ပိုက်ဆံ",
+   "phonetic": "paik-san",
+   "english": "money"
+  },
+  {
+   "id": "w58",
+   "cat": "things",
+   "burmese": "လက်ဖက်ရည်",
+   "phonetic": "la-pet-yay",
+   "english": "milk tea"
+  },
+  {
+   "id": "w59",
+   "cat": "things",
+   "burmese": "ဟင်း",
+   "phonetic": "hin",
+   "english": "curry / dish"
+  },
+  {
+   "id": "w60",
+   "cat": "verbs",
+   "burmese": "ဝယ်",
+   "phonetic": "weh",
+   "english": "buy"
+  },
+  {
+   "id": "w61",
+   "cat": "verbs",
+   "burmese": "ပေး",
+   "phonetic": "pay",
+   "english": "give"
+  },
+  {
+   "id": "w62",
+   "cat": "verbs",
+   "burmese": "ယူ",
+   "phonetic": "yu",
+   "english": "take"
+  },
+  {
+   "id": "w63",
+   "cat": "verbs",
+   "burmese": "ကြည့်",
+   "phonetic": "chi",
+   "english": "look / watch"
+  },
+  {
+   "id": "w64",
+   "cat": "verbs",
+   "burmese": "အိပ်",
+   "phonetic": "eik",
+   "english": "sleep"
+  },
+  {
+   "id": "w65",
+   "cat": "describing",
+   "burmese": "ပျော်",
+   "phonetic": "pyaw",
+   "english": "happy"
+  },
+  {
+   "id": "w66",
+   "cat": "describing",
+   "burmese": "မော",
+   "phonetic": "maw",
+   "english": "tired"
+  },
+  {
+   "id": "w67",
+   "cat": "describing",
+   "burmese": "အများကြီး",
+   "phonetic": "a-mya-ji",
+   "english": "a lot"
+  },
+  {
+   "id": "w68",
+   "cat": "describing",
+   "burmese": "နည်းနည်း",
+   "phonetic": "neh-neh",
+   "english": "a little"
+  },
+  {
+   "id": "w69",
+   "cat": "describing",
+   "burmese": "ကြီး",
+   "phonetic": "ji",
+   "english": "big"
+  },
+  {
+   "id": "w70",
+   "cat": "describing",
+   "burmese": "သေး",
+   "phonetic": "thay",
+   "english": "small"
+  },
+  {
+   "id": "w71",
+   "cat": "describing",
+   "burmese": "ဈေးကြီး",
+   "phonetic": "zay-ji",
+   "english": "expensive"
+  },
+  {
+   "id": "w72",
+   "cat": "place",
+   "burmese": "ဟို",
+   "phonetic": "ho",
+   "english": "that"
+  },
+  {
+   "id": "w73",
+   "cat": "place",
+   "burmese": "ဒီမှာ",
+   "phonetic": "di-hma",
+   "english": "here"
+  },
+  {
+   "id": "w74",
+   "cat": "place",
+   "burmese": "ည",
+   "phonetic": "nya",
+   "english": "night"
+  },
+  {
+   "id": "w75",
+   "cat": "place",
+   "burmese": "နောက်မှ",
+   "phonetic": "nauk-hma",
+   "english": "later"
+  },
+  {
+   "id": "w76",
+   "cat": "people",
+   "burmese": "အမေ",
+   "phonetic": "a-may",
+   "english": "mum"
+  },
+  {
+   "id": "w77",
+   "cat": "people",
+   "burmese": "အဖေ",
+   "phonetic": "a-pay",
+   "english": "dad"
+  },
+  {
+   "id": "w78",
+   "cat": "people",
+   "burmese": "လူ",
+   "phonetic": "lu",
+   "english": "person"
+  },
+  {
+   "id": "w79",
+   "cat": "people",
+   "burmese": "ချစ်သူ",
+   "phonetic": "chit-thu",
+   "english": "boyfriend / girlfriend"
+  },
+  {
+   "id": "w80",
+   "cat": "things",
+   "burmese": "နာမည်",
+   "phonetic": "na-meh",
+   "english": "name"
+  },
+  {
+   "id": "w81",
+   "cat": "verbs",
+   "burmese": "ပြန်",
+   "phonetic": "pyan",
+   "english": "go back"
+  },
+  {
+   "id": "w82",
+   "cat": "verbs",
+   "burmese": "လုပ်",
+   "phonetic": "louk",
+   "english": "do / make"
+  },
+  {
+   "id": "w83",
+   "cat": "verbs",
+   "burmese": "ရောက်",
+   "phonetic": "yauk",
+   "english": "arrive"
+  },
+  {
+   "id": "w84",
+   "cat": "verbs",
+   "burmese": "စောင့်",
+   "phonetic": "saung",
+   "english": "wait"
+  },
+  {
+   "id": "w85",
+   "cat": "verbs",
+   "burmese": "ထိုင်",
+   "phonetic": "htaing",
+   "english": "sit"
+  },
+  {
+   "id": "w86",
+   "cat": "verbs",
+   "burmese": "မြင်",
+   "phonetic": "myin",
+   "english": "see"
+  },
+  {
+   "id": "w87",
+   "cat": "verbs",
+   "burmese": "ကြား",
+   "phonetic": "cha",
+   "english": "hear"
+  },
+  {
+   "id": "w88",
+   "cat": "verbs",
+   "burmese": "မေ့",
+   "phonetic": "may",
+   "english": "forget"
+  },
+  {
+   "id": "w89",
+   "cat": "verbs",
+   "burmese": "လိုချင်",
+   "phonetic": "lo-chin",
+   "english": "want (a thing)"
+  },
+  {
+   "id": "w90",
+   "cat": "describing",
+   "burmese": "ခက်",
+   "phonetic": "khet",
+   "english": "difficult"
+  },
+  {
+   "id": "w91",
+   "cat": "describing",
+   "burmese": "လွယ်",
+   "phonetic": "lweh",
+   "english": "easy"
+  },
+  {
+   "id": "w92",
+   "cat": "phrases",
+   "burmese": "အရေးမကြီးဘူး",
+   "phonetic": "a-yay ma-ji-bu",
+   "english": "never mind"
+  },
+  {
+   "id": "w93",
+   "cat": "phrases",
+   "burmese": "တော်ပြီ",
+   "phonetic": "taw-bi",
+   "english": "enough"
+  },
+  {
+   "id": "w94",
+   "cat": "things",
+   "burmese": "ဖုန်း",
+   "phonetic": "poun",
+   "english": "phone"
+  },
+  {
+   "id": "w95",
+   "cat": "things",
+   "burmese": "အလုပ်",
+   "phonetic": "a-louk",
+   "english": "work"
+  },
+  {
+   "id": "w96",
+   "cat": "things",
+   "burmese": "မြန်မာ",
+   "phonetic": "myan-ma",
+   "english": "Burmese"
+  },
+  {
+   "id": "w97",
+   "cat": "people",
+   "burmese": "ကလေး",
+   "phonetic": "kha-lay",
+   "english": "child"
+  },
+  {
+   "id": "w98",
+   "cat": "people",
+   "burmese": "ကျွန်တော်",
+   "phonetic": "kya-naw",
+   "english": "I (polite, man speaking)"
+  },
+  {
+   "id": "w99",
+   "cat": "numbers",
+   "burmese": "တစ်ရာ",
+   "phonetic": "ta-ya",
+   "english": "one hundred"
+  },
+  {
+   "id": "w100",
+   "cat": "numbers",
+   "burmese": "တစ်ထောင်",
+   "phonetic": "ta-htaung",
+   "english": "one thousand"
+  }
+ ]
+}

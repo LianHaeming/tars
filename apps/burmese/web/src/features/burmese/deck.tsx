@@ -23,7 +23,7 @@ export function Tint({ color, children }: { color: string; children: ReactNode }
   return <Badge variant="soft" style={{ '--tint': `var(--${color})` } as CSSProperties}>{children}</Badge>
 }
 
-export function DeckTop({ i, total, onClose }: { i: number; total: number; onClose: () => void }) {
+export function DeckTop({ i, total, onClose, children }: { i: number; total: number; onClose: () => void; children?: ReactNode }) {
   return (
     <div className="flex items-center gap-3 px-1">
       <Button variant="ghost" size="icon-lg" onClick={onClose} aria-label="Close" className="glass rounded-full">
@@ -37,6 +37,7 @@ export function DeckTop({ i, total, onClose }: { i: number; total: number; onClo
         </div>
       ) : <Progress value={(i / total) * 100} className="flex-1" />)}
       {total > 0 && <span className="text-sm font-semibold text-muted-foreground tabular-nums">{Math.min(i + 1, total)}/{total}</span>}
+      {children}
     </div>
   )
 }

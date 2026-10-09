@@ -1,9 +1,10 @@
 import { NavLink, Outlet } from 'react-router'
-import { BookOpenIcon, LayersIcon, SparklesIcon } from 'lucide-react'
+import { BookOpenIcon, LayersIcon, SparklesIcon, WholeWordIcon } from 'lucide-react'
 import { Button } from '@tars/ui/components/ui/button'
 
 const TABS = [
   { to: '/', label: 'Learn', icon: LayersIcon },
+  { to: '/words', label: 'Words', icon: WholeWordIcon },
   { to: '/sentences', label: 'Phrases', icon: BookOpenIcon },
   { to: '/ask', label: 'Ask', icon: SparklesIcon },
 ]

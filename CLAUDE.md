@@ -86,8 +86,8 @@ reads the owner's port from its app.json; `TARS_PORT_<APP>` overrides it for sid
   id, base 2) · `POST /api/food/suggest` · `POST /api/shopping {items}` (passed to tasks). Static: `/data/food/*` from
   the repo's data/food.
 - **Burmese app** (`apps/burmese`, its own icon — scope: tars vault `language-app-scope.md`): the "deck" look (option B of
-  the 2026-10-08 redesign; `features/burmese/deck.tsx` + the `deck-card` utility): three tabs in a floating icon dock at
-  the bottom (Learn · Phrases · Ask), iOS-style large titles. **Learn** (`/`, the next unit as a stack of cards with
+  the 2026-10-08 redesign; `features/burmese/deck.tsx` + the `deck-card` utility): four tabs in a floating icon dock at
+  the bottom (Learn · Words · Phrases · Ask), iOS-style large titles. **Learn** (`/`, the next unit as a stack of cards with
   Play, tiles below; Stats at `/stats` from the round button) runs **units** at `/unit` (close button, step dots, one
   large card per step, answer box under the card, scored card gets a coloured edge, actions pinned to the bottom):
   "Last time" (up to 8 memories predicted below 90% recall, most at risk first, one per sentence), then "New" (the next
@@ -112,6 +112,15 @@ reads the owner's port from its app.json; `TARS_PORT_<APP>` overrides it for sid
   questions until answered. API: `GET /api/burmese` (status) · `GET /api/burmese/{unit,stats,sentences,asked}` ·
   `POST /api/burmese/answer {unit,id,kind,answer|null,phase}` · `POST /api/burmese/ask {text}` · `GET /api/burmese/audio/<id>[?speed=slow]` (MP3, byte ranges). The old deck app's
   data is in `state/old-app-2026-10-08/`. The tasks app's `/burmese` redirects there.
+- **Burmese Words** (the Words tab, `/words`; play at `/words/play`), separate from the sentence game: 100 hand-picked
+  words in `apps/burmese/server/words.json` (in git; Burmese script for the audio), endless 4-option multiple choice
+  (`server/words.js`, progress in `state/words.json`, answers in `state/words-log.jsonl`). Two memories per word: read
+  (phonetic → English) from its New-word card, say (English → phonetic) once read graduates. Anki-style learning steps
+  counted in cards (back 2, 5, 12 cards later; a miss or "I don't know" resets to the first step), then FSRS (miss =
+  Again, > 5 s = Hard, else Good). Next card: due learning step → slipping review → new word (while < 6 words in steps)
+  → earliest learning → weakest words, never the same card twice running. Right answers auto-advance; misses show the
+  answer until Next. API: `GET /api/burmese/words` · `GET /api/burmese/words/next` · `POST /api/burmese/words/seen {id}` ·
+  `POST /api/burmese/words/answer {key, choice|null, ms}` (→ `{right, next}`); audio by word id (`w1`…).
 - **Discover app** (`apps/discover`): one root page — a daily "cool GitHub repos" feed: real repos from the GitHub search
   API, curated by `claude -p` once a London day into state/discover.json. API: `GET /api/discover[/fresh]`.
 - **WhatsApp app** (`apps/whatsapp`): the conversation list (`/`) and one chat's thread (`/chat/:id`, back to `/`).

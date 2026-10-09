@@ -3,4 +3,5 @@ const { docs } = require('@tars/server');
 
 module.exports = docs(__dirname + '/..', {
   burmese: () => ({ memories: {}, custom: [], units: 0 }),
+  words: () => ({ seq: 0, mem: {} }),
 });

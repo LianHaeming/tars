@@ -34,3 +34,20 @@ export const ask = (text: string) => api<Asked>('POST', 'burmese/ask', { text })
 
 export const scoreTone = (score: number | null) =>
   score == null || score < 60 ? 'text-overdue' : score < 85 ? 'text-tomorrow' : 'text-today'
+
+export type WordOption = { id: string; text: string }
+export type WordCard = {
+  key: string; id: string; dir: 'read' | 'say'; stage: 'new' | 'learning' | 'review'; cat: string
+  phonetic: string; english: string; prompt?: string; options?: WordOption[]; answer?: string
+}
+export type Held = 'new' | 'learning' | 'slipping' | 'known' | 'solid'
+export type WordsStatus = {
+  total: number; answers: number
+  counts: Record<Held, number>
+  words: { id: string; cat: string; phonetic: string; english: string; held: Held }[]
+}
+export const getWords = () => api<WordsStatus>('GET', 'burmese/words')
+export const startWords = () => api<{ next: WordCard | null }>('GET', 'burmese/words/next')
+export const seenWord = (id: string) => api<{ next: WordCard | null }>('POST', 'burmese/words/seen', { id })
+export const answerWord = (key: string, choice: string | null, ms: number) =>
+  api<{ right: boolean; next: WordCard | null }>('POST', 'burmese/words/answer', { key, choice, ms })

@@ -6,13 +6,14 @@ const { send, start } = require('@tars/server');
 const game = require('./game');
 const score = require('./score');
 const tts = require('./tts');
+const words = require('./words');
 
 const PORT = process.env.PORT || 8404;
 const DIST = path.join(__dirname, '..', 'dist');
 
-// GET /api/burmese/audio/<sentence id>?speed=slow — the spoken Burmese as MP3 (made on first play, a few seconds).
+// GET /api/burmese/audio/<sentence or word id>?speed=slow — the spoken Burmese as MP3 (made on first play, a few seconds).
 async function audio(req, res, id) {
-  const text = game.scriptOf(id);
+  const text = words.word(id)?.burmese || game.scriptOf(id);
   if (!text) return send(res, 404, { error: 'no Burmese for that sentence' });
   const speed = new URL(req.url, 'http://x').searchParams.get('speed') === 'slow' ? 'slow' : 'normal';
   let file;
@@ -38,11 +39,15 @@ async function api(req, res, [resource, rid, ...rest], body) {
     if (rid === 'asked') return send(res, 200, game.asked());
     if (rid === 'cards') return send(res, 200, game.cards());
     if (rid === 'audio') return audio(req, res, rest[0]);
+    if (rid === 'words' && !rest[0]) return send(res, 200, words.status());
+    if (rid === 'words' && rest[0] === 'next') return send(res, 200, words.start());
   }
   if (req.method === 'POST') {
     try {
       if (rid === 'answer') return send(res, 200, await game.answer(body));
       if (rid === 'ask') return send(res, 200, await game.ask(body.text));
+      if (rid === 'words' && rest[0] === 'seen') return send(res, 200, words.seen(body.id));
+      if (rid === 'words' && rest[0] === 'answer') return send(res, 200, words.answer(body));
     } catch (e) { return send(res, rid === 'ask' ? 502 : 400, { error: e.message }); }
   }
 }
