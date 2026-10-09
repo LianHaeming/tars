@@ -112,15 +112,22 @@ reads the owner's port from its app.json; `TARS_PORT_<APP>` overrides it for sid
   questions until answered. API: `GET /api/burmese` (status) · `GET /api/burmese/{unit,stats,sentences,asked}` ·
   `POST /api/burmese/answer {unit,id,kind,answer|null,phase}` · `POST /api/burmese/ask {text}` · `GET /api/burmese/audio/<id>[?speed=slow]` (MP3, byte ranges). The old deck app's
   data is in `state/old-app-2026-10-08/`. The tasks app's `/burmese` redirects there.
-- **Burmese Words** (the Words tab, `/words`; play at `/words/play`), separate from the sentence game: 100 hand-picked
-  words in `apps/burmese/server/words.json` (in git; Burmese script for the audio), endless 4-option multiple choice
-  (`server/words.js`, progress in `state/words.json`, answers in `state/words-log.jsonl`). Two memories per word: read
-  (phonetic → English) from its New-word card, say (English → phonetic) once read graduates. Anki-style learning steps
-  counted in cards (back 2, 5, 12 cards later; a miss or "I don't know" resets to the first step), then FSRS (miss =
-  Again, > 5 s = Hard, else Good). Next card: due learning step → slipping review → new word (while < 6 words in steps)
-  → earliest learning → weakest words, never the same card twice running. Silent and quick: right answers move on after 0.25 s,
-  misses show the answer for 1.2 s (or until Next). API: `GET /api/burmese/words` · `GET /api/burmese/words/next` · `POST /api/burmese/words/seen {id}` ·
-  `POST /api/burmese/words/answer {key, choice|null, ms}` (→ `{right, next}`); audio by word id (`w1`…).
+- **Burmese Words** (the Words tab, `/words`; play at `/words/play`), separate from the sentence game, **offline-first**
+  so it plays on the Tube: 100 hand-picked words in `apps/burmese/shared/words.json` (in git; Burmese script for the
+  audio), endless 4-option multiple choice. The engine is `apps/burmese/shared/words.ts` (with `shared/fsrs.ts`, also
+  used by the sentence game via `server/fsrs.js`) — plain TypeScript the web app bundles and the server `require`s
+  (Node strips the types; `shared/package.json` says ESM). The game runs in the browser on progress kept in browser
+  storage (`web/src/features/burmese/wordsStore.ts` — the one exception to "browser storage is view preferences only"),
+  merged with the server's `state/words.json` by `POST /api/burmese/words/sync {state, log}` (per memory, the most
+  recently answered wins; new answers appended to `state/words-log.jsonl`) on open, 3 s after answering and on hide.
+  `public/app-sw.js` is the offline copy (pages network-first with a 3 s timeout, hashed assets cache-first, /api never
+  cached; not /sw.js, the shared tombstone). Two memories per word: read (phonetic → English) from its New-word card,
+  say (English → phonetic) once read graduates. Anki-style learning steps counted in cards (back 2, 5, 12 cards later; a
+  miss or "I don't know" resets to the first step), then FSRS (miss = Again, > 5 s = Hard, else Good). Next card: due
+  learning step → slipping review → new word (while < 6 words in steps) → earliest learning → weakest words, never the
+  same card twice running. Silent and quick: right answers move on after 0.25 s, misses show the answer for 1.2 s (or
+  until Next). API: `GET /api/burmese/words` (the server's progress) · `POST /api/burmese/words/sync`; audio by word id
+  (`w1`…).
 - **Discover app** (`apps/discover`): one root page — a daily "cool GitHub repos" feed: real repos from the GitHub search
   API, curated by `claude -p` once a London day into state/discover.json. API: `GET /api/discover[/fresh]`.
 - **WhatsApp app** (`apps/whatsapp`): the conversation list (`/`) and one chat's thread (`/chat/:id`, back to `/`).

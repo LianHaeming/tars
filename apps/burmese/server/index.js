@@ -39,15 +39,13 @@ async function api(req, res, [resource, rid, ...rest], body) {
     if (rid === 'asked') return send(res, 200, game.asked());
     if (rid === 'cards') return send(res, 200, game.cards());
     if (rid === 'audio') return audio(req, res, rest[0]);
-    if (rid === 'words' && !rest[0]) return send(res, 200, words.status());
-    if (rid === 'words' && rest[0] === 'next') return send(res, 200, words.start());
+    if (rid === 'words' && !rest[0]) return send(res, 200, words.state());
   }
   if (req.method === 'POST') {
     try {
       if (rid === 'answer') return send(res, 200, await game.answer(body));
       if (rid === 'ask') return send(res, 200, await game.ask(body.text));
-      if (rid === 'words' && rest[0] === 'seen') return send(res, 200, words.seen(body.id));
-      if (rid === 'words' && rest[0] === 'answer') return send(res, 200, words.answer(body));
+      if (rid === 'words' && rest[0] === 'sync') return send(res, 200, words.sync(body));
     } catch (e) { return send(res, rid === 'ask' ? 502 : 400, { error: e.message }); }
   }
 }

@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router'
 import { CheckIcon, XIcon } from 'lucide-react'
-import { toast } from 'sonner'
 import { Button } from '@tars/ui/components/ui/button'
 import { cn } from '@tars/ui/lib/utils'
-import { answerWord, seenWord, startWords, type WordCard } from './data'
+import type { WordCard } from '../../../../shared/words.ts'
+import { getState, record, sync, words } from './wordsStore'
 import { BottomBar, DeckTop, PillButton, Tint } from './deck'
 
-// Endless quick-fire, silent: a right answer moves on almost at once, a miss shows the answer briefly (or until Next). The server picks every card (words.js), so misses come back a few cards later.
+// Endless quick-fire, silent, and offline-first (the engine runs here, see wordsStore): a right answer moves on almost at once, a miss shows the answer briefly (or until Next). The server picks every card (words.js), so misses come back a few cards later.
 const RIGHT_MS = 250
 const WRONG_MS = 1200
 const OPTION = 'glass h-auto min-h-14 w-full rounded-2xl px-4 py-3 text-lg whitespace-normal active:scale-98'
@@ -84,41 +84,41 @@ function Question({ card, picked, onPick, onNext }: { card: WordCard; picked: Pi
 export function WordsPlayPage() {
   const navigate = useNavigate()
   const location = useLocation()
-  const [card, setCard] = useState<WordCard | null | undefined>(undefined)
+  const [card, setCard] = useState<WordCard | null>(() => words.next(getState()))
   const [picked, setPicked] = useState<Picked | null>(null)
   const [tally, setTally] = useState({ right: 0, wrong: 0 })
-  const [error, setError] = useState<string | null>(null)
   const [n, setN] = useState(0)
   const shownAt = useRef(Date.now())
-  const pending = useRef<Promise<WordCard | null> | null>(null)
+  const upcoming = useRef<WordCard | null>(null)
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
   const show = (c: WordCard | null) => { setCard(c); setPicked(null); setN(x => x + 1); shownAt.current = Date.now() }
-  const fail = (e: unknown) => toast(`Couldn't reach the app — ${(e as Error).message}`)
+  const advance = () => { clearTimeout(timer.current); if (upcoming.current) show(upcoming.current); upcoming.current = null }
 
-  useEffect(() => { startWords().then(r => show(r.next), e => setError((e as Error).message)) }, [])
-
-  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
-  const advance = () => { clearTimeout(timer.current); const p = pending.current; pending.current = null; p?.then(show, fail) }
-  useEffect(() => () => clearTimeout(timer.current), [])
+  useEffect(() => { sync(); return () => clearTimeout(timer.current) }, [])
 
   const pick = (choice: string | null) => {
     if (!card || picked) return
     const right = choice === card.answer
     setPicked({ choice, right })
     setTally(t => right ? { ...t, right: t.right + 1 } : { ...t, wrong: t.wrong + 1 })
-    pending.current = answerWord(card.key, choice, Date.now() - shownAt.current).then(r => r.next)
+    record(words.answer(getState(), card.key, choice, Date.now() - shownAt.current))
+    upcoming.current = words.next(getState(), card.key)
     timer.current = setTimeout(advance, right ? RIGHT_MS : WRONG_MS)
   }
 
-  const seen = () => { if (card) seenWord(card.id).then(r => show(r.next), fail) }
+  const seen = () => {
+    if (!card) return
+    words.seen(getState(), card.id)
+    record()
+    show(words.next(getState(), card.key))
+  }
   const close = () => location.key !== 'default' ? navigate(-1) : navigate('/words')
 
   return (
     <main className="mx-auto max-w-page px-4 pt-safe-3 pb-safe-32">
       <DeckTop i={0} total={0} onClose={close}><Tally {...tally} /></DeckTop>
-      {error ? <p className="pt-8 text-sm text-muted-foreground">Couldn't start — {error}</p>
-        : card === undefined ? <p className="pt-8 text-sm text-muted-foreground">Loading…</p>
-        : card === null ? <p className="pt-16 text-center text-2xl font-semibold">No words yet</p>
+      {card === null ? <p className="pt-16 text-center text-2xl font-semibold">No words yet</p>
         : card.stage === 'new' ? <NewWord key={n} card={card} onNext={seen} />
         : <Question key={n} card={card} picked={picked} onPick={pick} onNext={advance} />}
     </main>

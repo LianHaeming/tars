@@ -1,10 +1,10 @@
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { PlayIcon } from 'lucide-react'
-import { useResource } from '@tars/ui/lib/use-resource'
-import { getWords, type Held, type WordsStatus } from './data'
+import type { Held } from '../../../../shared/words.ts'
+import { getState, sync, words as engine } from './wordsStore'
 import { LargeTitle, PillButton, Speak, Tint } from './deck'
 
-const cache: { current: WordsStatus | null } = { current: null }
 const HELD: Record<Exclude<Held, 'new'>, [string, string]> = {
   learning: ['tomorrow', 'Learning'], slipping: ['overdue', 'Slipping'], known: ['primary', 'Known'], solid: ['today', 'Solid'],
 }
@@ -20,14 +20,20 @@ function Tile({ n, label, className }: { n: number; label: string; className?: s
 
 export function WordsPage() {
   const navigate = useNavigate()
-  const { data, error } = useResource(getWords, { cache, reloadOnVisible: true })
+  const [data, setData] = useState(() => engine.status(getState()))
+  useEffect(() => {
+    const refresh = () => sync().then(() => setData(engine.status(getState())))
+    refresh()
+    const onVisible = () => { if (document.visibilityState === 'visible') refresh() }
+    document.addEventListener('visibilitychange', onVisible)
+    return () => document.removeEventListener('visibilitychange', onVisible)
+  }, [])
   const seen = data ? data.total - data.counts.new : 0
   const words = data?.words.filter(w => w.held !== 'new') ?? []
 
   return (
     <>
       <LargeTitle title="Words" sub={data && `${seen} of ${data.total} seen`} />
-      {error && <p className="pt-3 text-sm text-muted-foreground">Couldn't load — {error}</p>}
 
       <div className="deck-card mt-6 flex min-h-56 flex-col rounded-3xl p-5">
         <div><Tint color="foreground">Quick fire</Tint></div>
