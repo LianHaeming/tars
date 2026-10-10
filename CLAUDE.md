@@ -23,6 +23,9 @@ packages/
   ui/            @tars/ui — the one look: styles/globals.css (tokens), components/ui (shadcn), Page, AppShell, common,
                  lib/{api,apps,dates,utils,use-resource}, hooks
   server/        @tars/server — docs() (JSON state), start() (HTTP + static + /sw.js tombstone), runClaude
+  drill/         the drill games' shared kit (Burmese, Omarchy): fsrs.ts, typo.ts (edit distance), progress.ts (Mem,
+                 DrillState, merge), store.ts (offline progress in browser storage + sync) — plain TS, imported by
+                 relative path so Node can strip the types
 data/food/       Food content: menu.json, r/<id>.json, sainsburys/ocado.json, photos/ (in git; published from the Mac)
 bin/             up, sync, icon, gmail, monzo, burmese, email-tasks, whatsapp (+ lib/state.sh)
 ```
@@ -35,6 +38,7 @@ bin/             up, sync, icon, gmail, monzo, burmese, email-tasks, whatsapp (+
 | whatsapp (`tars-whatsapp`) | 8406 | https://omarchy.tail0bf266.ts.net:8446/ | whatsapp (written by the bridge, `tars-whatsapp-bridge`; the viewer only reads) |
 | money (`tars-money`) | 8407 | https://omarchy.tail0bf266.ts.net:8447/ | money |
 | food (`tars-food`) | 8408 | https://omarchy.tail0bf266.ts.net:8448/ | food (+ serves data/food) |
+| omarchy (`tars-omarchy`) | 8409 | https://omarchy.tail0bf266.ts.net:8449/ | omarchy (drill progress) |
 
 There is no launcher: the iPhone Home Screen is the launcher (one icon per app). A new app takes the next port pair
 (internal 840x, public 844x).
@@ -86,7 +90,7 @@ reads the owner's port from its app.json; `TARS_PORT_<APP>` overrides it for sid
   id, base 2) · `POST /api/food/suggest` · `POST /api/shopping {items}` (passed to tasks). Static: `/data/food/*` from
   the repo's data/food.
 - **Burmese app** (`apps/burmese`, its own icon — scope: tars vault `language-app-scope.md`): the "deck" look (option B of
-  the 2026-10-08 redesign; `features/burmese/deck.tsx` + the `deck-card` utility): four tabs in a floating icon dock at
+  the 2026-10-08 redesign; `@tars/ui/components/deck` + the `deck-card` utility): four tabs in a floating icon dock at
   the bottom (Learn · Words · Phrases · Ask), iOS-style large titles. **Learn** (`/`, the next unit as a stack of cards with
   Play, tiles below; Stats at `/stats` from the round button) runs **units** at `/unit` (close button, step dots, one
   large card per step, answer box under the card, scored card gets a coloured edge, actions pinned to the bottom):
@@ -114,10 +118,10 @@ reads the owner's port from its app.json; `TARS_PORT_<APP>` overrides it for sid
   data is in `state/old-app-2026-10-08/`. The tasks app's `/burmese` redirects there.
 - **Burmese Words** (the Words tab, `/words`; play at `/words/play`), separate from the sentence game, **offline-first**
   so it plays on the Tube: 100 hand-picked words in `apps/burmese/shared/words.json` (in git; Burmese script for the
-  audio), endless 4-option multiple choice. The engine is `apps/burmese/shared/words.ts` (with `shared/fsrs.ts`, also
+  audio), endless 4-option multiple choice. The engine is `apps/burmese/shared/words.ts` (with `packages/drill`'s fsrs.ts, also
   used by the sentence game via `server/fsrs.js`) — plain TypeScript the web app bundles and the server `require`s
   (Node strips the types; `shared/package.json` says ESM). The game runs in the browser on progress kept in browser
-  storage (`web/src/features/burmese/wordsStore.ts` — the one exception to "browser storage is view preferences only"),
+  storage (`web/src/features/burmese/wordsStore.ts` over `packages/drill/store.ts` — the one exception (with Omarchy) to "browser storage is view preferences only"),
   merged with the server's `state/words.json` by `POST /api/burmese/words/sync {state, log}` (per memory, the most
   recently answered wins; new answers appended to `state/words-log.jsonl`) on open, 3 s after answering and on hide.
   `public/app-sw.js` is the offline copy (pages network-first with a 3 s timeout, hashed assets cache-first, /api never
@@ -136,6 +140,17 @@ reads the owner's port from its app.json; `TARS_PORT_<APP>` overrides it for sid
   same card twice running. Silent and quick: right answers move on after 0.25 s, misses show the answer for 1.2 s (or
   until Next). API: `GET /api/burmese/words` (the server's progress) · `POST /api/burmese/words/sync`; audio by word id
   (`w1`…).
+- **Omarchy app** (`apps/omarchy`, "⌘"): the Burmese Words drill for Omarchy keybindings and commands, offline-first the
+  same way. 138 cards in `apps/omarchy/shared/cards.json` (in git; from the tars vault's `omarchy-guide.md`, checked
+  against `/usr/share/omarchy/default/hypr/bindings/`; `kind` keys or cmd, `q` what's pressed/typed, `does`, optional
+  `also`), most useful first. Engine `apps/omarchy/shared/drill.ts` — the Words engine with: read (keys → what it does)
+  always multiple choice; say (what it does → keys/command) typed in recall (default), multiple choice in choice, mixed
+  = choice on the first step then typed. Keys are typed as words in any order (`super shift b`, `ctrl+alt+del`; aliases
+  win/cmd/control/enter/esc/←…; a typo in a long key name = close); commands as run, `<placeholder>`/"quoted" args
+  optional, a typo per word from 4 letters. Modifier buttons (Super/Shift/Ctrl/Alt) above the input on key cards. Pages:
+  `/` (modes, Learning · Slipping · Recognised · Recalled, every card seen) and `/play?mode=`. API: `GET
+  /api/omarchy/drill` · `POST /api/omarchy/drill/sync {state, log}` (state/drill.json, state/drill-log.jsonl).
+  Update cards.json when the guide or bindings change (ids are progress keys: append, don't renumber).
 - **Discover app** (`apps/discover`): one root page — a daily "cool GitHub repos" feed: real repos from the GitHub search
   API, curated by `claude -p` once a London day into state/discover.json. API: `GET /api/discover[/fresh]`.
 - **WhatsApp app** (`apps/whatsapp`): the conversation list (`/`) and one chat's thread (`/chat/:id`, back to `/`).

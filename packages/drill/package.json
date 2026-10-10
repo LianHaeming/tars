@@ -1,0 +1,7 @@
+{
+  "name": "@tars/drill",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Shared spaced-repetition kit for the drill games (Burmese Words, Omarchy): FSRS and typo distance. Plain TypeScript, imported by relative path so Node can strip the types.",
+  "type": "module"
+}

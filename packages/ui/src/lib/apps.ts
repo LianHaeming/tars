@@ -5,6 +5,7 @@ export const APP_PORTS = {
   whatsapp: 8446,
   money: 8447,
   food: 8448,
+  omarchy: 8449,
 } as const
 
 export type AppName = keyof typeof APP_PORTS

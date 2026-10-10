@@ -17,18 +17,19 @@
 //
 // The queue never runs dry: learning cards that are due, then slipping reviews, then a new word (while fewer than
 // MAX_LEARNING words are in steps), then the earliest learning card, then the weakest words anyway.
-import * as fsrs from './fsrs.ts'
-import { distance, normPhonetic } from './phonetic.ts'
+import * as fsrs from '../../../packages/drill/fsrs.ts'
+import { emptyState, merge, type DrillState, type Mem } from '../../../packages/drill/progress.ts'
+import { distance, typosAllowed } from '../../../packages/drill/typo.ts'
+import { normPhonetic } from './phonetic.ts'
+
+export { emptyState, merge }
+export type { Mem }
+export type WordsState = DrillState
 
 export type Word = { id: string; cat: string; burmese: string; phonetic: string; english: string; also?: string[] }
 export type WordData = { categories: { key: string; name: string }[]; words: Word[] }
 export type Dir = 'read' | 'say'
 export type Mode = 'recall' | 'mixed' | 'choice'
-export type Mem = {
-  s: number | null; d: number | null; reps: number; lapses: number
-  step: number | null; due?: number; last: number | null; introduced?: number; recalled?: boolean
-}
-export type WordsState = { seq: number; mem: Record<string, Mem> }
 export type WordOption = { id: string; text: string }
 export type Format = 'choice' | 'type'
 export type WordCard = {
@@ -51,14 +52,9 @@ const TYPED_FROM_STEP = 2
 const STABLE = 21
 const DAY = 864e5
 
-export const emptyState = (): WordsState => ({ seq: 0, mem: {} })
-
 const recallNow = (m: Mem, now: number) => m.s == null || m.last == null ? 0 : fsrs.recall((now - m.last) / DAY, m.s)
 const shuffle = <T>(a: T[]) => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]] } return a }
 const split = (key: string) => key.split(':') as [string, Dir]
-// Typos allowed in a typed word: none for short words (one letter is often the whole difference), one from 4 letters,
-// two from 9.
-const typosAllowed = (n: number) => n >= 9 ? 2 : n >= 4 ? 1 : 0
 
 function close(a: string, b: string): Marked {
   if (!a) return { right: false, close: false }
@@ -79,18 +75,6 @@ export function markEnglish(typed: string, w: Word): Marked {
   const a = normEnglish(typed)
   const results = meanings(w).map(m => close(a.replace(/\s/g, ''), m.replace(/\s/g, '')))
   return results.find(r => r.right && !r.close) || results.find(r => r.right) || { right: false, close: false }
-}
-
-const touched = (m: Mem) => m.last ?? m.introduced ?? 0
-
-// merge(a, b) — the union of two devices' progress: per memory, whichever was answered (or introduced) most recently.
-export function merge(a: WordsState, b: WordsState): WordsState {
-  const mem: Record<string, Mem> = { ...a.mem }
-  for (const [k, m] of Object.entries(b.mem || {})) {
-    const o = mem[k]
-    if (!o || touched(m) > touched(o) || (touched(m) === touched(o) && m.reps > o.reps)) mem[k] = m
-  }
-  return { seq: Math.max(a.seq || 0, b.seq || 0), mem }
 }
 
 export function engine(data: WordData) {

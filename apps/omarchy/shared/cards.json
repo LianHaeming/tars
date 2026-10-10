@@ -1,0 +1,1018 @@
+{
+ "categories": [
+  {
+   "key": "start",
+   "name": "Essentials"
+  },
+  {
+   "key": "windows",
+   "name": "Windows"
+  },
+  {
+   "key": "workspaces",
+   "name": "Workspaces"
+  },
+  {
+   "key": "groups",
+   "name": "Groups"
+  },
+  {
+   "key": "apps",
+   "name": "Apps"
+  },
+  {
+   "key": "menus",
+   "name": "Menus & system"
+  },
+  {
+   "key": "capture",
+   "name": "Capture & clipboard"
+  },
+  {
+   "key": "notify",
+   "name": "Notifications"
+  },
+  {
+   "key": "terminal",
+   "name": "Terminal"
+  },
+  {
+   "key": "omarchy",
+   "name": "Omarchy command"
+  }
+ ],
+ "cards": [
+  {
+   "id": "o1",
+   "cat": "start",
+   "kind": "keys",
+   "q": "Super + Space",
+   "does": "Omarchy menu: launch apps, settings, everything"
+  },
+  {
+   "id": "o2",
+   "cat": "start",
+   "kind": "keys",
+   "q": "Super + K",
+   "does": "Search all keybindings"
+  },
+  {
+   "id": "o3",
+   "cat": "start",
+   "kind": "keys",
+   "q": "Super + Return",
+   "does": "Open a terminal"
+  },
+  {
+   "id": "o4",
+   "cat": "start",
+   "kind": "keys",
+   "q": "Super + Shift + B",
+   "does": "Open the browser",
+   "also": [
+    "Super + Shift + Return"
+   ]
+  },
+  {
+   "id": "o5",
+   "cat": "start",
+   "kind": "keys",
+   "q": "Super + W",
+   "does": "Close the window"
+  },
+  {
+   "id": "o6",
+   "cat": "start",
+   "kind": "keys",
+   "q": "Super + 1",
+   "does": "Go to workspace 1"
+  },
+  {
+   "id": "o7",
+   "cat": "start",
+   "kind": "keys",
+   "q": "Super + Shift + 2",
+   "does": "Send the window to workspace 2 (and follow it)"
+  },
+  {
+   "id": "o8",
+   "cat": "start",
+   "kind": "keys",
+   "q": "Super + Left",
+   "does": "Focus the window on the left"
+  },
+  {
+   "id": "o9",
+   "cat": "start",
+   "kind": "keys",
+   "q": "Super + Shift + Left",
+   "does": "Swap the window with its left neighbour"
+  },
+  {
+   "id": "o10",
+   "cat": "start",
+   "kind": "keys",
+   "q": "Super + F",
+   "does": "Full screen"
+  },
+  {
+   "id": "o11",
+   "cat": "start",
+   "kind": "keys",
+   "q": "Super + T",
+   "does": "Toggle floating / tiling"
+  },
+  {
+   "id": "o12",
+   "cat": "start",
+   "kind": "keys",
+   "q": "Super + Escape",
+   "does": "System menu: lock, log out, restart, shut down"
+  },
+  {
+   "id": "o13",
+   "cat": "omarchy",
+   "kind": "cmd",
+   "q": "omarchy update",
+   "does": "Update everything (Omarchy + system packages)"
+  },
+  {
+   "id": "o14",
+   "cat": "windows",
+   "kind": "keys",
+   "q": "Super + J",
+   "does": "Toggle the split direction"
+  },
+  {
+   "id": "o15",
+   "cat": "capture",
+   "kind": "keys",
+   "q": "Super + C",
+   "does": "Copy that works everywhere, even the terminal"
+  },
+  {
+   "id": "o16",
+   "cat": "capture",
+   "kind": "keys",
+   "q": "Super + V",
+   "does": "Paste that works everywhere, even the terminal"
+  },
+  {
+   "id": "o17",
+   "cat": "workspaces",
+   "kind": "keys",
+   "q": "Super + Ctrl + Tab",
+   "does": "Back to the workspace you were just on"
+  },
+  {
+   "id": "o18",
+   "cat": "terminal",
+   "kind": "cmd",
+   "q": "cd <part of a name>",
+   "does": "Jump to a folder you've visited before (zoxide)"
+  },
+  {
+   "id": "o19",
+   "cat": "capture",
+   "kind": "keys",
+   "q": "Print",
+   "does": "Screenshot"
+  },
+  {
+   "id": "o20",
+   "cat": "workspaces",
+   "kind": "keys",
+   "q": "Super + S",
+   "does": "Show / hide the scratchpad"
+  },
+  {
+   "id": "o21",
+   "cat": "workspaces",
+   "kind": "keys",
+   "q": "Super + Alt + S",
+   "does": "Send the window to the scratchpad"
+  },
+  {
+   "id": "o22",
+   "cat": "windows",
+   "kind": "keys",
+   "q": "Super + O",
+   "does": "Pop out: float and pin on every workspace"
+  },
+  {
+   "id": "o23",
+   "cat": "menus",
+   "kind": "keys",
+   "q": "Super + Ctrl + L",
+   "does": "Lock now"
+  },
+  {
+   "id": "o24",
+   "cat": "capture",
+   "kind": "keys",
+   "q": "Super + Ctrl + V",
+   "does": "Clipboard history"
+  },
+  {
+   "id": "o25",
+   "cat": "capture",
+   "kind": "keys",
+   "q": "Super + Ctrl + Print",
+   "does": "Grab text from the screen (OCR)"
+  },
+  {
+   "id": "o26",
+   "cat": "omarchy",
+   "kind": "cmd",
+   "q": "omarchy restart audio",
+   "does": "Fix sound that's stopped working"
+  },
+  {
+   "id": "o27",
+   "cat": "windows",
+   "kind": "keys",
+   "q": "Ctrl + Alt + Delete",
+   "does": "Close all windows"
+  },
+  {
+   "id": "o28",
+   "cat": "windows",
+   "kind": "keys",
+   "q": "Alt + Tab",
+   "does": "Cycle to the next window"
+  },
+  {
+   "id": "o29",
+   "cat": "workspaces",
+   "kind": "keys",
+   "q": "Super + Tab",
+   "does": "Next workspace"
+  },
+  {
+   "id": "o30",
+   "cat": "workspaces",
+   "kind": "keys",
+   "q": "Super + Shift + Tab",
+   "does": "Previous workspace"
+  },
+  {
+   "id": "o31",
+   "cat": "workspaces",
+   "kind": "keys",
+   "q": "Super + Shift + Alt + 3",
+   "does": "Move the window to workspace 3 silently (stay here)"
+  },
+  {
+   "id": "o32",
+   "cat": "apps",
+   "kind": "keys",
+   "q": "Super + Shift + O",
+   "does": "Obsidian"
+  },
+  {
+   "id": "o33",
+   "cat": "apps",
+   "kind": "keys",
+   "q": "Super + Shift + N",
+   "does": "Editor (Neovim)"
+  },
+  {
+   "id": "o34",
+   "cat": "apps",
+   "kind": "keys",
+   "q": "Super + Shift + F",
+   "does": "File manager"
+  },
+  {
+   "id": "o35",
+   "cat": "apps",
+   "kind": "keys",
+   "q": "Super + Shift + /",
+   "does": "1Password"
+  },
+  {
+   "id": "o36",
+   "cat": "terminal",
+   "kind": "cmd",
+   "q": "ff",
+   "does": "Fuzzy-find a file with a preview"
+  },
+  {
+   "id": "o37",
+   "cat": "terminal",
+   "kind": "cmd",
+   "q": "cx",
+   "does": "Claude Code (auto mode)"
+  },
+  {
+   "id": "o38",
+   "cat": "omarchy",
+   "kind": "cmd",
+   "q": "omarchy snapshot create",
+   "does": "Take a system snapshot before tinkering"
+  },
+  {
+   "id": "o39",
+   "cat": "omarchy",
+   "kind": "cmd",
+   "q": "omarchy snapshot restore",
+   "does": "Roll back to a snapshot"
+  },
+  {
+   "id": "o40",
+   "cat": "notify",
+   "kind": "keys",
+   "q": "Super + ,",
+   "does": "Dismiss the latest notification"
+  },
+  {
+   "id": "o41",
+   "cat": "notify",
+   "kind": "keys",
+   "q": "Super + Ctrl + ,",
+   "does": "Do not disturb on / off"
+  },
+  {
+   "id": "o42",
+   "cat": "windows",
+   "kind": "keys",
+   "q": "Super + Ctrl + F",
+   "does": "Tiled full screen (keeps the bar)"
+  },
+  {
+   "id": "o43",
+   "cat": "windows",
+   "kind": "keys",
+   "q": "Super + Alt + F",
+   "does": "Full width (maximise)"
+  },
+  {
+   "id": "o44",
+   "cat": "windows",
+   "kind": "keys",
+   "q": "Super + P",
+   "does": "Pseudo-tile: keep its own size inside the tile"
+  },
+  {
+   "id": "o45",
+   "cat": "windows",
+   "kind": "keys",
+   "q": "Super + L",
+   "does": "Toggle the workspace layout"
+  },
+  {
+   "id": "o46",
+   "cat": "windows",
+   "kind": "keys",
+   "q": "Super + Backspace",
+   "does": "Toggle window transparency"
+  },
+  {
+   "id": "o47",
+   "cat": "windows",
+   "kind": "keys",
+   "q": "Super + Shift + Backspace",
+   "does": "Toggle gaps between windows"
+  },
+  {
+   "id": "o48",
+   "cat": "windows",
+   "kind": "keys",
+   "q": "Super + -",
+   "does": "Widen the window (expand left)"
+  },
+  {
+   "id": "o49",
+   "cat": "windows",
+   "kind": "keys",
+   "q": "Super + =",
+   "does": "Narrow the window (shrink left)"
+  },
+  {
+   "id": "o50",
+   "cat": "menus",
+   "kind": "keys",
+   "q": "Super + Alt + Space",
+   "does": "Apps menu only"
+  },
+  {
+   "id": "o51",
+   "cat": "menus",
+   "kind": "keys",
+   "q": "Super + Shift + Ctrl + Space",
+   "does": "Theme switcher"
+  },
+  {
+   "id": "o52",
+   "cat": "menus",
+   "kind": "keys",
+   "q": "Super + Ctrl + Space",
+   "does": "Background switcher"
+  },
+  {
+   "id": "o53",
+   "cat": "menus",
+   "kind": "keys",
+   "q": "Super + Shift + Space",
+   "does": "Hide / show the top bar"
+  },
+  {
+   "id": "o54",
+   "cat": "menus",
+   "kind": "keys",
+   "q": "Super + Ctrl + A",
+   "does": "Audio panel"
+  },
+  {
+   "id": "o55",
+   "cat": "menus",
+   "kind": "keys",
+   "q": "Super + Ctrl + B",
+   "does": "Bluetooth panel"
+  },
+  {
+   "id": "o56",
+   "cat": "menus",
+   "kind": "keys",
+   "q": "Super + Ctrl + W",
+   "does": "Wi-Fi panel"
+  },
+  {
+   "id": "o57",
+   "cat": "menus",
+   "kind": "keys",
+   "q": "Super + Ctrl + D",
+   "does": "Display panel"
+  },
+  {
+   "id": "o58",
+   "cat": "menus",
+   "kind": "keys",
+   "q": "Super + Ctrl + P",
+   "does": "Power panel"
+  },
+  {
+   "id": "o59",
+   "cat": "menus",
+   "kind": "keys",
+   "q": "Super + Ctrl + O",
+   "does": "Toggles menu"
+  },
+  {
+   "id": "o60",
+   "cat": "menus",
+   "kind": "keys",
+   "q": "Super + Ctrl + H",
+   "does": "Hardware menu"
+  },
+  {
+   "id": "o61",
+   "cat": "menus",
+   "kind": "keys",
+   "q": "Super + Ctrl + Z",
+   "does": "Zoom in"
+  },
+  {
+   "id": "o62",
+   "cat": "menus",
+   "kind": "keys",
+   "q": "Super + Ctrl + Alt + Z",
+   "does": "Reset zoom"
+  },
+  {
+   "id": "o63",
+   "cat": "capture",
+   "kind": "keys",
+   "q": "Alt + Print",
+   "does": "Start / stop screen recording"
+  },
+  {
+   "id": "o64",
+   "cat": "capture",
+   "kind": "keys",
+   "q": "Super + Ctrl + C",
+   "does": "Capture menu: every screenshot / recording option"
+  },
+  {
+   "id": "o65",
+   "cat": "capture",
+   "kind": "keys",
+   "q": "Super + Print",
+   "does": "Colour picker (copies the hex code)"
+  },
+  {
+   "id": "o66",
+   "cat": "capture",
+   "kind": "keys",
+   "q": "Super + X",
+   "does": "Cut that works everywhere"
+  },
+  {
+   "id": "o67",
+   "cat": "capture",
+   "kind": "keys",
+   "q": "Super + Ctrl + E",
+   "does": "Emoji picker"
+  },
+  {
+   "id": "o68",
+   "cat": "capture",
+   "kind": "keys",
+   "q": "Super + Ctrl + X",
+   "does": "Dictation on / off"
+  },
+  {
+   "id": "o69",
+   "cat": "capture",
+   "kind": "keys",
+   "q": "Super + Ctrl + S",
+   "does": "Share menu"
+  },
+  {
+   "id": "o70",
+   "cat": "notify",
+   "kind": "keys",
+   "q": "Super + Shift + ,",
+   "does": "Dismiss all notifications"
+  },
+  {
+   "id": "o71",
+   "cat": "notify",
+   "kind": "keys",
+   "q": "Super + Alt + ,",
+   "does": "Open (act on) the latest notification"
+  },
+  {
+   "id": "o72",
+   "cat": "notify",
+   "kind": "keys",
+   "q": "Super + Shift + Alt + ,",
+   "does": "Notification history"
+  },
+  {
+   "id": "o73",
+   "cat": "notify",
+   "kind": "keys",
+   "q": "Super + Ctrl + R",
+   "does": "Set a reminder"
+  },
+  {
+   "id": "o74",
+   "cat": "notify",
+   "kind": "keys",
+   "q": "Super + Ctrl + Alt + R",
+   "does": "Show reminders"
+  },
+  {
+   "id": "o75",
+   "cat": "notify",
+   "kind": "keys",
+   "q": "Super + Ctrl + N",
+   "does": "Night light on / off"
+  },
+  {
+   "id": "o76",
+   "cat": "notify",
+   "kind": "keys",
+   "q": "Super + Ctrl + I",
+   "does": "Lock-on-idle on / off"
+  },
+  {
+   "id": "o77",
+   "cat": "notify",
+   "kind": "keys",
+   "q": "Super + Ctrl + Alt + T",
+   "does": "Show the time"
+  },
+  {
+   "id": "o78",
+   "cat": "notify",
+   "kind": "keys",
+   "q": "Super + Ctrl + Alt + B",
+   "does": "Show battery left"
+  },
+  {
+   "id": "o79",
+   "cat": "workspaces",
+   "kind": "keys",
+   "q": "Ctrl + Alt + Tab",
+   "does": "Focus the next monitor"
+  },
+  {
+   "id": "o80",
+   "cat": "workspaces",
+   "kind": "keys",
+   "q": "Super + Shift + Alt + Left",
+   "does": "Move the whole workspace to the left monitor"
+  },
+  {
+   "id": "o81",
+   "cat": "groups",
+   "kind": "keys",
+   "q": "Super + G",
+   "does": "Group / ungroup the window"
+  },
+  {
+   "id": "o82",
+   "cat": "groups",
+   "kind": "keys",
+   "q": "Super + Alt + Left",
+   "does": "Move the window into the group on its left"
+  },
+  {
+   "id": "o83",
+   "cat": "groups",
+   "kind": "keys",
+   "q": "Super + Alt + G",
+   "does": "Take the window out of its group"
+  },
+  {
+   "id": "o84",
+   "cat": "groups",
+   "kind": "keys",
+   "q": "Super + Alt + Tab",
+   "does": "Next window in the group"
+  },
+  {
+   "id": "o85",
+   "cat": "groups",
+   "kind": "keys",
+   "q": "Super + Ctrl + Right",
+   "does": "Next tab in the group"
+  },
+  {
+   "id": "o86",
+   "cat": "groups",
+   "kind": "keys",
+   "q": "Super + Alt + 1",
+   "does": "Jump to tab 1 of the group"
+  },
+  {
+   "id": "o87",
+   "cat": "apps",
+   "kind": "keys",
+   "q": "Super + Alt + Return",
+   "does": "Terminal with tmux"
+  },
+  {
+   "id": "o88",
+   "cat": "apps",
+   "kind": "keys",
+   "q": "Super + Ctrl + Return",
+   "does": "Terminal with Herdr"
+  },
+  {
+   "id": "o89",
+   "cat": "apps",
+   "kind": "keys",
+   "q": "Super + Shift + Alt + B",
+   "does": "Private browser window"
+  },
+  {
+   "id": "o90",
+   "cat": "apps",
+   "kind": "keys",
+   "q": "Super + Shift + M",
+   "does": "Spotify"
+  },
+  {
+   "id": "o91",
+   "cat": "apps",
+   "kind": "keys",
+   "q": "Super + Shift + G",
+   "does": "Signal"
+  },
+  {
+   "id": "o92",
+   "cat": "apps",
+   "kind": "keys",
+   "q": "Super + Shift + Alt + G",
+   "does": "WhatsApp"
+  },
+  {
+   "id": "o93",
+   "cat": "apps",
+   "kind": "keys",
+   "q": "Super + Shift + Y",
+   "does": "YouTube"
+  },
+  {
+   "id": "o94",
+   "cat": "apps",
+   "kind": "keys",
+   "q": "Super + Shift + P",
+   "does": "Google Photos"
+  },
+  {
+   "id": "o95",
+   "cat": "apps",
+   "kind": "keys",
+   "q": "Super + Shift + S",
+   "does": "Google Maps"
+  },
+  {
+   "id": "o96",
+   "cat": "apps",
+   "kind": "keys",
+   "q": "Super + Shift + A",
+   "does": "ChatGPT"
+  },
+  {
+   "id": "o97",
+   "cat": "apps",
+   "kind": "keys",
+   "q": "Super + Shift + D",
+   "does": "Docker (lazydocker)"
+  },
+  {
+   "id": "o98",
+   "cat": "apps",
+   "kind": "keys",
+   "q": "Super + Ctrl + Q",
+   "does": "Calculator"
+  },
+  {
+   "id": "o99",
+   "cat": "apps",
+   "kind": "keys",
+   "q": "Super + Ctrl + T",
+   "does": "Activity monitor (btop)"
+  },
+  {
+   "id": "o100",
+   "cat": "apps",
+   "kind": "keys",
+   "q": "Super + Shift + Ctrl + A",
+   "does": "Pick an AI coding agent"
+  },
+  {
+   "id": "o101",
+   "cat": "terminal",
+   "kind": "cmd",
+   "q": "lsa",
+   "does": "List files, hidden ones too"
+  },
+  {
+   "id": "o102",
+   "cat": "terminal",
+   "kind": "cmd",
+   "q": "lt",
+   "does": "Tree view, two levels deep, with git status"
+  },
+  {
+   "id": "o103",
+   "cat": "terminal",
+   "kind": "cmd",
+   "q": "eff",
+   "does": "Fuzzy-find a file and open it in the editor"
+  },
+  {
+   "id": "o104",
+   "cat": "terminal",
+   "kind": "cmd",
+   "q": "n",
+   "does": "Neovim in this folder"
+  },
+  {
+   "id": "o105",
+   "cat": "terminal",
+   "kind": "cmd",
+   "q": "open <file>",
+   "does": "Open a file with its default app"
+  },
+  {
+   "id": "o106",
+   "cat": "terminal",
+   "kind": "cmd",
+   "q": "..",
+   "does": "Up one folder"
+  },
+  {
+   "id": "o107",
+   "cat": "terminal",
+   "kind": "cmd",
+   "q": "gcm \"msg\"",
+   "does": "git commit with a message",
+   "also": [
+    "gcm"
+   ]
+  },
+  {
+   "id": "o108",
+   "cat": "terminal",
+   "kind": "cmd",
+   "q": "gcam \"msg\"", "also": ["gcam"],
+   "does": "git commit all"
+  },
+  {
+   "id": "o109",
+   "cat": "terminal",
+   "kind": "cmd",
+   "q": "ga <branch>",
+   "does": "Make a git worktree for a branch"
+  },
+  {
+   "id": "o110",
+   "cat": "terminal",
+   "kind": "cmd",
+   "q": "gd",
+   "does": "Remove a git worktree"
+  },
+  {
+   "id": "o111",
+   "cat": "terminal",
+   "kind": "cmd",
+   "q": "t",
+   "does": "tmux: attach, or start a \"Work\" session"
+  },
+  {
+   "id": "o112",
+   "cat": "terminal",
+   "kind": "cmd",
+   "q": "tdl",
+   "does": "tmux dev layout: editor + AI + terminal panes"
+  },
+  {
+   "id": "o113",
+   "cat": "terminal",
+   "kind": "cmd",
+   "q": "compress <folder>",
+   "does": "Make a tar.gz of a folder"
+  },
+  {
+   "id": "o114",
+   "cat": "terminal",
+   "kind": "cmd",
+   "q": "decompress <file>",
+   "does": "Unpack a tar.gz"
+  },
+  {
+   "id": "o115",
+   "cat": "terminal",
+   "kind": "cmd",
+   "q": "lazygit",
+   "does": "A full git UI in the terminal"
+  },
+  {
+   "id": "o116",
+   "cat": "terminal",
+   "kind": "cmd",
+   "q": "rg <text>",
+   "does": "Search every file in a folder for some text"
+  },
+  {
+   "id": "o117",
+   "cat": "terminal",
+   "kind": "cmd",
+   "q": "btop",
+   "does": "Activity monitor in the terminal"
+  },
+  {
+   "id": "o118",
+   "cat": "omarchy",
+   "kind": "cmd",
+   "q": "omarchy update available",
+   "does": "Check whether an update is waiting"
+  },
+  {
+   "id": "o119",
+   "cat": "omarchy",
+   "kind": "cmd",
+   "q": "omarchy restart wifi",
+   "does": "Fix stuck Wi-Fi"
+  },
+  {
+   "id": "o120",
+   "cat": "omarchy",
+   "kind": "cmd",
+   "q": "omarchy restart bluetooth",
+   "does": "Fix stuck Bluetooth"
+  },
+  {
+   "id": "o121",
+   "cat": "omarchy",
+   "kind": "cmd",
+   "q": "omarchy restart shell",
+   "does": "Fix a frozen bar or menus"
+  },
+  {
+   "id": "o122",
+   "cat": "omarchy",
+   "kind": "cmd",
+   "q": "omarchy theme set <name>",
+   "does": "Switch theme by name"
+  },
+  {
+   "id": "o123",
+   "cat": "omarchy",
+   "kind": "cmd",
+   "q": "omarchy theme list",
+   "does": "List the themes"
+  },
+  {
+   "id": "o124",
+   "cat": "omarchy",
+   "kind": "cmd",
+   "q": "omarchy theme bg next",
+   "does": "Next wallpaper for this theme"
+  },
+  {
+   "id": "o125",
+   "cat": "omarchy",
+   "kind": "cmd",
+   "q": "omarchy pkg install",
+   "does": "Pick packages to install from a searchable list"
+  },
+  {
+   "id": "o126",
+   "cat": "omarchy",
+   "kind": "cmd",
+   "q": "omarchy pkg remove",
+   "does": "Pick installed packages to remove"
+  },
+  {
+   "id": "o127",
+   "cat": "omarchy",
+   "kind": "cmd",
+   "q": "omarchy pkg aur install",
+   "does": "Install community packages (AUR)"
+  },
+  {
+   "id": "o128",
+   "cat": "omarchy",
+   "kind": "cmd",
+   "q": "omarchy webapp install",
+   "does": "Turn a website into an app with its own launcher"
+  },
+  {
+   "id": "o129",
+   "cat": "omarchy",
+   "kind": "cmd",
+   "q": "omarchy tui install",
+   "does": "Give a terminal app its own launcher"
+  },
+  {
+   "id": "o130",
+   "cat": "omarchy",
+   "kind": "cmd",
+   "q": "omarchy refresh hyprland",
+   "does": "Reset Hyprland's config to Omarchy's default"
+  },
+  {
+   "id": "o131",
+   "cat": "omarchy",
+   "kind": "cmd",
+   "q": "omarchy update analyze logs",
+   "does": "Find out what an update broke"
+  },
+  {
+   "id": "o132",
+   "cat": "omarchy",
+   "kind": "cmd",
+   "q": "omarchy debug",
+   "does": "Collect diagnostics to ask for help"
+  },
+  {
+   "id": "o133",
+   "cat": "omarchy",
+   "kind": "cmd",
+   "q": "omarchy version",
+   "does": "Version and release channel"
+  },
+  {
+   "id": "o134",
+   "cat": "omarchy",
+   "kind": "cmd",
+   "q": "omarchy commands",
+   "does": "List every omarchy command"
+  },
+  {
+   "id": "o135",
+   "cat": "omarchy",
+   "kind": "cmd",
+   "q": "omarchy update firmware",
+   "does": "Firmware updates"
+  },
+  {
+   "id": "o136",
+   "cat": "omarchy",
+   "kind": "cmd",
+   "q": "omarchy tailscale send <machine> <file>",
+   "does": "Send a file to another Tailscale device"
+  },
+  {
+   "id": "o137",
+   "cat": "omarchy",
+   "kind": "cmd",
+   "q": "omarchy setup security fingerprint",
+   "does": "Fingerprint for sudo and the lock screen"
+  },
+  {
+   "id": "o138",
+   "cat": "omarchy",
+   "kind": "cmd",
+   "q": "omarchy default browser",
+   "does": "Change the default browser"
+  }
+ ]
+}
