@@ -35,7 +35,7 @@ export type Card = {
   key: string; id: string; dir: Dir; stage: 'new' | 'learning' | 'review'; format: Format; cat: string; kind: Kind
   q: string; does: string; prompt?: string; options?: Option[]; answer?: string
 }
-export type Held = 'new' | 'learning' | 'slipping' | 'recognised' | 'recalled' | 'solid'
+export type Held = 'new' | 'learning' | 'slipping' | 'recognised' | 'recalled' | 'solid' | 'known'
 export type Given = { choice: string | null } | { typed: string }
 export type Marked = { right: boolean; close: boolean }
 export type LogEntry = {
@@ -54,6 +54,9 @@ const DAY = 864e5
 const recallNow = (m: Mem, now: number) => m.s == null || m.last == null ? 0 : fsrs.recall((now - m.last) / DAY, m.s)
 const shuffle = <T>(a: T[]) => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]] } return a }
 const split = (key: string) => key.split(':') as [string, Dir]
+// "I know this": a card marked known is never shown. Kept as an extra memory (<id>:known, recalled = known) so it
+// merges between devices like any answer, the latest mark winning.
+const isKnown = (st: DrillState, id: string) => !!st.mem[`${id}:known`]?.recalled
 
 // Keys: every name a key goes by, mapped to one. Modifiers come first in a fixed order, so "shift super b" = "super
 // shift b".
@@ -146,7 +149,7 @@ export function engine(data: DrillData) {
   }
 
   function next(st: DrillState, { last, mode = 'recall', now = Date.now() }: { last?: string; mode?: Mode; now?: number } = {}): Card | null {
-    const all = Object.entries(st.mem).filter(([k]) => byId.has(split(k)[0]) && k !== last)
+    const all = Object.entries(st.mem).filter(([k]) => { const [id] = split(k); return byId.has(id) && !k.endsWith(':known') && !isKnown(st, id) && k !== last })
     const learning = all.filter(([, m]) => m.step != null).sort((a, b) => (a[1].due ?? 0) - (b[1].due ?? 0))
     const pick = ([k]: [string, Mem], stage: Card['stage']) => { const [id, dir] = split(k); return card(st, id, dir, stage, mode) }
 
@@ -155,14 +158,19 @@ export function engine(data: DrillData) {
     const slipping = all.filter(([, m]) => m.step == null).map(e => [e, recallNow(e[1], now)] as const)
       .filter(([, r]) => r < fsrs.RETENTION).sort((a, b) => a[1] - b[1])
     if (slipping.length) return pick(slipping[0][0], 'review')
-    const fresh = ITEMS.find(w => !st.mem[`${w.id}:read`])
-    const inSteps = new Set(Object.entries(st.mem).filter(([, m]) => m.step != null).map(([k]) => split(k)[0])).size
+    const fresh = ITEMS.find(w => !st.mem[`${w.id}:read`] && !isKnown(st, w.id))
+    const inSteps = new Set(all.filter(([, m]) => m.step != null).map(([k]) => split(k)[0])).size
     if (fresh && inSteps < MAX_LEARNING) return card(st, fresh.id, 'read', 'new', mode)
     if (learning.length) return pick(learning[0], 'learning')
     const weak = (m: Mem) => recallNow(m, now) - (mode === 'recall' && !m.recalled ? 1 : 0)
     const weakest = all.map(e => [e, weak(e[1])] as const).sort((a, b) => a[1] - b[1])
     if (weakest.length) return pick(weakest[Math.floor(Math.random() * Math.min(5, weakest.length))][0], 'review')
     return fresh ? card(st, fresh.id, 'read', 'new', mode) : null
+  }
+
+  // know — mark a card as already known (never shown again), or undo that.
+  function know(st: DrillState, id: string, known = true, now = Date.now()) {
+    if (byId.has(id)) st.mem[`${id}:known`] = { s: null, d: null, reps: 0, lapses: 0, step: null, last: now, recalled: known }
   }
 
   // seen — the New card was shown: start its read memory at the first learning step.
@@ -212,6 +220,7 @@ export function engine(data: DrillData) {
   function status(st: DrillState, now = Date.now()) {
     const held = (w: Item): Held => {
       const read = st.mem[`${w.id}:read`], say = st.mem[`${w.id}:say`]
+      if (isKnown(st, w.id)) return 'known'
       if (!read) return 'new'
       if (read.step != null || !say || say.step != null) return 'learning'
       if ([read, say].some(m => recallNow(m, now) < fsrs.RETENTION)) return 'slipping'
@@ -222,13 +231,13 @@ export function engine(data: DrillData) {
     const count = (h: Held) => cards.filter(w => w.held === h).length
     return {
       total: ITEMS.length,
-      counts: Object.fromEntries((['new', 'learning', 'slipping', 'recognised', 'recalled', 'solid'] as const).map(h => [h, count(h)])) as Record<Held, number>,
+      counts: Object.fromEntries((['new', 'learning', 'slipping', 'recognised', 'recalled', 'solid', 'known'] as const).map(h => [h, count(h)])) as Record<Held, number>,
       answers: st.seq,
       cards,
     }
   }
 
-  return { next, seen, mark, answer, status, item: (id: string) => byId.get(id) }
+  return { next, seen, know, mark, answer, status, item: (id: string) => byId.get(id) }
 }
 
 export type DrillStatus = ReturnType<ReturnType<typeof engine>['status']>

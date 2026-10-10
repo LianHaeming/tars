@@ -147,7 +147,7 @@ reads the owner's port from its app.json; `TARS_PORT_<APP>` overrides it for sid
   always multiple choice; say (what it does → keys/command) typed in recall (default), multiple choice in choice, mixed
   = choice on the first step then typed. Keys are typed as words in any order (`super shift b`, `ctrl+alt+del`; aliases
   win/cmd/control/enter/esc/←…; a typo in a long key name = close); commands as run, `<placeholder>`/"quoted" args
-  optional, a typo per word from 4 letters. Modifier buttons (Super/Shift/Ctrl/Alt) above the input on key cards. Pages:
+  optional, a typo per word from 4 letters. Modifier buttons (Super/Shift/Ctrl/Alt) above the input on key cards. **I know this** (on New cards, in play, and a ✓✓ button per row on `/`, with Undo) retires a card for good: an `<id>:known` memory (`recalled` = known) that syncs like any answer; known cards are never queued and count as Known. Pages:
   `/` (modes, Learning · Slipping · Recognised · Recalled, every card seen) and `/play?mode=`. API: `GET
   /api/omarchy/drill` · `POST /api/omarchy/drill/sync {state, log}` (state/drill.json, state/drill-log.jsonl).
   Update cards.json when the guide or bindings change (ids are progress keys: append, don't renumber).

@@ -27,7 +27,7 @@ function Tally({ right, wrong }: { right: number; wrong: number }) {
   )
 }
 
-function NewCard({ card, onNext }: { card: Card; onNext: () => void }) {
+function NewCard({ card, onNext, onKnow }: { card: Card; onNext: () => void; onKnow: () => void }) {
   return (
     <>
       <div className="deck-card mt-5 flex min-h-96 flex-col rounded-3xl p-5">
@@ -37,7 +37,10 @@ function NewCard({ card, onNext }: { card: Card; onNext: () => void }) {
           <p className="mt-4 text-2xl">{card.does}</p>
         </div>
       </div>
-      <BottomBar><PillButton autoFocus onClick={onNext}>Got it</PillButton></BottomBar>
+      <BottomBar cols={2}>
+        <PillButton quiet onClick={onKnow}>I know this</PillButton>
+        <PillButton autoFocus onClick={onNext}>Got it</PillButton>
+      </BottomBar>
     </>
   )
 }
@@ -69,7 +72,7 @@ function Prompt({ card, result }: { card: Card; result: Result | null }) {
   )
 }
 
-function Choices({ card, result, onPick }: { card: Card; result: Result | null; onPick: (choice: string | null) => void }) {
+function Choices({ card, result, onPick, onKnow }: { card: Card; result: Result | null; onPick: (choice: string | null) => void; onKnow: () => void }) {
   return (
     <>
       <div className="mt-4 grid gap-2">
@@ -87,16 +90,17 @@ function Choices({ card, result, onPick }: { card: Card; result: Result | null; 
         })}
       </div>
       {!result && (
-        <div className="mt-3 text-center">
+        <div className="mt-3 flex justify-center gap-6">
           <Button variant="link" size="inline" onClick={() => onPick(null)}>I don't know</Button>
+          <Button variant="link" size="inline" onClick={onKnow}>I know this, skip it</Button>
         </div>
       )}
     </>
   )
 }
 
-function TypeBox({ value, onChange, done, keys, onSubmit, onDontKnow }: {
-  value: string; onChange: (v: string) => void; done: boolean; keys: boolean; onSubmit: () => void; onDontKnow: () => void
+function TypeBox({ value, onChange, done, keys, onSubmit, onDontKnow, onKnow }: {
+  value: string; onChange: (v: string) => void; done: boolean; keys: boolean; onSubmit: () => void; onDontKnow: () => void; onKnow: () => void
 }) {
   const ref = useRef<HTMLInputElement>(null)
   useEffect(() => { ref.current?.focus() }, [])
@@ -121,8 +125,9 @@ function TypeBox({ value, onChange, done, keys, onSubmit, onDontKnow }: {
         </Button>
       </div>
       {!done && (
-        <div className="mt-3 text-center">
+        <div className="mt-3 flex justify-center gap-6">
           <Button type="button" variant="link" size="inline" onMouseDown={e => e.preventDefault()} onClick={onDontKnow}>I don't know</Button>
+          <Button type="button" variant="link" size="inline" onMouseDown={e => e.preventDefault()} onClick={onKnow}>I know this, skip it</Button>
         </div>
       )}
     </form>
@@ -165,6 +170,13 @@ export function PlayPage() {
     record()
     show(drill.next(getState(), { last: card.key, mode }))
   }
+  const knowIt = () => {
+    if (!card) return
+    clearTimeout(timer.current)
+    drill.know(getState(), card.id)
+    record()
+    show(drill.next(getState(), { last: card.key, mode }))
+  }
   const close = () => location.key !== 'default' ? navigate(-1) : navigate('/')
   const question = card && card.stage !== 'new'
 
@@ -172,18 +184,18 @@ export function PlayPage() {
     <main className="mx-auto max-w-page px-4 pt-safe-3 pb-safe-32">
       <DeckTop i={0} total={0} onClose={close}><Tally {...tally} /></DeckTop>
       {card === null ? <p className="pt-16 text-center text-2xl font-semibold">Nothing to play</p>
-        : card.stage === 'new' ? <NewCard key={n} card={card} onNext={seen} />
+        : card.stage === 'new' ? <NewCard key={n} card={card} onNext={seen} onKnow={knowIt} />
         : (
           <div key={n}>
             <Prompt card={card} result={result} />
-            {card.format === 'choice' && <Choices card={card} result={result} onPick={choice => answer({ choice })} />}
+            {card.format === 'choice' && <Choices card={card} result={result} onPick={choice => answer({ choice })} onKnow={knowIt} />}
             {result && !result.right && card.format === 'choice' && <BottomBar><PillButton autoFocus onClick={advance}>Next</PillButton></BottomBar>}
           </div>
         )}
       {question && card.format === 'type' && (
         <TypeBox value={typed} onChange={setTyped} done={!!result} keys={card.kind === 'keys'}
           onSubmit={() => result ? advance() : typed.trim() && answer({ typed })}
-          onDontKnow={() => answer({ typed: '' })} />
+          onDontKnow={() => answer({ typed: '' })} onKnow={knowIt} />
       )}
     </main>
   )

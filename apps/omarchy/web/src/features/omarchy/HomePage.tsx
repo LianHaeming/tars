@@ -1,16 +1,17 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
-import { PlayIcon } from 'lucide-react'
+import { CheckCheckIcon, PlayIcon } from 'lucide-react'
+import { Button } from '@tars/ui/components/ui/button'
 import { ToggleGroup, ToggleGroupItem } from '@tars/ui/components/ui/toggle-group'
 import { LargeTitle, PillButton, Tint } from '@tars/ui/components/deck'
 import { localGet, localSet } from '@tars/ui/lib/api'
 import { MODES, type Held, type Mode } from '../../../../shared/drill.ts'
-import { drill, getState, sync } from './store'
+import { drill, getState, record, sync } from './store'
 import { Keys } from './Keys'
 
 const HELD: Record<Exclude<Held, 'new'>, [string, string]> = {
   learning: ['tomorrow', 'Learning'], slipping: ['overdue', 'Slipping'], recognised: ['primary', 'Recognised'],
-  recalled: ['today', 'Recalled'], solid: ['today', 'Solid'],
+  recalled: ['today', 'Recalled'], solid: ['today', 'Solid'], known: ['muted-foreground', 'Known'],
 }
 const MODE_KEY = 'omarchy-drill-mode'
 const MODE_INFO: Record<Mode, [string, string]> = {
@@ -40,12 +41,13 @@ export function HomePage() {
     document.addEventListener('visibilitychange', onVisible)
     return () => document.removeEventListener('visibilitychange', onVisible)
   }, [])
-  const seen = data.total - data.counts.new
+  const seen = data.total - data.counts.new - data.counts.known
+  const know = (id: string, known: boolean) => { drill.know(getState(), id, known); record(); setData(drill.status(getState())) }
   const cards = data.cards.filter(c => c.held !== 'new')
 
   return (
     <main className="mx-auto max-w-page px-4 pt-safe-3 pb-safe-16">
-      <LargeTitle title="Omarchy" sub={`${seen} of ${data.total} seen`} />
+      <LargeTitle title="Omarchy" sub={`${seen} of ${data.total} seen${data.counts.known ? ` · ${data.counts.known} known` : ''}`} />
 
       <div className="deck-card mt-6 flex min-h-56 flex-col rounded-3xl p-5">
         <div><Tint color="foreground">Keys & commands</Tint></div>
@@ -74,6 +76,9 @@ export function HomePage() {
                   <div className="mt-1 text-sm text-muted-foreground">{c.does}</div>
                 </div>
                 <Tint color={color}>{label}</Tint>
+                {c.held === 'known'
+                  ? <Button variant="link" size="inline" onClick={() => know(c.id, false)}>Undo</Button>
+                  : <Button variant="ghost" size="icon-lg" aria-label="I know this" className="glass rounded-full" onClick={() => know(c.id, true)}><CheckCheckIcon /></Button>}
               </div>
             )
           })}
