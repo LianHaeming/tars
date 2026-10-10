@@ -3,7 +3,7 @@ import { DiscoverSection } from './DiscoverSection'
 
 export function DiscoverPage() {
   return (
-    <Page title="Discover" back={false}>
+    <Page title="Discover" back="/dashboard">
       <DiscoverSection />
     </Page>
   )

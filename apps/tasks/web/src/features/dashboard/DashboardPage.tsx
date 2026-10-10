@@ -2,12 +2,11 @@ import type { ReactNode } from 'react'
 import { Link } from 'react-router'
 import { ChevronRightIcon, SparklesIcon } from 'lucide-react'
 import { Page } from '@tars/ui/components/Page'
-import { appUrl } from '@tars/ui/lib/apps'
 import { fmt0 } from '@tars/ui/lib/money'
 import { useInbox } from '@/features/inbox/data'
 import { useDashboard } from './data'
 
-function Tile({ title, to, href, children }: { title: string; to?: string; href?: string; children: ReactNode }) {
+function Tile({ title, to, children }: { title: string; to: string; children: ReactNode }) {
   const head = (
     <div className="flex items-baseline justify-between">
       <span className="text-sm font-semibold">{title}</span>
@@ -15,9 +14,7 @@ function Tile({ title, to, href, children }: { title: string; to?: string; href?
     </div>
   )
   const cls = 'glass block rounded-2xl p-4 transition-opacity active:opacity-80'
-  return to
-    ? <Link to={to} className={cls}>{head}<div className="mt-3">{children}</div></Link>
-    : <a href={href} className={cls}>{head}<div className="mt-3">{children}</div></a>
+  return <Link to={to} className={cls}>{head}<div className="mt-3">{children}</div></Link>
 }
 
 function Stat({ value, label }: { value: string; label: string }) {
@@ -55,7 +52,7 @@ function MoneyTile() {
   const { data, error } = useDashboard()
   const m = data?.money
   return (
-    <Tile title="Money" href={appUrl('money')}>
+    <Tile title="Money" to="/money">
       {!m ? <Quiet>{data?.moneyError || error || 'Loading…'}</Quiet> : (
         <>
           <div className="flex items-end justify-between gap-3">
@@ -92,7 +89,7 @@ function DiscoverTile() {
   const { data, error } = useDashboard()
   const repos = data?.discover?.repos
   return (
-    <Tile title="Discover" href={appUrl('discover')}>
+    <Tile title="Discover" to="/discover">
       {!repos ? <Quiet>{data?.discoverError || error || 'Loading…'}</Quiet> : !repos.length ? <Quiet>No picks yet today.</Quiet> : (
         <ul className="space-y-2">
           {repos.map(r => (

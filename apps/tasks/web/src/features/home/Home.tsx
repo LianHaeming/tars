@@ -8,7 +8,6 @@ import { byCreated, byWhen, useTars } from '@/features/tasks/store'
 import { TaskRow } from '@/features/tasks/TaskRow'
 import { CalendarPanel } from '@/features/tasks/calendar'
 import { Empty, FilterBar, FilterLabel, Section, SectionHead } from '@tars/ui/components/common'
-import { appUrl } from '@tars/ui/lib/apps'
 import { PaymentRow, useExpected, type Expected } from '@tars/ui/components/payments'
 import { Button } from '@tars/ui/components/ui/button'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@tars/ui/components/ui/collapsible'
@@ -232,7 +231,7 @@ export function Home() {
                   {day === t && main && <MainEvent task={main} />}
                   {list.map(e => e.task
                     ? e.task !== main && <TaskRow key={e.task.id} task={e.task} compact tag={tag} hideDue />
-                    : <PaymentRow key={e.pay!.id} p={e.pay!} tag={tag} href={appUrl('money')} />)}
+                    : <PaymentRow key={e.pay!.id} p={e.pay!} tag={tag} to="/money" />)}
                 </div>
               )
             })}

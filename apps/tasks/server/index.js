@@ -1,10 +1,13 @@
-// tars tasks server: the only code that reads or writes this app's state/ (tasks, inbox). Serves /api/* and the
-// built React app (web → dist/). Run: node server  (port 8400)
+// tars server: the only code that reads or writes this app's state/ — tasks and inbox, plus money/ (server/money,
+// read-only Monzo via bin/monzo) and discover/ (server/discover). Serves /api/* and the built React app (web → dist/).
+// Run: node server  (port 8400)
 const path = require('path');
 const crypto = require('crypto');
-const { callApp, send, start } = require('@tars/server');
+const { send, start } = require('@tars/server');
 const store = require('./state');
 const { organise } = require('./organise');
+const { money, expected, summary } = require('./money/money');
+const { discover } = require('./discover/discover');
 
 const PORT = process.env.PORT || 8400;
 const DIST = path.join(__dirname, '..', 'dist');
@@ -122,22 +125,28 @@ async function api(req, res, parts, body) {
   }
 
   if (resource === 'expected' && req.method === 'GET') {
-    try { return send(res, 200, await callApp('money', 'GET', 'expected')); }
+    try { return send(res, 200, await expected()); }
     catch (e) { return send(res, 503, { error: e.message }); }
   }
 
   if (resource === 'dashboard' && req.method === 'GET') {
-    const [money, discover] = await Promise.allSettled([
-      callApp('money', 'GET', 'money/summary', null, { timeout: 15e3 }),
-      callApp('discover', 'GET', 'discover', null, { timeout: 15e3 }),
-    ]);
-    const m = money.value, d = discover.value;
+    const [m, d] = await Promise.allSettled([summary(false), discover(false)]);
     return send(res, 200, {
-      money: m ? pick(m, ['balance', 'potTotal', 'committed', 'income', 'insights', 'thinking', 'fetchedAt']) : null,
-      moneyError: money.reason?.message || null,
-      discover: d ? { repos: (d.repos || []).slice(0, 3) } : null,
-      discoverError: discover.reason?.message || null,
+      money: m.value ? pick(m.value, ['balance', 'potTotal', 'committed', 'income', 'insights', 'thinking', 'fetchedAt']) : null,
+      moneyError: m.reason?.message || null,
+      discover: d.value ? { repos: (d.value.repos || []).slice(0, 3) } : null,
+      discoverError: d.reason?.message || null,
     });
+  }
+
+  if (resource === 'money' && req.method === 'GET') {
+    try { return send(res, 200, rid === 'summary' ? await summary(false) : rid === 'summary-fresh' ? await summary(true) : await money(rid === 'fresh')); }
+    catch (e) { return send(res, 503, { error: e.message }); }
+  }
+
+  if (resource === 'discover' && req.method === 'GET') {
+    try { return send(res, 200, await discover(rid === 'fresh')); }
+    catch (e) { return send(res, 503, { error: e.message }); }
   }
 
   if (resource === 'organise' && req.method === 'GET') {

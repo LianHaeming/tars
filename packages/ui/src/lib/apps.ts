@@ -1,7 +1,5 @@
 export const APP_PORTS = {
   tasks: 443,
-  discover: 8445,
-  money: 8447,
   food: 8448,
   memo: 8450,
 } as const

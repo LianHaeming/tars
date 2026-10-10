@@ -3,7 +3,7 @@ const path = require('path');
 const store = require('./state');
 const { runClaude } = require('@tars/server');
 
-const MONZO = path.join(__dirname, '..', '..', '..', 'bin', 'monzo');
+const MONZO = path.join(__dirname, '..', '..', '..', '..', 'bin', 'monzo');
 const FRESH_MS = 2 * 60 * 1000;
 const DAY = 864e5;
 let cached = null;

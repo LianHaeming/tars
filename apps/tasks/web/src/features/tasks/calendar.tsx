@@ -3,7 +3,6 @@ import type { Task } from '@/lib/types'
 import { addDays, parseYmd, relDay, today, ymd } from '@tars/ui/lib/dates'
 import { byTime, useTars } from '@/features/tasks/store'
 import { TaskRow } from '@/features/tasks/TaskRow'
-import { appUrl } from '@tars/ui/lib/apps'
 import { PaymentRow, useExpected, type Expected } from '@tars/ui/components/payments'
 import { SectionHead } from '@tars/ui/components/common'
 import { Button } from '@tars/ui/components/ui/button'
@@ -131,7 +130,7 @@ export function CalendarPanel({ filter = 'all' }: { filter?: string }) {
         <div className="pt-2">
           <div className="hairline-b pt-2 pb-1 text-xs font-semibold tracking-wider text-primary uppercase">{dayLabel}</div>
           {dayTasks.map(x => <TaskRow key={x.id} task={x} compact tag={!activeTag} hideDue />)}
-          {dayPays.map(p => <PaymentRow key={p.id} p={p} tag={!activeTag} href={appUrl('money')} />)}
+          {dayPays.map(p => <PaymentRow key={p.id} p={p} tag={!activeTag} to="/money" />)}
           {!dayTasks.length && !dayPays.length && <div className="py-4 text-sm text-muted-foreground">Nothing on this day.</div>}
         </div>
       )}

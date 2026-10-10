@@ -6,6 +6,8 @@ import { StoreProvider } from '@/features/tasks/store'
 import { Layout } from './Layout'
 
 const DashboardPage = lazy(() => import('@/features/dashboard/DashboardPage').then(m => ({ default: m.DashboardPage })))
+const MoneyPage = lazy(() => import('@/features/money/MoneyPage').then(m => ({ default: m.MoneyPage })))
+const DiscoverPage = lazy(() => import('@/features/discover/DiscoverPage').then(m => ({ default: m.DiscoverPage })))
 const InboxPage = lazy(() => import('@/features/inbox/InboxPage').then(m => ({ default: m.InboxPage })))
 
 function ToApp({ app, path }: { app: AppName; path?: string }) {
@@ -20,8 +22,8 @@ const router = createBrowserRouter([
       { path: '/', element: <Home /> },
       { path: '/apps', element: <Navigate to="/" replace /> },
       { path: '/burmese', element: <ToApp app="memo" path="/burmese" /> },
-      { path: '/money', element: <ToApp app="money" /> },
-      { path: '/discover', element: <ToApp app="discover" /> },
+      { path: '/money', element: <MoneyPage /> },
+      { path: '/discover', element: <DiscoverPage /> },
       { path: '/food/*', element: <ToApp app="food" /> },
       { path: '/dashboard', element: <DashboardPage /> },
       { path: '/inbox', element: <InboxPage /> },

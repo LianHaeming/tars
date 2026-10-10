@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router'
 import { cn } from '@tars/ui/lib/utils'
 import { api } from '@tars/ui/lib/api'
 import { parseYmd } from '@tars/ui/lib/dates'
@@ -33,13 +34,12 @@ export function Logo({ src, name, className }: { src: string | null; name: strin
 
 export const amountLabel = (p: { amount: number; varies: boolean }, value = p.amount) => `${value > 0 ? '+' : ''}${p.varies ? '~' : ''}${fmt(Math.abs(value))}`
 
-export function PaymentRow({ p, tag, dated, href }: { p: Expected; tag?: boolean; dated?: boolean; href?: string }) {
+export function PaymentRow({ p, tag, dated, to }: { p: Expected; tag?: boolean; dated?: boolean; to?: string }) {
   const when = p.late
     ? `Due ${parseYmd(p.expectedOn).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })} · not taken yet`
     : `${dated ? parseYmd(p.date).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' }) : 'Expected'} · ${p.kind}${p.cadence === 'weekly' ? ' · weekly' : ''}`
-  const Row = href ? 'a' : 'div'
-  return (
-    <Row href={href} className="flex items-start gap-3 hairline-b py-3">
+  const body = (
+    <>
       <Logo src={p.logo} name={p.name} className="mt-px size-5 text-micro" />
       <span className="min-w-0 flex-1">
         <span className="block truncate">{p.name}</span>
@@ -49,6 +49,8 @@ export function PaymentRow({ p, tag, dated, href }: { p: Expected; tag?: boolean
         </span>
       </span>
       <span className="font-semibold tabular-nums">{amountLabel(p)}</span>
-    </Row>
+    </>
   )
+  const cls = 'flex items-start gap-3 hairline-b py-3'
+  return to ? <Link to={to} className={cls}>{body}</Link> : <div className={cls}>{body}</div>
 }

@@ -32,9 +32,7 @@ bin/             up, sync, icon, gmail, monzo, burmese, email-tasks, whatsapp, o
 
 | App | Internal port | URL (tailnet) | Owns |
 |---|---|---|---|
-| tasks (`tars-tasks`) | 8400 | https://omarchy.tail0bf266.ts.net/ | tasks (incl. the Shopping list), inbox |
-| discover (`tars-discover`) | 8405 | https://omarchy.tail0bf266.ts.net:8445/ | discover |
-| money (`tars-money`) | 8407 | https://omarchy.tail0bf266.ts.net:8447/ | money |
+| tasks (`tars-tasks`, "the tars app") | 8400 | https://omarchy.tail0bf266.ts.net/ | tasks (incl. the Shopping list), inbox, money, discover |
 | food (`tars-food`) | 8408 | https://omarchy.tail0bf266.ts.net:8448/ | food (+ serves data/food) |
 | memo (`tars-memo`) | 8410 | https://omarchy.tail0bf266.ts.net:8450/ | burmese, omarchy (the memorisation games) |
 
@@ -43,13 +41,9 @@ There is no launcher: the iPhone Home Screen is the launcher (one icon per app).
 
 **How the apps share data** (all server to server via `callApp(app, method, path, body)` from @tars/server, which
 reads the owner's port from its app.json; `TARS_PORT_<APP>` overrides it for side-by-side tests on spare ports):
-- tasks `GET /api/expected` → money `GET /api/expected` (the teal payment rows on the Schedule and calendar; if money
-  is down the Schedule just loads without them).
 - food `POST /api/shopping` → tasks `POST /api/shopping` (tasks owns the Shopping list; it answers `{projectId}` and
   the food toast's Open goes to `appUrl('tasks', '/?filter=<projectId>')`).
 - bin/email-tasks → tasks `/api/inbox` (as before, on :8400).
-- tasks `GET /api/dashboard` → money `GET /api/money/summary` + discover `GET /api/discover` (each `null` with an
-  `…Error` message when that app is down).
 
 **Rules of the split** (they keep it robust):
 - **One owner per data file.** `docs()` keeps each JSON file in memory and rewrites it whole, so two processes writing
@@ -59,7 +53,8 @@ reads the owner's port from its app.json; `TARS_PORT_<APP>` overrides it for sid
   home-screen identities can never collide. Link between apps with `appUrl('<app>')` from `@tars/ui/lib/apps` (the one
   registry of public ports). iOS opens a link to another app in a Safari sheet over the current one.
 - **Shared code lives in packages/, never copied.** If two apps need it, it moves to @tars/ui or @tars/server.
-- A new app: copy apps/discover as the template, pick the next ports, `bin/icon <app> <glyph> [font]`, add it to
+- A new app (only for something that really wants its own icon — otherwise it's a page in the tars app, like Money and
+  Discover): copy apps/food's skeleton, pick the next ports, `bin/icon <app> <glyph> [font]`, add it to
   `APP_PORTS`, then `bin/up <app>` on the live checkout and add it to the Home Screen from Safari.
 
 - **The tasks app** (`apps/tasks`, the original "t" icon at /): **Schedule** (`/`) — a flat **"Life, so far"** strip,
@@ -68,23 +63,24 @@ reads the owner's port from its app.json; `TARS_PORT_<APP>` overrides it for sid
   shaded by a global top gradient scrim (`.island-scrim` in globals.css, rendered by AppShell, z-10: fades content under
   the status bar, sits below the sticky filter/headers) — while the filters lock to the top), the Sort card, **Upcoming** grouped by day (next 14 days
   only, then an "N more · See Month" link; Overdue first; expected Monzo payments mixed in as teal Money rows with a
-  Money filter label — tapping one opens the Money app; today's next timed task is a highlighted "main event" pill that
+  Money filter label — tapping one opens `/money`; today's next timed task is a highlighted "main event" pill that
   expands in place for notes / Mark done / Edit), then **To-do · no date**. Rows show the list as a coloured tag under
   All. Dock (Schedule and Dashboard): **Sort** on the left when there are loose to-dos, one-tap **Add task** in the centre
   (Schedule only); the undo flash borrows the centre slot; on the right one round button toggles Schedule ⇄
   **Dashboard** (`/dashboard`, a dot on it when email is waiting). The **Dashboard** is glanceable tiles of quick AI
   info from elsewhere: **Email** (review-queue count + first titles, opens `/inbox`), **Money** (balance, monthly
-  outgoings, the first two "Tars noticed" insights; opens the Money app), **Discover** (today's top 3 repos; opens
-  Discover). New tiles go there rather than onto the Schedule. Safari's status strip is `theme-color` = `--chrome` (#15263a) — keep them equal in
+  outgoings, the first two "Tars noticed" insights; opens `/money`), **Discover** (today's top 3 repos; opens
+  `/discover`). Money and Discover were their own apps (:8447, :8445) until 2026-10-10 and are now pages of this one
+  app (one build, one server), like the games inside Memo. New tiles go there rather than onto the Schedule. Safari's status strip is `theme-color` = `--chrome` (#15263a) — keep them equal in
   every app so the top reads as one navy surface; added to the Home Screen each app runs standalone (manifest) under the
   Dynamic Island. Everything else is a **page** with its own URL and a back button — Lian doesn't want pop-up windows:
-  `/inbox` (back to `/dashboard`). `/month` and `/apps` redirect to `/`; the old `/burmese` (→ Memo),
-  `/discover`, `/money`, `/food/*` URLs open the new apps. "Todo"/"calendar" = this app.
-- **Money app** (`apps/money`, "£"): one root page — a small dashboard, not a Monzo copy: balance line, "goes out
+  `/inbox` (back to `/dashboard`). `/month` and `/apps` redirect to `/`; the old `/burmese` (→ Memo)
+  and `/food/*` URLs open those apps. "Todo"/"calendar" = this app.
+- **Money** (`/money` in the tars app, back to `/dashboard`; `features/money/`, `server/money/`): a small dashboard, not a Monzo copy: balance line, "goes out
   automatically every month" total split by group, Claude's "Tars noticed" insights, the repeating payments by group with
-  logos, next 30 days. API: `GET /api/money[/fresh]` (runs `bin/monzo json` via `server/money.js`, cached 2 min; 503 with
+  logos, next 30 days. API: `GET /api/money[/fresh]` (runs `bin/monzo json` via `server/money/money.js`, cached 2 min; 503 with
   the message if sign-in is needed) · `GET /api/money/summary[-fresh]` (repeating payments as monthly costs + `claude -p`
-  once a London day for clean names, groups, logo domains and 3–5 insights, kept in state/money.json) ·
+  once a London day for clean names, groups, logo domains and 3–5 insights, kept in state/money/money.json) ·
   `GET /api/expected` (repeating payments/income predicted from the last 89 days — monthly or weekly, split by amount
   when a payee has several, stopped ones dropped, late ones shown today; next 90 days; Monzo data reused up to 1 h).
 - **Food app** (`apps/food`, "f"): `/` menu search + recipe carousels (a basket-icon header action opens `/list`, the
@@ -164,14 +160,15 @@ reads the owner's port from its app.json; `TARS_PORT_<APP>` overrides it for sid
   `/omarchy` (modes, Learning · Slipping · Recognised · Recalled, every card seen) and `/omarchy/play?mode=`. API: `GET
   /api/omarchy/drill` · `POST /api/omarchy/drill/sync {state, log}` (state/omarchy/drill.json, state/omarchy/drill-log.jsonl).
   Update cards.json when the guide or bindings change (ids are progress keys: append, don't renumber).
-- **Discover app** (`apps/discover`): one root page — a daily "cool GitHub repos" feed: real repos from the GitHub search
-  API, curated by `claude -p` once a London day into state/discover.json. API: `GET /api/discover[/fresh]`.
+- **Discover** (`/discover` in the tars app, back to `/dashboard`; `features/discover/`, `server/discover/`): a daily "cool GitHub repos" feed: real repos from the GitHub search
+  API, curated by `claude -p` once a London day into state/discover/discover.json. API: `GET /api/discover[/fresh]`.
 - **WhatsApp** (`apps/whatsapp`): capture only, no viewer app (Lian uses WhatsApp itself; the viewer was removed
   2026-10-10). The bridge in `apps/whatsapp/bridge` (its own package.json, outside the workspaces, its own service
   `tars-whatsapp-bridge`) writes state/whatsapp.json for tars to read and act on.
 - **Tasks API** (`apps/tasks/server/index.js`): `GET /api/state` · `POST|PATCH|DELETE /api/tasks[/id]` · `/api/projects[/id]` (a project PATCH with `subs` sets its sub-categories; tasks carry an optional `subId`) ·
-  `POST /api/shopping {items}` (replaces the Shopping list's unticked items; called by food) · `GET /api/expected` (from money) ·
-  `GET /api/organise` · `GET /api/dashboard` · `GET|POST /api/inbox` (candidates carry `kind` task|reminder; a new one with
+  `POST /api/shopping {items}` (replaces the Shopping list's unticked items; called by food) · `GET /api/expected` ·
+  `GET /api/organise` · `GET /api/dashboard` (Money summary + top 3 Discover repos; each `null` with an `…Error` on
+  failure) · the Money and Discover APIs above · `GET|POST /api/inbox` (candidates carry `kind` task|reminder; a new one with
   the same title as a pending one updates it instead of adding a duplicate), `POST /api/inbox/:id/accept`, `DELETE /api/inbox/:id`.
   Anything else is the built app (page URLs fall back to index.html).
 - **Tasks frontend** (`apps/tasks/web/src/`), grouped by feature:
@@ -189,7 +186,7 @@ reads the owner's port from its app.json; `TARS_PORT_<APP>` overrides it for sid
     FilterLabel, SectionHead, Section, Empty, Dot), `ui/` (shadcn: `cd apps/<any>/web && npx shadcn@latest add <name>` —
     it writes into packages/ui). `lib/` — api.ts (`api()`, localGet/localSet), apps.ts (`APP_PORTS`, `appUrl`), dates.ts,
     utils.ts, money.ts (`fmt`, `fmt0`), use-resource.ts (shared `{data,error,loading,reload}` fetch hook for read-mostly
-    features); `components/payments.tsx` (Expected, useExpected, Logo, PaymentRow — used by tasks and money). `styles/globals.css` — the tokens.
+    features); `components/payments.tsx` (Expected, useExpected, Logo, PaymentRow — `to` makes the row an in-app link). `styles/globals.css` — the tokens.
   - **One look everywhere**: shadcn components + the shared pieces above; never hard-code colours — use the tokens in
     `packages/ui/src/styles/globals.css` (dark only, blue `primary`, due/priority colours). No second theme or CSS file
     (Burmese briefly had its own and Lian asked for the tars look back: keep every app on the one look).
