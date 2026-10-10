@@ -2,7 +2,6 @@ export const APP_PORTS = {
   tasks: 443,
   burmese: 8444,
   discover: 8445,
-  whatsapp: 8446,
   money: 8447,
   food: 8448,
   omarchy: 8449,

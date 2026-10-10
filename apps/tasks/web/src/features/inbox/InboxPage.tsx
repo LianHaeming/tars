@@ -5,6 +5,7 @@ import { dueColor, dueLabel } from '@tars/ui/lib/dates'
 import { Page } from '@tars/ui/components/Page'
 import { Empty } from '@tars/ui/components/common'
 import { Button } from '@tars/ui/components/ui/button'
+import { Badge } from '@tars/ui/components/ui/badge'
 import { useTars } from '@/features/tasks/store'
 import { useInbox } from './data'
 
@@ -24,6 +25,7 @@ function Card({ c, onAccept, onDismiss }: { c: Candidate; onAccept: () => void; 
           </span>
         )}
       </div>
+      {c.kind === 'reminder' && <Badge variant="tag" className="mt-1">Reminder</Badge>}
       {c.description && <p className="mt-1 text-sm whitespace-pre-line text-muted-foreground">{c.description}</p>}
       <p className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
         <MailIcon className="size-3.5 shrink-0" />
@@ -56,11 +58,11 @@ export function InboxPage() {
   }
 
   return (
-    <Page title="From email" back="/">
+    <Page title="From email" back="/dashboard">
       {error && !candidates.length ? (
         <Empty>Couldn't load the review queue — {error}.</Empty>
       ) : loaded && !candidates.length ? (
-        <Empty>Nothing to review. New emails that look like tasks will show up here.</Empty>
+        <Empty>Nothing to review. New emails that look like tasks or useful reminders will show up here.</Empty>
       ) : (
         <ul className="space-y-3 pt-4">
           {candidates.map(c => (

@@ -55,7 +55,7 @@ UNIT
     systemctl --user restart tars-whatsapp-bridge.service
     sleep 1
     systemctl --user --no-pager --lines=0 status tars-whatsapp-bridge.service | head -4 || true
-    echo "capturing in the background. Check the WhatsApp app, or: bin/whatsapp status"
+    echo "capturing in the background. Check: bin/whatsapp status"
     ;;
   more)
     ensure_deps

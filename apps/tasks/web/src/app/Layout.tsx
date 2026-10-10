@@ -4,7 +4,7 @@ import { AppShell } from '@tars/ui/components/AppShell'
 import { useQuickAdd, useTars } from '@/features/tasks/store'
 import { TaskSheet } from '@/features/tasks/TaskSheet'
 import { OrganiseProvider } from '@/features/home/organise'
-import { Dock, showsDock } from './Dock'
+import { Dock } from './Dock'
 
 export function Layout() {
   const { openId, setOpenId, flash } = useTars()
@@ -14,7 +14,7 @@ export function Layout() {
   useEffect(() => {
     const editing = () => document.activeElement?.closest('input, textarea, select, [contenteditable]')
     const onKey = (e: KeyboardEvent) => {
-      if ((e.key === 'q' || e.key === '/') && !editing() && showsDock(pathname)) {
+      if ((e.key === 'q' || e.key === '/') && !editing() && pathname === '/') {
         e.preventDefault()
         quickAdd()
       }

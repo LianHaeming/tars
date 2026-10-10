@@ -1,11 +1,12 @@
 import type { ReactNode } from 'react'
-import { useLocation } from 'react-router'
-import { PlusIcon, WandSparklesIcon } from 'lucide-react'
+import { Link, useLocation } from 'react-router'
+import { CircleCheckIcon, LayoutGridIcon, PlusIcon, WandSparklesIcon } from 'lucide-react'
 import { cn } from '@tars/ui/lib/utils'
 import { useQuickAdd, useTars } from '@/features/tasks/store'
 import { useOrganise } from '@/features/home/organise'
+import { useInbox } from '@/features/inbox/data'
 
-export const showsDock = (path: string) => path === '/'
+export const showsDock = (path: string) => path === '/' || path === '/dashboard'
 
 export function Dock() {
   const { flash } = useTars()
@@ -17,6 +18,10 @@ export function Dock() {
   const tab = hidden ? -1 : 0
   const onSchedule = pathname === '/'
   const showSort = onSchedule && !flash && phase === 'idle' && loose > 0
+  const { candidates } = useInbox()
+  const nav = onSchedule
+    ? { to: '/dashboard', label: 'Dashboard', Icon: LayoutGridIcon }
+    : { to: '/', label: 'Schedule', Icon: CircleCheckIcon }
 
   let center: ReactNode = null
   if (flash) {
@@ -61,7 +66,18 @@ export function Dock() {
         )}
       </div>
       <div className="flex shrink-0 justify-center">{center}</div>
-      <div className="flex flex-1 justify-end" />
+      <div className="flex flex-1 justify-end">
+        <Link
+          to={nav.to}
+          replace
+          aria-label={nav.label}
+          tabIndex={tab}
+          className={cn('dock relative grid size-12 place-items-center rounded-full text-foreground transition-transform active:scale-98 [&_svg]:size-5', !hidden && 'pointer-events-auto')}
+        >
+          <nav.Icon />
+          {onSchedule && candidates.length > 0 && <span className="absolute top-2 right-2 size-2 rounded-full bg-primary" />}
+        </Link>
+      </div>
     </nav>
   )
 }

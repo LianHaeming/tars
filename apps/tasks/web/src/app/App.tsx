@@ -5,6 +5,7 @@ import { Home } from '@/features/home/Home'
 import { StoreProvider } from '@/features/tasks/store'
 import { Layout } from './Layout'
 
+const DashboardPage = lazy(() => import('@/features/dashboard/DashboardPage').then(m => ({ default: m.DashboardPage })))
 const InboxPage = lazy(() => import('@/features/inbox/InboxPage').then(m => ({ default: m.InboxPage })))
 
 function ToApp({ app }: { app: AppName }) {
@@ -21,8 +22,8 @@ const router = createBrowserRouter([
       { path: '/burmese', element: <ToApp app="burmese" /> },
       { path: '/money', element: <ToApp app="money" /> },
       { path: '/discover', element: <ToApp app="discover" /> },
-      { path: '/whatsapp/*', element: <ToApp app="whatsapp" /> },
       { path: '/food/*', element: <ToApp app="food" /> },
+      { path: '/dashboard', element: <DashboardPage /> },
       { path: '/inbox', element: <InboxPage /> },
       { path: '/month', element: <Navigate to="/" replace /> },
       { path: '*', element: <Home /> },

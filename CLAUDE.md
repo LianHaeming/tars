@@ -27,7 +27,7 @@ packages/
                  DrillState, merge), store.ts (offline progress in browser storage + sync) — plain TS, imported by
                  relative path so Node can strip the types
 data/food/       Food content: menu.json, r/<id>.json, sainsburys/ocado.json, photos/ (in git; published from the Mac)
-bin/             up, sync, icon, gmail, monzo, burmese, email-tasks, whatsapp (+ lib/state.sh)
+bin/             up, sync, icon, gmail, monzo, burmese, email-tasks, whatsapp, obsidian (+ lib/state.sh)
 ```
 
 | App | Internal port | URL (tailnet) | Owns |
@@ -35,7 +35,6 @@ bin/             up, sync, icon, gmail, monzo, burmese, email-tasks, whatsapp (+
 | tasks (`tars-tasks`) | 8400 | https://omarchy.tail0bf266.ts.net/ | tasks (incl. the Shopping list), inbox |
 | burmese (`tars-burmese`) | 8404 | https://omarchy.tail0bf266.ts.net:8444/ | burmese |
 | discover (`tars-discover`) | 8405 | https://omarchy.tail0bf266.ts.net:8445/ | discover |
-| whatsapp (`tars-whatsapp`) | 8406 | https://omarchy.tail0bf266.ts.net:8446/ | whatsapp (written by the bridge, `tars-whatsapp-bridge`; the viewer only reads) |
 | money (`tars-money`) | 8407 | https://omarchy.tail0bf266.ts.net:8447/ | money |
 | food (`tars-food`) | 8408 | https://omarchy.tail0bf266.ts.net:8448/ | food (+ serves data/food) |
 | omarchy (`tars-omarchy`) | 8409 | https://omarchy.tail0bf266.ts.net:8449/ | omarchy (drill progress) |
@@ -50,6 +49,8 @@ reads the owner's port from its app.json; `TARS_PORT_<APP>` overrides it for sid
 - food `POST /api/shopping` → tasks `POST /api/shopping` (tasks owns the Shopping list; it answers `{projectId}` and
   the food toast's Open goes to `appUrl('tasks', '/?filter=<projectId>')`).
 - bin/email-tasks → tasks `/api/inbox` (as before, on :8400).
+- tasks `GET /api/dashboard` → money `GET /api/money/summary` + discover `GET /api/discover` (each `null` with an
+  `…Error` message when that app is down).
 
 **Rules of the split** (they keep it robust):
 - **One owner per data file.** `docs()` keeps each JSON file in memory and rewrites it whole, so two processes writing
@@ -66,16 +67,19 @@ reads the owner's port from its app.json; `TARS_PORT_<APP>` overrides it for sid
   then a sticky row of monochrome list filter labels (All + one per list with a small colour-matched tag icon, + Completed;
   choice kept in browser storage; `?filter=<listId>` picks one; on scroll the strip slides up behind the Dynamic Island —
   shaded by a global top gradient scrim (`.island-scrim` in globals.css, rendered by AppShell, z-10: fades content under
-  the status bar, sits below the sticky filter/headers) — while the filters lock to the top), the **Email** review card
-  (when bin/email-tasks has queued candidates; opens `/inbox`), the Sort card, **Upcoming** grouped by day (next 14 days
+  the status bar, sits below the sticky filter/headers) — while the filters lock to the top), the Sort card, **Upcoming** grouped by day (next 14 days
   only, then an "N more · See Month" link; Overdue first; expected Monzo payments mixed in as teal Money rows with a
   Money filter label — tapping one opens the Money app; today's next timed task is a highlighted "main event" pill that
   expands in place for notes / Mark done / Edit), then **To-do · no date**. Rows show the list as a coloured tag under
-  All. Dock (Schedule only): **Sort** on the left when there are loose to-dos, one-tap **Add task** in the centre; the
-  undo flash borrows the centre slot. Safari's status strip is `theme-color` = `--chrome` (#15263a) — keep them equal in
+  All. Dock (Schedule and Dashboard): **Sort** on the left when there are loose to-dos, one-tap **Add task** in the centre
+  (Schedule only); the undo flash borrows the centre slot; on the right one round button toggles Schedule ⇄
+  **Dashboard** (`/dashboard`, a dot on it when email is waiting). The **Dashboard** is glanceable tiles of quick AI
+  info from elsewhere: **Email** (review-queue count + first titles, opens `/inbox`), **Money** (balance, monthly
+  outgoings, the first two "Tars noticed" insights; opens the Money app), **Discover** (today's top 3 repos; opens
+  Discover). New tiles go there rather than onto the Schedule. Safari's status strip is `theme-color` = `--chrome` (#15263a) — keep them equal in
   every app so the top reads as one navy surface; added to the Home Screen each app runs standalone (manifest) under the
   Dynamic Island. Everything else is a **page** with its own URL and a back button — Lian doesn't want pop-up windows:
-  `/inbox` (back to `/`). `/month` and `/apps` redirect to `/`; the old `/burmese`, `/discover`, `/whatsapp/*`,
+  `/inbox` (back to `/dashboard`). `/month` and `/apps` redirect to `/`; the old `/burmese`, `/discover`,
   `/money`, `/food/*` URLs open the new apps. "Todo"/"calendar" = this app.
 - **Money app** (`apps/money`, "£"): one root page — a small dashboard, not a Monzo copy: balance line, "goes out
   automatically every month" total split by group, Claude's "Tars noticed" insights, the repeating payments by group with
@@ -153,20 +157,21 @@ reads the owner's port from its app.json; `TARS_PORT_<APP>` overrides it for sid
   Update cards.json when the guide or bindings change (ids are progress keys: append, don't renumber).
 - **Discover app** (`apps/discover`): one root page — a daily "cool GitHub repos" feed: real repos from the GitHub search
   API, curated by `claude -p` once a London day into state/discover.json. API: `GET /api/discover[/fresh]`.
-- **WhatsApp app** (`apps/whatsapp`): the conversation list (`/`) and one chat's thread (`/chat/:id`, back to `/`).
-  API: `GET /api/whatsapp` (newest first, each with a last-message preview) · `GET /api/whatsapp/:id` — read-only;
-  `server/whatsapp.js` re-reads state/whatsapp.json when its mtime changes. The file is written by the capture bridge
-  in `apps/whatsapp/bridge` (its own package.json, outside the workspaces, and its own service `tars-whatsapp-bridge`).
+- **WhatsApp** (`apps/whatsapp`): capture only, no viewer app (Lian uses WhatsApp itself; the viewer was removed
+  2026-10-10). The bridge in `apps/whatsapp/bridge` (its own package.json, outside the workspaces, its own service
+  `tars-whatsapp-bridge`) writes state/whatsapp.json for tars to read and act on.
 - **Tasks API** (`apps/tasks/server/index.js`): `GET /api/state` · `POST|PATCH|DELETE /api/tasks[/id]` · `/api/projects[/id]` (a project PATCH with `subs` sets its sub-categories; tasks carry an optional `subId`) ·
   `POST /api/shopping {items}` (replaces the Shopping list's unticked items; called by food) · `GET /api/expected` (from money) ·
-  `GET /api/organise` · `GET|POST /api/inbox`, `POST /api/inbox/:id/accept`, `DELETE /api/inbox/:id`.
+  `GET /api/organise` · `GET /api/dashboard` · `GET|POST /api/inbox` (candidates carry `kind` task|reminder; a new one with
+  the same title as a pending one updates it instead of adding a duplicate), `POST /api/inbox/:id/accept`, `DELETE /api/inbox/:id`.
   Anything else is the built app (page URLs fall back to index.html).
 - **Tasks frontend** (`apps/tasks/web/src/`), grouped by feature:
   - `app/` — App.tsx (routes), Layout.tsx (AppShell + dock, quick-add), Dock.tsx. `lib/types.ts` — Task, Project, State, Candidate.
   - `features/tasks/` — store.tsx (`useTars()`: all task state + actions; `useQuickAdd()` shared by Dock/Layout; quick-add is draft-based — an empty optimistic row that persists on first edit, no NL parsing), TaskRow.tsx,
     TagManager.tsx (lists + their sub-categories), calendar.tsx (CalendarPanel, folded into Home). `features/home/` —
     Home.tsx (the Schedule tab, incl. the "Life, so far" strip), MainEvent.tsx, OrganiseCard.tsx + organise.tsx (Sort).
-    `features/inbox/` — data.ts (useInbox), EmailCard.tsx (on the Schedule), InboxPage.tsx (email → task review).
+    `features/inbox/` — data.ts (useInbox), InboxPage.tsx (email → task review). `features/dashboard/` — data.ts
+    (useDashboard), DashboardPage.tsx (the tiles).
 - **Other apps' frontends** are `apps/<app>/web/src/app/App.tsx` (router: `AppShell` + routes) and
   `features/<app>/` — each app's `*Section.tsx` is bare content (no page header), wrapped by its `*Page.tsx` in `Page`.
 - **Shared UI** (`packages/ui/src/`, imported as `@tars/ui/...`; an app's own code stays `@/...`):
@@ -213,6 +218,11 @@ reads the owner's port from its app.json; `TARS_PORT_<APP>` overrides it for sid
   6–8 Oct 2026 and dropped): `bin/gmail search '<gmail query>' [-n N]`, `bin/gmail read <id>`.
   OAuth client + token live in `~/.config/tars/` (outside the repo — never copy them into it or print them).
   If it says sign-in expired: `bin/gmail login`, give Lian the link, then `bin/gmail login '<localhost address they paste back>'`.
+- `bin/email-tasks` — the `tars-email.timer` job (every 30 min): Gmail inbox from the last 3 days (minus promotions/
+  social/forums), each new email judged by `claude -p` as **task** (something to do), **reminder** (a dated heads-up:
+  a payment about to be taken, a meter-reading/renewal reminder, a delivery) or none; tasks and reminders go to the
+  review queue. Logs every verdict (`journalctl --user -u tars-email`). `bin/email-tasks try <gmail id>` shows how one
+  email would be judged without queueing it.
 - `bin/monzo` — read-only Monzo (balance, pots, transactions; never moves money): `bin/monzo status|balance`,
   `bin/monzo transactions [-d DAYS]` (max 89 days - older needs re-verification). Client + token in `~/.config/tars/monzo-*.json`
   (never copy into the repo or print). Sign-in: `bin/monzo login`, give Lian the link, `bin/monzo login '<address>'`,

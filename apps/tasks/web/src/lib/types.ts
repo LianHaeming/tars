@@ -26,5 +26,6 @@ export type Candidate = {
   sender: string
   subject: string
   emailDate: string
+  kind?: 'task' | 'reminder'
   createdAt: number
 }

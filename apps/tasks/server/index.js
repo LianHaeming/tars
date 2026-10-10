@@ -126,6 +126,20 @@ async function api(req, res, parts, body) {
     catch (e) { return send(res, 503, { error: e.message }); }
   }
 
+  if (resource === 'dashboard' && req.method === 'GET') {
+    const [money, discover] = await Promise.allSettled([
+      callApp('money', 'GET', 'money/summary', null, { timeout: 15e3 }),
+      callApp('discover', 'GET', 'discover', null, { timeout: 15e3 }),
+    ]);
+    const m = money.value, d = discover.value;
+    return send(res, 200, {
+      money: m ? pick(m, ['balance', 'potTotal', 'committed', 'income', 'insights', 'thinking', 'fetchedAt']) : null,
+      moneyError: money.reason?.message || null,
+      discover: d ? { repos: (d.repos || []).slice(0, 3) } : null,
+      discoverError: discover.reason?.message || null,
+    });
+  }
+
   if (resource === 'organise' && req.method === 'GET') {
     try { return send(res, 200, await organise()); }
     catch (e) { return send(res, 503, { error: e.message }); }
@@ -140,12 +154,15 @@ async function api(req, res, parts, body) {
       if (!inbox.seen.includes(body.gmailId)) inbox.seen.push(body.gmailId);
       inbox.seen = inbox.seen.slice(-500);
       if (body.actionable && body.title?.trim()) {
-        inbox.candidates.push({
-          id: id(), gmailId: body.gmailId, title: body.title.trim(),
+        const title = body.title.trim();
+        const fields = {
+          gmailId: body.gmailId, title, kind: body.kind === 'reminder' ? 'reminder' : 'task',
           due: body.due || null, dueTime: body.dueTime || null, description: body.description || '',
           sender: body.sender || '', subject: body.subject || '', emailDate: body.emailDate || '',
-          createdAt: Date.now(),
-        });
+        };
+        const same = inbox.candidates.find(c => c.title.toLowerCase() === title.toLowerCase());
+        if (same) Object.assign(same, fields);
+        else inbox.candidates.push({ id: id(), ...fields, createdAt: Date.now() });
       }
       store.inbox.save();
       return send(res, 200, { candidates: inbox.candidates.length });

@@ -13,7 +13,6 @@ import { PaymentRow, useExpected, type Expected } from '@tars/ui/components/paym
 import { Button } from '@tars/ui/components/ui/button'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@tars/ui/components/ui/collapsible'
 import { MainEvent } from './MainEvent'
-import { EmailCard } from '@/features/inbox/EmailCard'
 import { OrganiseCard } from './OrganiseCard'
 
 type Entry = { day: string; task?: Task; pay?: Expected }
@@ -213,7 +212,6 @@ export function Home() {
         <FilterLabel value="completed">Completed</FilterLabel>
       </FilterBar>
 
-      <EmailCard />
       <OrganiseCard />
 
       {completed ? (

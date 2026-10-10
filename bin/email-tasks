@@ -3,6 +3,7 @@
 // review inbox (GET /api/inbox, then Add/Dismiss on the /inbox page). Never creates tasks directly.
 //   bin/email-tasks            one poll (run by the timer)
 //   bin/email-tasks install    install the systemd user timer (every 30 min)
+//   bin/email-tasks try <id>   show how one email would be judged (queues nothing)
 const { execFileSync, spawnSync } = require('child_process');
 const fs = require('fs');
 const os = require('os');
@@ -47,11 +48,15 @@ function gmail(args) {
 const PROMPT = email => `You triage one of Lian's emails into a to-do task. Today is ${
   new Date().toLocaleDateString('en-CA', { timeZone: 'Europe/London' })}, timezone Europe/London.
 
-Decide if it needs Lian to DO something or marks a dated commitment: an appointment, booking, delivery, deadline, bill due, a reply that's needed, or an explicit action required. Marketing, newsletters, social/app notifications, read-only FYIs, and receipts with nothing left to do are NOT actionable.
+Sort it into one of three kinds:
+- "task": Lian needs to DO something — a reply that's needed, a form, a payment to make, a booking to make, an explicit action required, or a dated commitment (appointment, booking, deadline).
+- "reminder": nothing to do now, but a dated heads-up worth seeing in the to-do list — a payment or direct debit about to be taken, a meter-reading or renewal reminder, a contract/price change taking effect, a subscription or trial ending, a delivery arriving.
+- "none": marketing, newsletters, social/app notifications, receipts with nothing left to do, sign-in alerts, anything Lian wouldn't want a to-do for.
+Emails Lian sent only matter when they commit Lian to something dated.
 
 Reply with ONE line of JSON and nothing else, no code fence, no tools:
-{"actionable":true|false,"title":"","due":"YYYY-MM-DD"|null,"dueTime":"HH:MM"|null,"description":""}
-- title: short and specific — what + who/where (e.g. "Dentist check-up — Smile Dental").
+{"kind":"task"|"reminder"|"none","title":"","due":"YYYY-MM-DD"|null,"dueTime":"HH:MM"|null,"description":""}
+- title: short and specific — what + who/where (e.g. "Dentist check-up — Smile Dental", "Octopus takes £60.36"). The same thing must get the same title across emails (a delivery's dispatch and out-for-delivery emails are one title).
 - due / dueTime: only if the email states a date/time; never guess. 24h London time.
 - description: location/address, reference or booking numbers, what to bring — else "".
 
@@ -82,10 +87,11 @@ async function poll() {
         raw.split('\n').slice(0, 5).map(l => l.split(/:\s(.+)/)).filter(p => p[1]).map(p => [p[0].toLowerCase(), p[1]]));
       const v = judge(raw);
       await http('POST', '/inbox', {
-        gmailId, actionable: !!v.actionable, title: v.title, due: v.due, dueTime: v.dueTime,
+        gmailId, actionable: v.kind === 'task' || v.kind === 'reminder', kind: v.kind, title: v.title, due: v.due, dueTime: v.dueTime,
         description: v.description, sender: head.from || '', subject: head.subject || '', emailDate: head.date || '',
       });
-      if (v.actionable) { queued++; log('queued:', v.title); }
+      if (v.kind === 'task' || v.kind === 'reminder') { queued++; log(`queued ${v.kind}:`, v.title); }
+      else log('skipped:', head.subject || gmailId);
     } catch (e) {
       log('skip', gmailId, '-', e.message); // left unseen, retried next run
     }
@@ -95,5 +101,6 @@ async function poll() {
 
 (async () => {
   if (process.argv[2] === 'install') return install();
+  if (process.argv[2] === 'try') return console.log(judge(gmail(['read', process.argv[3]])));
   try { await poll(); } catch (e) { log('error:', e.message); process.exit(1); }
 })();
