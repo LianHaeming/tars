@@ -48,7 +48,8 @@ function inside(base, rel) {
   return file.startsWith(base + path.sep) ? file : null;
 }
 
-// start({ port, dist, api, statics: [{ prefix: '/data/food/', dir, cache }] }) — listens on 127.0.0.1 only; Tailscale serves it.
+// start({ port, dist, api, statics: [{ prefix: '/data/food/', dir, cache }, { prefix: '/burmese/', dir, spa: true }] })
+// (spa: a built React app under a sub-path — page paths get its index.html) — listens on 127.0.0.1 only; Tailscale serves it.
 function start({ port, dist, api, statics = [] }) {
   return http.createServer(async (req, res) => {
     const url = new URL(req.url, 'http://x');
@@ -69,8 +70,12 @@ function start({ port, dist, api, statics = [] }) {
     }
     for (const s of statics) {
       if (!rel.startsWith(s.prefix)) continue;
-      const file = inside(s.dir, rel.slice(s.prefix.length - 1));
-      return file ? serve(res, file, s.cache || 'public, max-age=3600') : send(res, 403, { error: 'forbidden' });
+      const sub = rel.slice(s.prefix.length - 1);
+      const file = inside(s.dir, sub);
+      if (!file) return send(res, 403, { error: 'forbidden' });
+      if (!s.spa) return serve(res, file, s.cache || 'public, max-age=3600');
+      if (!path.extname(sub)) return serve(res, path.join(s.dir, 'index.html'), 'no-cache');
+      return serve(res, file, sub.startsWith('/assets/') ? 'public, max-age=31536000, immutable' : 'no-cache');
     }
     if (rel === '/sw.js') {
       res.writeHead(200, { 'content-type': 'text/javascript', 'cache-control': 'no-cache', 'service-worker-allowed': '/' });

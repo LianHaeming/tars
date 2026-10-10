@@ -38,6 +38,7 @@ bin/             up, sync, icon, gmail, monzo, burmese, email-tasks, whatsapp, o
 | money (`tars-money`) | 8407 | https://omarchy.tail0bf266.ts.net:8447/ | money |
 | food (`tars-food`) | 8408 | https://omarchy.tail0bf266.ts.net:8448/ | food (+ serves data/food) |
 | omarchy (`tars-omarchy`) | 8409 | https://omarchy.tail0bf266.ts.net:8449/ | omarchy (drill progress) |
+| memo (`tars-memo`) | 8410 | https://omarchy.tail0bf266.ts.net:8450/ | nothing — Burmese + Omarchy in one app |
 
 There is no launcher: the iPhone Home Screen is the launcher (one icon per app). A new app takes the next port pair
 (internal 840x, public 844x).
@@ -155,6 +156,17 @@ reads the owner's port from its app.json; `TARS_PORT_<APP>` overrides it for sid
   `/` (modes, Learning · Slipping · Recognised · Recalled, every card seen) and `/play?mode=`. API: `GET
   /api/omarchy/drill` · `POST /api/omarchy/drill/sync {state, log}` (state/drill.json, state/drill-log.jsonl).
   Update cards.json when the guide or bindings change (ids are progress keys: append, don't renumber).
+- **Memo app** (`apps/memo`, "m"): the memorisation apps under one icon, each exactly as it is. `/` is a landing page
+  with one card per app (Burmese → `/burmese/`, Omarchy → `/omarchy/`); `build.sh` builds the landing page, then
+  builds Burmese and Omarchy again with Vite `--base /<app>/` into `dist/<app>/` (their own dist/ and icons stay). The
+  server serves those as sub-path SPAs (`statics` with `spa: true` in @tars/server) and passes `/api/burmese/*` and
+  `/api/omarchy/*` straight to the burmese and omarchy servers (which still own all the data — Memo owns nothing).
+  For this, both apps are base-aware: `createBrowserRouter(…, { basename: import.meta.env.BASE_URL })`, the service
+  worker registered at `BASE_URL + 'app-sw.js'` and `app-sw.js` working relative to its scope; `LargeTitle` (deck.tsx)
+  shows a "‹ Memo" link (to `/`) above the title only when built under a sub-path. Their browser storage (progress,
+  modes) is per origin, so Memo has its own copy, synced with the same servers. Memo's own `app-sw.js` caches only
+  the landing page. A new memorisation app: make it base-aware the same way, add it to `APPS` in
+  `apps/memo/server/index.js`, `build.sh` and the landing page's `DECKS`, then `bin/up memo`.
 - **Discover app** (`apps/discover`): one root page — a daily "cool GitHub repos" feed: real repos from the GitHub search
   API, curated by `claude -p` once a London day into state/discover.json. API: `GET /api/discover[/fresh]`.
 - **WhatsApp** (`apps/whatsapp`): capture only, no viewer app (Lian uses WhatsApp itself; the viewer was removed

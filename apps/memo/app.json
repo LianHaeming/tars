@@ -1,0 +1,7 @@
+{
+  "name": "memo",
+  "port": 8410,
+  "https": 8450,
+  "start": "node server",
+  "build": "sh build.sh"
+}
