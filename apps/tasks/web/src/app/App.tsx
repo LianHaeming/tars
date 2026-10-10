@@ -8,8 +8,8 @@ import { Layout } from './Layout'
 const DashboardPage = lazy(() => import('@/features/dashboard/DashboardPage').then(m => ({ default: m.DashboardPage })))
 const InboxPage = lazy(() => import('@/features/inbox/InboxPage').then(m => ({ default: m.InboxPage })))
 
-function ToApp({ app }: { app: AppName }) {
-  useEffect(() => location.replace(appUrl(app)), [app])
+function ToApp({ app, path }: { app: AppName; path?: string }) {
+  useEffect(() => location.replace(appUrl(app, path)), [app, path])
   return null
 }
 
@@ -19,7 +19,7 @@ const router = createBrowserRouter([
     children: [
       { path: '/', element: <Home /> },
       { path: '/apps', element: <Navigate to="/" replace /> },
-      { path: '/burmese', element: <ToApp app="burmese" /> },
+      { path: '/burmese', element: <ToApp app="memo" path="/burmese" /> },
       { path: '/money', element: <ToApp app="money" /> },
       { path: '/discover', element: <ToApp app="discover" /> },
       { path: '/food/*', element: <ToApp app="food" /> },

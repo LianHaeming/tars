@@ -5,7 +5,7 @@
 // Safe while the service runs: it only writes state/sentences.json, which the server reloads on change.
 const { execFileSync } = require('child_process');
 const path = require('path');
-const { build, pool, CATEGORIES } = require('../apps/burmese/server/content');
+const { build, pool, CATEGORIES } = require('../apps/memo/server/burmese/content');
 
 const args = process.argv.slice(2);
 const cmd = args.shift();
@@ -24,7 +24,7 @@ if (cmd === 'count') {
   run(pip, ['install', '-q', '--index-url', 'https://download.pytorch.org/whl/cpu', 'torch']);
   run(pip, ['install', '-q', 'transformers']);
   run(path.join(venv, 'bin/python'), ['-c', "from transformers import AutoTokenizer, VitsModel as V; m='facebook/mms-tts-mya'; AutoTokenizer.from_pretrained(m); V.from_pretrained(m)"]);
-  console.log('Burmese voice installed; restart the app: bin/up burmese');
+  console.log('Burmese voice installed; restart the app: bin/up memo');
 } else if (cmd === 'build') {
   const keys = args.length ? args : CATEGORIES.map(c => c.key);
   const bad = keys.filter(k => !CATEGORIES.some(c => c.key === k));

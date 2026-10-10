@@ -15,7 +15,7 @@ each other's APIs.
 ```
 apps/<app>/
   app.json       service config for bin/up: {name, port, https, start, build}
-  server/        Node, no dependencies beyond @tars/server (Burmese also uses @huggingface/transformers, a root dependency): index.js (routes), state.js, …
+  server/        Node, no dependencies beyond @tars/server (Memo's Burmese also uses @huggingface/transformers, a root dependency): index.js (routes), state.js, …
   web/           React + TypeScript + Vite + Tailwind v4 + shadcn/ui — display only, everything via its own /api
   state/         live data (gitignored): a symlink to ~/tars/apps/<app>/state on the live checkout, empty in a worktree
   dist/          the built web app (gitignored)
@@ -23,7 +23,7 @@ packages/
   ui/            @tars/ui — the one look: styles/globals.css (tokens), components/ui (shadcn), Page, AppShell, common,
                  lib/{api,apps,dates,utils,use-resource}, hooks
   server/        @tars/server — docs() (JSON state), start() (HTTP + static + /sw.js tombstone), runClaude
-  drill/         the drill games' shared kit (Burmese, Omarchy): fsrs.ts, typo.ts (edit distance), progress.ts (Mem,
+  drill/         the drill games' shared kit (Memo's Burmese Words and Omarchy): fsrs.ts, typo.ts (edit distance), progress.ts (Mem,
                  DrillState, merge), store.ts (offline progress in browser storage + sync) — plain TS, imported by
                  relative path so Node can strip the types
 data/food/       Food content: menu.json, r/<id>.json, sainsburys/ocado.json, photos/ (in git; published from the Mac)
@@ -33,12 +33,10 @@ bin/             up, sync, icon, gmail, monzo, burmese, email-tasks, whatsapp, o
 | App | Internal port | URL (tailnet) | Owns |
 |---|---|---|---|
 | tasks (`tars-tasks`) | 8400 | https://omarchy.tail0bf266.ts.net/ | tasks (incl. the Shopping list), inbox |
-| burmese (`tars-burmese`) | 8404 | https://omarchy.tail0bf266.ts.net:8444/ | burmese |
 | discover (`tars-discover`) | 8405 | https://omarchy.tail0bf266.ts.net:8445/ | discover |
 | money (`tars-money`) | 8407 | https://omarchy.tail0bf266.ts.net:8447/ | money |
 | food (`tars-food`) | 8408 | https://omarchy.tail0bf266.ts.net:8448/ | food (+ serves data/food) |
-| omarchy (`tars-omarchy`) | 8409 | https://omarchy.tail0bf266.ts.net:8449/ | omarchy (drill progress) |
-| memo (`tars-memo`) | 8410 | https://omarchy.tail0bf266.ts.net:8450/ | nothing — Burmese + Omarchy in one app |
+| memo (`tars-memo`) | 8410 | https://omarchy.tail0bf266.ts.net:8450/ | burmese, omarchy (the memorisation games) |
 
 There is no launcher: the iPhone Home Screen is the launcher (one icon per app). A new app takes the next port pair
 (internal 840x, public 844x).
@@ -61,7 +59,7 @@ reads the owner's port from its app.json; `TARS_PORT_<APP>` overrides it for sid
   home-screen identities can never collide. Link between apps with `appUrl('<app>')` from `@tars/ui/lib/apps` (the one
   registry of public ports). iOS opens a link to another app in a Safari sheet over the current one.
 - **Shared code lives in packages/, never copied.** If two apps need it, it moves to @tars/ui or @tars/server.
-- A new app: copy apps/burmese as the template, pick the next ports, `bin/icon <app> <glyph> [font]`, add it to
+- A new app: copy apps/discover as the template, pick the next ports, `bin/icon <app> <glyph> [font]`, add it to
   `APP_PORTS`, then `bin/up <app>` on the live checkout and add it to the Home Screen from Safari.
 
 - **The tasks app** (`apps/tasks`, the original "t" icon at /): **Schedule** (`/`) — a flat **"Life, so far"** strip,
@@ -80,8 +78,8 @@ reads the owner's port from its app.json; `TARS_PORT_<APP>` overrides it for sid
   Discover). New tiles go there rather than onto the Schedule. Safari's status strip is `theme-color` = `--chrome` (#15263a) — keep them equal in
   every app so the top reads as one navy surface; added to the Home Screen each app runs standalone (manifest) under the
   Dynamic Island. Everything else is a **page** with its own URL and a back button — Lian doesn't want pop-up windows:
-  `/inbox` (back to `/dashboard`). `/month` and `/apps` redirect to `/`; the old `/burmese`, `/discover`,
-  `/money`, `/food/*` URLs open the new apps. "Todo"/"calendar" = this app.
+  `/inbox` (back to `/dashboard`). `/month` and `/apps` redirect to `/`; the old `/burmese` (→ Memo),
+  `/discover`, `/money`, `/food/*` URLs open the new apps. "Todo"/"calendar" = this app.
 - **Money app** (`apps/money`, "£"): one root page — a small dashboard, not a Monzo copy: balance line, "goes out
   automatically every month" total split by group, Claude's "Tars noticed" insights, the repeating payments by group with
   logos, next 30 days. API: `GET /api/money[/fresh]` (runs `bin/monzo json` via `server/money.js`, cached 2 min; 503 with
@@ -94,47 +92,57 @@ reads the owner's port from its app.json; `TARS_PORT_<APP>` overrides it for sid
   "I don't like X" swaps). Both back to `/`. API: `GET|PATCH /api/food {basket, shop, servings}` (servings per recipe
   id, base 2) · `POST /api/food/suggest` · `POST /api/shopping {items}` (passed to tasks). Static: `/data/food/*` from
   the repo's data/food.
-- **Burmese app** (`apps/burmese`, its own icon — scope: tars vault `language-app-scope.md`): the "deck" look (option B of
+- **Memo app** (`apps/memo`, "m"; was two apps, Burmese :8444 and Omarchy :8449, until 2026-10-10): **one app — one
+  build, one server, one state folder** — holding the memorisation games. `/` is a landing page with a card per game
+  (`web/src/app/HomePage.tsx`, `DECKS`); each game's home page has a "‹ Memo" link back (`LargeTitle back={HOME}`,
+  `src/app/home.ts`). Layout: `server/index.js` (routes `/api/<game>*` to `server/<game>/index.js`, which exports
+  `api`), `server/<game>/` (the game's modules; `state.js` = `docs(…, shapes, '<game>')`, so its data lives in
+  `state/<game>/`), `shared/<game>/` (engine + content, bundled by the web app and `require`d by the server),
+  `web/src/features/<game>/` (pages; every in-app link is absolute under `/<game>`), routes in `web/src/app/App.tsx`.
+  One offline service worker (`public/app-sw.js`, pages network-first with a 3 s timeout, hashed assets cache-first,
+  /api never cached; not /sw.js, the shared tombstone); `public/{burmese,omarchy}/app-sw.js` are tombstones for the
+  workers of the brief two-build version. A new game: `server/<game>/`, `shared/<game>/`, `features/<game>/`, its
+  routes under `/<game>`, a card in `DECKS`, then `bin/up memo`.
+- **Burmese** (Memo's `/burmese` — scope: tars vault `language-app-scope.md`): the "deck" look (option B of
   the 2026-10-08 redesign; `@tars/ui/components/deck` + the `deck-card` utility): four tabs in a floating icon dock at
-  the bottom (Learn · Words · Phrases · Ask), iOS-style large titles. **Learn** (`/`, the next unit as a stack of cards with
-  Play, tiles below; Stats at `/stats` from the round button) runs **units** at `/unit` (close button, step dots, one
+  the bottom (Learn · Words · Phrases · Ask), iOS-style large titles. **Learn** (`/burmese`, the next unit as a stack of cards with
+  Play, tiles below; Stats at `/burmese/stats` from the round button) runs **units** at `/burmese/unit` (close button, step dots, one
   large card per step, answer box under the card, scored card gets a coloured edge, actions pinned to the bottom):
   "Last time" (up to 8 memories predicted below 90% recall, most at risk first, one per sentence), then "New" (the next
   3 sentences in usefulness order — skipped while > 15 memories are at risk): teach (phonetic, English, word chips),
-  then a quick check where misses come back 2 cards later (max 4 tries), then a summary. **Your cards** (`/cards`, from the card under the tiles): every started
+  then a quick check where misses come back 2 cards later (max 4 tries), then a summary. **Your cards** (`/burmese/cards`, from the card under the tiles): every started
   sentence as its full card (phonetic, English, Listen/Slow, word chips, how well it's held), newest first, in a swipe
   rail — just for looking back, no testing (`GET /api/burmese/cards`). Not tied to days: no streaks,
-  limits or reminders. Each sentence has two FSRS memories (`server/fsrs.js`, fractional days): `read` (phonetic →
+  limits or reminders. Each sentence has two FSRS memories (`server/burmese/fsrs.js`, fractional days): `read` (phonetic →
   typed English) from its first answer, `say` (English → typed phonetic) once read scores ≥ 85%. Answers are scored
-  locally in `server/score.js`: meaning = cosine of `Xenova/bge-small-en-v1.5` embeddings (transformers.js, a root
+  locally in `server/burmese/score.js`: meaning = cosine of `Xenova/bge-small-en-v1.5` embeddings (transformers.js, a root
   dependency; model cached in `~/.cache/tars/models`) stretched 0.5→0, 0.95→100; phonetic = edit-distance closeness
   ignoring case/spaces/hyphens. % → grade: Don't know/<60 Again, <85 Hard, <95 Good, else Easy. **Ask**
-  (`/ask`, answer box pinned above the dock): one translation per ask (`claude -p --model opus`, ~10 s), every answer saved to the "Custom" category,
-  never in the game. **Phrases** (`/sentences`, a 2-column grid of categories; `/sentences/:cat` a plain list) + Custom. Content:
-  `state/sentences.json` (9 categories × ~40, ranked most-useful-first, phonetics per `server/phonetics.md`), written by
+  (`/burmese/ask`, answer box pinned above the dock): one translation per ask (`claude -p --model opus`, ~10 s), every answer saved to the "Custom" category,
+  never in the game. **Phrases** (`/burmese/sentences`, a 2-column grid of categories; `/burmese/sentences/:cat` a plain list) + Custom. Content:
+  `state/burmese/sentences.json` (9 categories × ~40, ranked most-useful-first, phonetics per `server/burmese/phonetics.md`), written by
   `bin/burmese build [category…] [-n N]` and re-read by the server when it changes (safe while it runs); progress in
-  `state/burmese.json` (`memories`, `custom`, `units`), every answer in `state/reviews.jsonl`. Phonetic only, no
+  `state/burmese/burmese.json` (`memories`, `custom`, `units`), every answer in `state/burmese/reviews.jsonl`. Phonetic only, no
   script shown. **Audio**: Listen / Slow buttons on cards, the Phrases list and Ask — Meta's MMS-TTS Burmese voice
-  (`facebook/mms-tts-mya`) run locally by `server/tts_mms.py` in a Python venv at `~/.local/share/tars/mms-tts`
-  (`bin/burmese tts-install` makes it and fetches the model); `server/tts.js` makes each clip on first play into
-  `state/audio/` (keyed by Burmese text + speed) and stops the worker after 5 idle minutes. Hidden on English → phonetic
+  (`facebook/mms-tts-mya`) run locally by `server/burmese/tts_mms.py` in a Python venv at `~/.local/share/tars/mms-tts`
+  (`bin/burmese tts-install` makes it and fetches the model); `server/burmese/tts.js` makes each clip on first play into
+  `state/burmese/audio/` (keyed by Burmese text + speed) and stops the worker after 5 idle minutes. Hidden on English → phonetic
   questions until answered. API: `GET /api/burmese` (status) · `GET /api/burmese/{unit,stats,sentences,asked}` ·
   `POST /api/burmese/answer {unit,id,kind,answer|null,phase}` · `POST /api/burmese/ask {text}` · `GET /api/burmese/audio/<id>[?speed=slow]` (MP3, byte ranges). The old deck app's
-  data is in `state/old-app-2026-10-08/`. The tasks app's `/burmese` redirects there.
-- **Burmese Words** (the Words tab, `/words`; play at `/words/play`), separate from the sentence game, **offline-first**
-  so it plays on the Tube: 100 hand-picked words in `apps/burmese/shared/words.json` (in git; Burmese script for the
-  audio), endless 4-option multiple choice. The engine is `apps/burmese/shared/words.ts` (with `packages/drill`'s fsrs.ts, also
-  used by the sentence game via `server/fsrs.js`) — plain TypeScript the web app bundles and the server `require`s
+  data is in `state/burmese/old-app-2026-10-08/`. The tasks app's `/burmese` redirects there.
+- **Burmese Words** (the Words tab, `/burmese/words`; play at `/burmese/words/play`), separate from the sentence game, **offline-first**
+  so it plays on the Tube: 100 hand-picked words in `apps/memo/shared/burmese/words.json` (in git; Burmese script for the
+  audio), endless 4-option multiple choice. The engine is `apps/memo/shared/burmese/words.ts` (with `packages/drill`'s fsrs.ts, also
+  used by the sentence game via `server/burmese/fsrs.js`) — plain TypeScript the web app bundles and the server `require`s
   (Node strips the types; `shared/package.json` says ESM). The game runs in the browser on progress kept in browser
   storage (`web/src/features/burmese/wordsStore.ts` over `packages/drill/store.ts` — the one exception (with Omarchy) to "browser storage is view preferences only"),
-  merged with the server's `state/words.json` by `POST /api/burmese/words/sync {state, log}` (per memory, the most
-  recently answered wins; new answers appended to `state/words-log.jsonl`) on open, 3 s after answering and on hide.
-  `public/app-sw.js` is the offline copy (pages network-first with a 3 s timeout, hashed assets cache-first, /api never
-  cached; not /sw.js, the shared tombstone). Three **modes** (picked on the Words tab, kept in browser storage, passed as
-  `/words/play?mode=`): **recall** (default — every card typed: the phonetic for English → Burmese, the English for
+  merged with the server's `state/burmese/words.json` by `POST /api/burmese/words/sync {state, log}` (per memory, the most
+  recently answered wins; new answers appended to `state/burmese/words-log.jsonl`) on open, 3 s after answering and on hide; Memo's service worker keeps
+  it working offline. Three **modes** (picked on the Words tab, kept in browser storage, passed as
+  `/burmese/words/play?mode=`): **recall** (default — every card typed: the phonetic for English → Burmese, the English for
   Burmese → English, matched against any of the word's meanings + its `also` synonyms in words.json), **mixed** (say
   cards multiple choice on their first step, typed after), **choice** (multiple choice only). Typed answers are marked on
-  the phone by spelling (`shared/phonetic.ts`, a swap of two letters = one typo): exact = right, a typo allowed from 4
+  the phone by spelling (`shared/burmese/phonetic.ts`, a swap of two letters = one typo): exact = right, a typo allowed from 4
   letters (two from 9) = close/Hard, else wrong; one input stays mounted across typed cards so the iPhone keyboard stays
   up. Two memories per word: read (phonetic → English) from its New-word card, say (English → phonetic) once read
   graduates. A memory is `recalled` while its last typed answer was right; the tab's honest counts are Learning ·
@@ -145,28 +153,17 @@ reads the owner's port from its app.json; `TARS_PORT_<APP>` overrides it for sid
   same card twice running. Silent and quick: right answers move on after 0.25 s, misses show the answer for 1.2 s (or
   until Next). API: `GET /api/burmese/words` (the server's progress) · `POST /api/burmese/words/sync`; audio by word id
   (`w1`…).
-- **Omarchy app** (`apps/omarchy`, "⌘"): the Burmese Words drill for Omarchy keybindings and commands, offline-first the
-  same way. 138 cards in `apps/omarchy/shared/cards.json` (in git; from the tars vault's `omarchy-guide.md`, checked
+- **Omarchy** (Memo's `/omarchy`): the Burmese Words drill for Omarchy keybindings and commands, offline-first the
+  same way. 138 cards in `apps/memo/shared/omarchy/cards.json` (in git; from the tars vault's `omarchy-guide.md`, checked
   against `/usr/share/omarchy/default/hypr/bindings/`; `kind` keys or cmd, `q` what's pressed/typed, `does`, optional
-  `also`), most useful first. Engine `apps/omarchy/shared/drill.ts` — the Words engine with: read (keys → what it does)
+  `also`), most useful first. Engine `apps/memo/shared/omarchy/drill.ts` — the Words engine with: read (keys → what it does)
   always multiple choice; say (what it does → keys/command) typed in recall (default), multiple choice in choice, mixed
   = choice on the first step then typed. Keys are typed as words in any order (`super shift b`, `ctrl+alt+del`; aliases
   win/cmd/control/enter/esc/←…; a typo in a long key name = close); commands as run, `<placeholder>`/"quoted" args
-  optional, a typo per word from 4 letters. Modifier buttons (Super/Shift/Ctrl/Alt) above the input on key cards. **I know this** (on New cards, in play, and a ✓✓ button per row on `/`, with Undo) retires a card for good: an `<id>:known` memory (`recalled` = known) that syncs like any answer; known cards are never queued and count as Known. Pages:
-  `/` (modes, Learning · Slipping · Recognised · Recalled, every card seen) and `/play?mode=`. API: `GET
-  /api/omarchy/drill` · `POST /api/omarchy/drill/sync {state, log}` (state/drill.json, state/drill-log.jsonl).
+  optional, a typo per word from 4 letters. Modifier buttons (Super/Shift/Ctrl/Alt) above the input on key cards. **I know this** (on New cards, in play, and a ✓✓ button per row on `/omarchy`, with Undo) retires a card for good: an `<id>:known` memory (`recalled` = known) that syncs like any answer; known cards are never queued and count as Known. Pages:
+  `/omarchy` (modes, Learning · Slipping · Recognised · Recalled, every card seen) and `/omarchy/play?mode=`. API: `GET
+  /api/omarchy/drill` · `POST /api/omarchy/drill/sync {state, log}` (state/omarchy/drill.json, state/omarchy/drill-log.jsonl).
   Update cards.json when the guide or bindings change (ids are progress keys: append, don't renumber).
-- **Memo app** (`apps/memo`, "m"): the memorisation apps under one icon, each exactly as it is. `/` is a landing page
-  with one card per app (Burmese → `/burmese/`, Omarchy → `/omarchy/`); `build.sh` builds the landing page, then
-  builds Burmese and Omarchy again with Vite `--base /<app>/` into `dist/<app>/` (their own dist/ and icons stay). The
-  server serves those as sub-path SPAs (`statics` with `spa: true` in @tars/server) and passes `/api/burmese/*` and
-  `/api/omarchy/*` straight to the burmese and omarchy servers (which still own all the data — Memo owns nothing).
-  For this, both apps are base-aware: `createBrowserRouter(…, { basename: import.meta.env.BASE_URL })`, the service
-  worker registered at `BASE_URL + 'app-sw.js'` and `app-sw.js` working relative to its scope; `LargeTitle` (deck.tsx)
-  shows a "‹ Memo" link (to `/`) above the title only when built under a sub-path. Their browser storage (progress,
-  modes) is per origin, so Memo has its own copy, synced with the same servers. Memo's own `app-sw.js` caches only
-  the landing page. A new memorisation app: make it base-aware the same way, add it to `APPS` in
-  `apps/memo/server/index.js`, `build.sh` and the landing page's `DECKS`, then `bin/up memo`.
 - **Discover app** (`apps/discover`): one root page — a daily "cool GitHub repos" feed: real repos from the GitHub search
   API, curated by `claude -p` once a London day into state/discover.json. API: `GET /api/discover[/fresh]`.
 - **WhatsApp** (`apps/whatsapp`): capture only, no viewer app (Lian uses WhatsApp itself; the viewer was removed

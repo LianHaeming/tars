@@ -1,6 +1,7 @@
-// Offline copy of Memo's landing page, so it opens with no signal (Burmese and Omarchy have their own workers, scoped
-// to /burmese/ and /omarchy/). Only the landing page itself is handled here. Not /sw.js: that address is the shared
-// self-unregistering tombstone for the old PWA plugin.
+// Offline copy of the Memo app, so the Burmese Words and Omarchy drills open with no signal (their progress lives on
+// the phone; see packages/drill/store.ts). Not /sw.js: that address is the shared self-unregistering tombstone for the old PWA plugin.
+// Pages: network first (fresh build whenever there's signal), the saved shell when the network fails or stalls.
+// Built assets (/assets/*, hashed names) and icons: cache first. /api is never cached.
 const CACHE = 'memo-offline-v1';
 const SHELL = '/';
 const TIMEOUT_MS = 3000;
@@ -28,7 +29,7 @@ self.addEventListener('install', e => e.waitUntil((async () => {
 })()));
 
 self.addEventListener('activate', e => e.waitUntil((async () => {
-  for (const k of await caches.keys()) if (k !== CACHE && k.startsWith('memo-offline')) await caches.delete(k);
+  for (const k of await caches.keys()) if (k !== CACHE) await caches.delete(k);
   await self.clients.claim();
 })()));
 
@@ -39,9 +40,8 @@ function withTimeout(p) {
 self.addEventListener('fetch', e => {
   const req = e.request;
   const url = new URL(req.url);
-  if (req.method !== 'GET' || url.origin !== location.origin) return;
+  if (req.method !== 'GET' || url.origin !== location.origin || url.pathname.startsWith('/api/')) return;
   if (req.mode === 'navigate') {
-    if (url.pathname !== '/') return;
     e.respondWith((async () => {
       try {
         const res = await withTimeout(fetch(req, { cache: 'no-store' }));
@@ -53,7 +53,7 @@ self.addEventListener('fetch', e => {
     })());
     return;
   }
-  if (url.pathname.startsWith('/assets/') || /^\/[^/]+\.(png|webmanifest)$/.test(url.pathname)) {
+  if (url.pathname.startsWith('/assets/') || /\.(png|webmanifest)$/.test(url.pathname)) {
     e.respondWith((async () => {
       const hit = await caches.match(req);
       if (hit) return hit;

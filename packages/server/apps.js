@@ -22,4 +22,4 @@ async function callApp(app, method, url, body, { timeout = 90e3 } = {}) {
   return data;
 }
 
-module.exports = { callApp, appPort: port };
+module.exports = { callApp };

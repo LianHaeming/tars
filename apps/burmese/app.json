@@ -1,7 +1,0 @@
-{
-  "name": "burmese",
-  "port": 8404,
-  "https": 8444,
-  "start": "node server",
-  "build": "cd web && npm run build"
-}

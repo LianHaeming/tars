@@ -16,9 +16,10 @@ function doc(dir, name, empty) {
   };
 }
 
-// docs(appDir, { name: () => emptyValue }) → { STATE, name: doc, … }. State lives in <appDir>/state (TARS_STATE overrides).
-function docs(appDir, shapes) {
-  const STATE = process.env.TARS_STATE || path.join(appDir, 'state');
+// docs(appDir, { name: () => emptyValue }, sub?) → { STATE, name: doc, … }. State lives in <appDir>/state[/<sub>]
+// (TARS_STATE overrides <appDir>/state).
+function docs(appDir, shapes, sub = '') {
+  const STATE = path.join(process.env.TARS_STATE || path.join(appDir, 'state'), sub);
   fs.mkdirSync(STATE, { recursive: true });
   return { STATE, ...Object.fromEntries(Object.entries(shapes).map(([name, empty]) => [name, doc(STATE, name, empty)])) };
 }

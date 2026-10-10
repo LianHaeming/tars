@@ -1,20 +1,19 @@
 import type { ComponentProps, CSSProperties, ReactNode } from 'react'
+import { Link } from 'react-router'
 import { ChevronLeftIcon, XIcon } from 'lucide-react'
 import { cn } from '@tars/ui/lib/utils'
 import { Badge } from '@tars/ui/components/ui/badge'
 import { Button } from '@tars/ui/components/ui/button'
 import { Progress } from '@tars/ui/components/ui/progress'
 
-// The "deck" look shared by the drill apps (Burmese, Omarchy): large titles, tinted labels, the close/progress row on
+// The "deck" look of the Memo games (Burmese, Omarchy): large titles, tinted labels, the close/progress row on
 // top of a game, and the pinned pill buttons at the bottom.
-const inMemo = import.meta.env.BASE_URL !== '/'
-
-export function LargeTitle({ sub, title, action }: { sub?: ReactNode; title: string; action?: ReactNode }) {
+export function LargeTitle({ sub, title, action, back }: { sub?: ReactNode; title: string; action?: ReactNode; back?: { to: string; label: string } }) {
   return (
     <>
-      {inMemo && (
+      {back && (
         <Button asChild variant="link" size="inline" className="px-1 pt-2">
-          <a href="/"><ChevronLeftIcon />Memo</a>
+          <Link to={back.to}><ChevronLeftIcon />{back.label}</Link>
         </Button>
       )}
       <div className="flex items-end justify-between gap-3 px-1 pt-2">

@@ -3,5 +3,5 @@
   "port": 8410,
   "https": 8450,
   "start": "node server",
-  "build": "sh build.sh"
+  "build": "cd web && npm run build"
 }

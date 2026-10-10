@@ -1,7 +1,0 @@
-{
-  "name": "omarchy",
-  "port": 8409,
-  "https": 8449,
-  "start": "node server",
-  "build": "cd web && npm run build"
-}
